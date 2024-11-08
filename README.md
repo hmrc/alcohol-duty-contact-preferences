@@ -1,7 +1,7 @@
 
 # alcohol-duty-contact-preferences
 
-This is a placeholder README.md for a new repository
+This is the backend service to capture an alcohol producers communication preference
 
 ### License
 
