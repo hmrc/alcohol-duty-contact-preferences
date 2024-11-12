@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,9 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.alcoholdutycontactpreferences.config
+package models.requests
 
-import javax.inject.{Inject, Singleton}
-import play.api.Configuration
+import play.api.mvc.{Request, WrappedRequest}
 
-@Singleton
-class AppConfig @Inject() (config: Configuration) {
-
-  val appName: String = config.get[String]("appName")
-
-  val enrolmentServiceName: String = config.get[String]("enrolment.serviceName")
-  val enrolmentIdentifierKey       = config.get[String]("enrolment.identifierKey")
-}
+case class IdentifierRequest[A](request: Request[A], appaId: String, groupId: String, userId: String)
+    extends WrappedRequest[A](request)
