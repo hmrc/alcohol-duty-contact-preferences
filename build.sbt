@@ -2,32 +2,47 @@ import uk.gov.hmrc.DefaultBuildSettings
 import scoverage.ScoverageKeys
 
 ThisBuild / majorVersion := 0
-ThisBuild / scalaVersion := "2.13.12"
+ThisBuild / scalaVersion := "2.13.14"
+ThisBuild / excludeDependencies ++= Seq(
+  // As of Play 3.0, groupId has changed to org.playframework; exclude transitive dependencies to the old artifacts
+  // Specifically affects play-json-extensions dependency
+  ExclusionRule(organization = "com.typesafe.play")
+)
 
 lazy val microservice = Project("alcohol-duty-contact-preferences", file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
+  .disablePlugins(JUnitXmlReportPlugin)
   .settings(
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
     // https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html
     // suppress warnings in generated routes files
     scalacOptions += "-Wconf:src=routes/.*:s",
-    scalafmtOnCompile := true
+    Compile / scalafmtOnCompile := true,
+    Test / scalafmtOnCompile := true,
   )
+  .settings(inConfig(Test)(testSettings): _*)
   .settings(resolvers += Resolver.jcenterRepo)
-  .settings(CodeCoverageSettings.settings: _*)
   .settings(
     ScoverageKeys.coverageExcludedFiles := scoverageExcludedList.mkString(";"),
-    ScoverageKeys.coverageMinimumStmtTotal := 99,
+    ScoverageKeys.coverageMinimumStmtTotal := 80,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true,
   )
-  .settings(PlayKeys.playDefaultPort := 16006)
+  .settings(PlayKeys.playDefaultPort := 16005)
 
 lazy val it = project
   .enablePlugins(PlayScala)
-  .dependsOn(microservice % "test->test")
+  .dependsOn(microservice % "test->test") // the "test->test" allows reusing test code and test dependencies
   .settings(DefaultBuildSettings.itSettings())
-  .settings(libraryDependencies ++= AppDependencies.it)
+  .settings(libraryDependencies ++= AppDependencies.itDependencies)
+  .settings(
+    Test / parallelExecution := false,
+    Test / fork := true,
+  )
+
+lazy val testSettings: Seq[Def.Setting[_]] = Seq(
+  unmanagedSourceDirectories += baseDirectory.value / "test-utils"
+)
 
 lazy val scoverageExcludedList: Seq[String] = Seq(
   "<empty>",

@@ -29,9 +29,10 @@ import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core.CredentialStrength.strong
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{allEnrolments, groupIdentifier, internalId}
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{authorisedEnrolments, internalId}
 import uk.gov.hmrc.auth.core.retrieve.~
-import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendHeaderCarrierProvider
 import uk.gov.hmrc.play.bootstrap.backend.http.ErrorResponse
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
@@ -47,6 +48,7 @@ class AuthenticatedIdentifierAction @Inject() (
   val parser: BodyParsers.Default
 )(implicit val executionContext: ExecutionContext)
     extends IdentifierAction
+    with BackendHeaderCarrierProvider
     with AuthorisedFunctions
     with Logging {
 
@@ -58,45 +60,30 @@ class AuthenticatedIdentifierAction @Inject() (
       ConfidenceLevel.L50
 
   override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] = {
-
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
-    authorised(predicate).retrieve(internalId and groupIdentifier and allEnrolments) {
-      case optInternalId ~ optGroupId ~ enrolments =>
-        val internalId: String = getOrElseFailWithUnauthorised(optInternalId, "Unable to retrieve internalId")
-        val groupId: String = getOrElseFailWithUnauthorised(optGroupId, "Unable to retrieve groupIdentifier")
-        val appaId = getAppaId(enrolments)
-        block(IdentifierRequest(request, appaId, groupId, internalId))
-    } recover {
-      case e: AuthorisationException =>
-        logger.debug("Got AuthorisationException:", e)
-        Unauthorized(
-          Json.toJson(
-            ErrorResponse(
-              UNAUTHORIZED,
-              e.reason
-            )
+    authorised(predicate).retrieve(internalId and authorisedEnrolments) { case optInternalId ~ enrolments =>
+      val internalId: String = getOrElseFailWithUnauthorised(optInternalId, "Unable to retrieve internalId")
+      block(IdentifierRequest(request, getAppaId(enrolments), internalId))
+    } recover { case e: AuthorisationException =>
+      logger.debug("Got AuthorisationException:", e)
+      Unauthorized(
+        Json.toJson(
+          ErrorResponse(
+            UNAUTHORIZED,
+            e.reason
           )
         )
-      case e: UnauthorizedException =>
-        logger.debug("Got UnauthorizedException:", e)
-        Unauthorized(
-          Json.toJson(
-            ErrorResponse(
-              UNAUTHORIZED,
-              e.message
-            )
-          )
-        )
+      )
     }
   }
 
   private def getAppaId(enrolments: Enrolments): String = {
-    val adrEnrolments: Enrolment  = getOrElseFailWithUnauthorised(
+    val adrEnrolments: Enrolment = getOrElseFailWithUnauthorised(
       enrolments.enrolments.find(_.key == config.enrolmentServiceName),
       s"Unable to retrieve enrolment: ${config.enrolmentServiceName}"
     )
-    val key = config.enrolmentIdentifierKey
+    val key                      = config.enrolmentIdentifierKey
 
     val appaIdOpt: Option[String] =
       adrEnrolments.getIdentifier(config.enrolmentIdentifierKey).map(_.value)
@@ -106,7 +93,7 @@ class AuthenticatedIdentifierAction @Inject() (
   private def getOrElseFailWithUnauthorised[T](maybeAppId: Option[T], failureMessage: String): T =
     maybeAppId.getOrElse {
       logger.warn(s"Authorised Action failed with error: $failureMessage")
-      throw new UnauthorizedException(failureMessage)
+      throw new IllegalStateException(failureMessage)
     }
 
 }
