@@ -50,7 +50,7 @@ trait SpecBase
     with GuiceOneAppPerSuite
     with MockitoSugar
     with ScalaCheckPropertyChecks
-    with BeforeAndAfterEach  {
+    with BeforeAndAfterEach {
   def configOverrides: Map[String, Any] = Map()
 
   val additionalAppConfig: Map[String, Any] = Map(

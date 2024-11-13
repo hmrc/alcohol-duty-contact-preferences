@@ -31,18 +31,18 @@ import uk.gov.hmrc.auth.core.retrieve.~
 import scala.concurrent.Future
 
 class IdentifierActionSpec extends SpecBase {
-  val enrolment: String = "HMRC-AD-ORG"
-  val appaIdKey: String = "APPAID"
-  val appaId: String = "SOMEAPPAID"
-  val state: String = "Activated"
-  val internalId: String = "internalId"
-  val enrolments: Enrolments = Enrolments(Set(Enrolment(enrolment, Seq(EnrolmentIdentifier(appaIdKey, appaId)), state)))
-  val emptyEnrolments: Enrolments = Enrolments(Set.empty)
+  val enrolment: String                   = "HMRC-AD-ORG"
+  val appaIdKey: String                   = "APPAID"
+  val appaId: String                      = "SOMEAPPAID"
+  val state: String                       = "Activated"
+  val internalId: String                  = "internalId"
+  val enrolments: Enrolments              = Enrolments(Set(Enrolment(enrolment, Seq(EnrolmentIdentifier(appaIdKey, appaId)), state)))
+  val emptyEnrolments: Enrolments         = Enrolments(Set.empty)
   val enrolmentsWithoutAppaId: Enrolments = Enrolments(Set(Enrolment(enrolment, Seq.empty, state)))
-  val testContent = "Test"
+  val testContent                         = "Test"
 
   val defaultBodyParser: BodyParsers.Default = app.injector.instanceOf[BodyParsers.Default]
-  val mockAuthConnector: AuthConnector = mock[AuthConnector]
+  val mockAuthConnector: AuthConnector       = mock[AuthConnector]
 
   val authorisedAction =
     new AuthenticatedIdentifierAction(mockAuthConnector, appConfig, defaultBodyParser)
@@ -67,11 +67,11 @@ class IdentifierActionSpec extends SpecBase {
           )
         )(any(), any())
       )
-        .thenReturn(Future(new~(Some(internalId), enrolments)))
+        .thenReturn(Future(new ~(Some(internalId), enrolments)))
 
       val result: Future[Result] = authorisedAction.invokeBlock(fakeRequest, testAction)
 
-      status(result) mustBe OK
+      status(result)          mustBe OK
       contentAsString(result) mustBe testContent
     }
 
@@ -90,7 +90,7 @@ class IdentifierActionSpec extends SpecBase {
           )
         )(any(), any())
       )
-        .thenReturn(Future(new~(Some(internalId), emptyEnrolments)))
+        .thenReturn(Future(new ~(Some(internalId), emptyEnrolments)))
 
       intercept[IllegalStateException] {
         await(authorisedAction.invokeBlock(fakeRequest, testAction))
@@ -112,7 +112,7 @@ class IdentifierActionSpec extends SpecBase {
           )
         )(any(), any())
       )
-        .thenReturn(Future(new~(Some(internalId), enrolmentsWithoutAppaId)))
+        .thenReturn(Future(new ~(Some(internalId), enrolmentsWithoutAppaId)))
 
       intercept[IllegalStateException] {
         await(authorisedAction.invokeBlock(fakeRequest, testAction))
@@ -134,7 +134,7 @@ class IdentifierActionSpec extends SpecBase {
           )
         )(any(), any())
       )
-        .thenReturn(Future(new~(None, enrolments)))
+        .thenReturn(Future(new ~(None, enrolments)))
 
       intercept[IllegalStateException] {
         await(authorisedAction.invokeBlock(fakeRequest, testAction))
