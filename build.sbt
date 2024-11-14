@@ -17,7 +17,7 @@ lazy val microservice = Project("alcohol-duty-contact-preferences", file("."))
     // https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html
     // suppress warnings in generated routes files
     scalacOptions += "-Wconf:src=routes/.*:s",
-    scalafmtOnCompile := true,
+    scalafmtOnCompile := true
   )
   .settings(inConfig(Test)(testSettings): _*)
   .settings(resolvers += Resolver.jcenterRepo)
@@ -25,9 +25,9 @@ lazy val microservice = Project("alcohol-duty-contact-preferences", file("."))
     ScoverageKeys.coverageExcludedFiles := scoverageExcludedList.mkString(";"),
     ScoverageKeys.coverageMinimumStmtTotal := 80,
     ScoverageKeys.coverageFailOnMinimum := true,
-    ScoverageKeys.coverageHighlighting := true,
+    ScoverageKeys.coverageHighlighting := true
   )
-  .settings(PlayKeys.playDefaultPort := 16005)
+  .settings(PlayKeys.playDefaultPort := 16006)
 
 lazy val it = project
   .enablePlugins(PlayScala)

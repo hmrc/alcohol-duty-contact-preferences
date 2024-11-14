@@ -31,7 +31,7 @@ import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test.{DefaultAwaitTimeout, FakeHeaders, FakeRequest, ResultExtractors}
 import uk.gov.hmrc.alcoholdutycontactpreferences.config.AppConfig
-import uk.gov.hmrc.alcoholdutycontactpreferences.controllers.actions.FakeAuthorisedAction
+import uk.gov.hmrc.alcoholdutycontactpreferences.controllers.actions.{FakeAuthorisedAction, FakeCheckAppaIdAction}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext
@@ -69,7 +69,7 @@ trait SpecBase
   val appConfig: AppConfig                             = app.injector.instanceOf[AppConfig]
   val bodyParsers: PlayBodyParsers                     = app.injector.instanceOf[PlayBodyParsers]
   val fakeAuthorisedAction                             = new FakeAuthorisedAction(bodyParsers)
-  // TODO - val fakeCheckAppaIdAction                            = new FakeCheckAppaIdAction()
+  val fakeCheckAppaIdAction                            = new FakeCheckAppaIdAction()
 
   def fakeRequestWithJsonBody(json: JsValue): FakeRequest[JsValue] = FakeRequest("", "/", FakeHeaders(), json)
 
