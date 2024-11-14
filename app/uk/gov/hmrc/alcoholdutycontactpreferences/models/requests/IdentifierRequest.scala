@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package models.requests
+package uk.gov.hmrc.alcoholdutycontactpreferences.models.requests
 
 import play.api.mvc.{Request, WrappedRequest}
 

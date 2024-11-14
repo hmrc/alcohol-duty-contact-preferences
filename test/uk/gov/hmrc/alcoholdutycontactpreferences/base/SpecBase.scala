@@ -51,6 +51,7 @@ trait SpecBase
     with MockitoSugar
     with ScalaCheckPropertyChecks
     with BeforeAndAfterEach {
+
   def configOverrides: Map[String, Any] = Map()
 
   val additionalAppConfig: Map[String, Any] = Map(

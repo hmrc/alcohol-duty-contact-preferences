@@ -60,4 +60,4 @@ lazy val scoverageExcludedList: Seq[String] = Seq(
   ".*config.*"
 )
 
-addCommandAlias("runAllChecks", ";clean;compile;scalafmtCheckAll;coverage;test;it/test;scalastyle;coverageReport")
+addCommandAlias("runAllChecks", ";clean;test:compile;scalafmtCheckAll;coverage;test;it/test;scalastyle;coverageReport")

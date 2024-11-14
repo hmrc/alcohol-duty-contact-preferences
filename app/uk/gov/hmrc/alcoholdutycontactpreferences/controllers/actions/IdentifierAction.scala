@@ -17,13 +17,13 @@
 package uk.gov.hmrc.alcoholdutycontactpreferences.controllers.actions
 
 import com.google.inject.Inject
-import models.requests.IdentifierRequest
 import play.api.Logging
 import play.api.http.Status.UNAUTHORIZED
 import play.api.libs.json.Json
 import play.api.mvc.Results._
 import play.api.mvc._
 import uk.gov.hmrc.alcoholdutycontactpreferences.config.AppConfig
+import uk.gov.hmrc.alcoholdutycontactpreferences.models.requests.IdentifierRequest
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core.CredentialStrength.strong
