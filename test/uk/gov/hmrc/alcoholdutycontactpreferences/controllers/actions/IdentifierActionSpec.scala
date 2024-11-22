@@ -45,7 +45,7 @@ class IdentifierActionSpec extends SpecBase {
   val mockAuthConnector: AuthConnector       = mock[AuthConnector]
 
   val authorisedAction =
-    new AuthenticatedIdentifierAction(mockAuthConnector, appConfig, defaultBodyParser)
+    new BaseAuthorisedAction(mockAuthConnector, appConfig, defaultBodyParser)
 
   val testAction: Request[_] => Future[Result] = { _ =>
     Future(Ok(testContent))

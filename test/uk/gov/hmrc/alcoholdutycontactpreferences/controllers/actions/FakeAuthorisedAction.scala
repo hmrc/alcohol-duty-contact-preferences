@@ -22,7 +22,7 @@ import uk.gov.hmrc.alcoholdutycontactpreferences.models.requests.IdentifierReque
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class FakeAuthorisedAction @Inject() (bodyParsers: PlayBodyParsers) extends IdentifierAction {
+class FakeAuthorisedAction @Inject() (bodyParsers: PlayBodyParsers) extends AuthorisedAction {
 
   override def parser: BodyParser[AnyContent] = bodyParsers.defaultBodyParser
 
