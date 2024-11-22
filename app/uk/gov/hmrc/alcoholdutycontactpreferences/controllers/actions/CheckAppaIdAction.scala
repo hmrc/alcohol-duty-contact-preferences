@@ -17,12 +17,11 @@
 package uk.gov.hmrc.alcoholdutycontactpreferences.controllers.actions
 
 import play.api.Logging
-import play.api.http.Status.UNAUTHORIZED
 import play.api.libs.json.Json
 import play.api.mvc.Results.Unauthorized
 import play.api.mvc.{ActionRefiner, Result}
+import uk.gov.hmrc.alcoholdutycontactpreferences.models.ErrorCodes
 import uk.gov.hmrc.alcoholdutycontactpreferences.models.requests.IdentifierRequest
-import uk.gov.hmrc.play.bootstrap.backend.http.ErrorResponse
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -40,12 +39,7 @@ class CheckAppaIdActionImpl private[actions] (appaId: String)(implicit val execu
       )
       Left(
         Unauthorized(
-          Json.toJson(
-            ErrorResponse(
-              UNAUTHORIZED,
-              "Unauthorised request"
-            )
-          )
+          Json.toJson(ErrorCodes.unauthorisedRequest)
         )
       )
     } else {

@@ -20,7 +20,7 @@ import com.google.inject.Inject
 import play.api.Logging
 import play.api.http.Status.UNAUTHORIZED
 import play.api.libs.json.Json
-import play.api.mvc.Results._
+import play.api.mvc.Results.Unauthorized
 import play.api.mvc._
 import uk.gov.hmrc.alcoholdutycontactpreferences.config.AppConfig
 import uk.gov.hmrc.alcoholdutycontactpreferences.models.requests.IdentifierRequest
@@ -28,41 +28,39 @@ import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core.CredentialStrength.strong
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{authorisedEnrolments, internalId}
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendHeaderCarrierProvider
 import uk.gov.hmrc.play.bootstrap.backend.http.ErrorResponse
-import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait IdentifierAction
+trait AuthorisedAction
     extends ActionBuilder[IdentifierRequest, AnyContent]
+    with BackendHeaderCarrierProvider
     with ActionFunction[Request, IdentifierRequest]
 
-class AuthenticatedIdentifierAction @Inject() (
+class BaseAuthorisedAction @Inject() (
   override val authConnector: AuthConnector,
   config: AppConfig,
   val parser: BodyParsers.Default
 )(implicit val executionContext: ExecutionContext)
-    extends IdentifierAction
+    extends AuthorisedAction
     with BackendHeaderCarrierProvider
     with AuthorisedFunctions
     with Logging {
 
-  private def predicate: Predicate =
-    AuthProviders(GovernmentGateway) and
-      Enrolment(config.enrolmentServiceName) and
-      CredentialStrength(strong) and
-      Organisation and
-      ConfidenceLevel.L50
-
   override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] = {
-    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
+    implicit val headerCarrier: HeaderCarrier = hc(request)
 
-    authorised(predicate).retrieve(internalId and authorisedEnrolments) { case optInternalId ~ enrolments =>
+    authorised(
+      AuthProviders(GovernmentGateway)
+        and Enrolment(config.enrolmentServiceName)
+        and CredentialStrength(strong)
+        and Organisation
+        and ConfidenceLevel.L50
+    ).retrieve(internalId and authorisedEnrolments) { case optInternalId ~ enrolments =>
       val internalId: String = getOrElseFailWithUnauthorised(optInternalId, "Unable to retrieve internalId")
       block(IdentifierRequest(request, getAppaId(enrolments), internalId))
     } recover { case e: AuthorisationException =>
@@ -83,17 +81,17 @@ class AuthenticatedIdentifierAction @Inject() (
       enrolments.enrolments.find(_.key == config.enrolmentServiceName),
       s"Unable to retrieve enrolment: ${config.enrolmentServiceName}"
     )
-    val key                      = config.enrolmentIdentifierKey
+
+    val key = config.enrolmentIdentifierKey
 
     val appaIdOpt: Option[String] =
-      adrEnrolments.getIdentifier(config.enrolmentIdentifierKey).map(_.value)
+      adrEnrolments.getIdentifier(key).map(_.value)
     getOrElseFailWithUnauthorised(appaIdOpt, s"Unable to retrieve $key from enrolments")
   }
 
-  private def getOrElseFailWithUnauthorised[T](maybeAppId: Option[T], failureMessage: String): T =
-    maybeAppId.getOrElse {
+  private def getOrElseFailWithUnauthorised[T](o: Option[T], failureMessage: String): T =
+    o.getOrElse {
       logger.warn(s"Authorised Action failed with error: $failureMessage")
       throw new IllegalStateException(failureMessage)
     }
-
 }
