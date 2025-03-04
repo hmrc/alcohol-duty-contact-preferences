@@ -33,7 +33,7 @@ class EventHubBounceController @Inject() (val controllerComponents: ControllerCo
       .validate[Event]
       .fold(
         invalid = _ => {
-          logger.info("Bounced email json body could not be parsed as Event")
+          logger.warn("Bounced email json body could not be parsed as Event")
           Future.successful(InternalServerError("Bounced email json body could not be parsed as Event"))
         },
         valid = event => {
