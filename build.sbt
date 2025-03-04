@@ -55,6 +55,7 @@ lazy val scoverageExcludedList: Seq[String] = Seq(
   ".*Routes.*",
   "testOnly.*",
   ".*testOnly.*",
+  ".*testOnly.controllers.*",
   ".*TestOnlyController.*",
   "testOnlyDoNotUseInAppConf.*",
   ".*config.*"

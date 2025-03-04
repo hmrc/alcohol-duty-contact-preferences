@@ -19,7 +19,7 @@ package uk.gov.hmrc.alcoholdutycontactpreferences.testOnly.controllers
 import play.api.Logging
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, BaseController, ControllerComponents}
-import uk.gov.hmrc.alcoholdutycontactpreferences.models.Event
+import uk.gov.hmrc.alcoholdutycontactpreferences.testOnly.models.Event
 
 import javax.inject.Inject
 import scala.concurrent.Future
