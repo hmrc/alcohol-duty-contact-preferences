@@ -39,7 +39,7 @@ curl -v -X POST -H "Content-Type: application/json" http://localhost:9050/event-
         "detected": "2021-04-07T09:46:29+00:00",
         "code": 605,
         "reason": "Not delivering to previously bounced address",
-        "enrolment": "HMRC-CUS-ORG~EORINumber~GB123456789"
+        "enrolment": "HMRC-AD-ORG~APPAID~XMADP0000100208"
     }
 }'
 ```
@@ -59,7 +59,7 @@ curl -v -X POST -H "Content-Type: application/json" http://localhost:16006/alcoh
         "detected":"2021-04-07T09:46:29+00:00",
         "code":605,
         "reason":"Not delivering to previously bounced address",
-        "enrolment":"HMRC-CUS-ORG~EORINumber~GB123456789"
+        "enrolment":"HMRC-AD-ORG~APPAID~XMADP0000100208"
     }
 }'
 ```
