@@ -1,4 +1,6 @@
 # Add all the application routes to the app.routes file
 
 POST         /event-hub/bounce                   uk.gov.hmrc.alcoholdutycontactpreferences.testOnly.controllers.EventHubBounceController.handleBouncedEmail()
+GET          /user-answers/set                   uk.gov.hmrc.alcoholdutycontactpreferences.controllers.UserAnswersController.createUserAnswers()
+GET          /user-answers/get                   uk.gov.hmrc.alcoholdutycontactpreferences.controllers.UserAnswersController.getUserAnswers()
 

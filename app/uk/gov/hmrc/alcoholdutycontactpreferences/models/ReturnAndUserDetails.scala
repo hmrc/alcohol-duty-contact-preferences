@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.alcoholdutycontactpreferences.config
+package uk.gov.hmrc.alcoholdutycontactpreferences.models
 
-import play.api.Configuration
+import play.api.libs.json.{Json, OFormat}
 
-import javax.inject.{Inject, Singleton}
+case class ReturnAndUserDetails(returnId: ReturnId, groupId: String, userId: String)
 
-@Singleton
-class AppConfig @Inject() (config: Configuration) {
-
-  val appName: String = config.get[String]("appName")
-
-  val enrolmentServiceName: String   = config.get[String]("enrolment.serviceName")
-  val enrolmentIdentifierKey: String = config.get[String]("enrolment.identifierKey")
-
-  val dbTimeToLiveInSeconds: Int = 125000
+object ReturnAndUserDetails {
+  implicit val returnAndUserDetailsFormat: OFormat[ReturnAndUserDetails] = Json.format[ReturnAndUserDetails]
 }
