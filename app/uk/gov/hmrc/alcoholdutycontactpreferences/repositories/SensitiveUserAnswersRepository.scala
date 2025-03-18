@@ -22,7 +22,7 @@ import org.mongodb.scala.result.UpdateResult
 import play.api.Configuration
 import play.api.libs.json.Format
 import uk.gov.hmrc.alcoholdutycontactpreferences.config.AppConfig
-import uk.gov.hmrc.alcoholdutycontactpreferences.models.{ReturnId, UserAnswers}
+import uk.gov.hmrc.alcoholdutycontactpreferences.models.UserAnswers
 import uk.gov.hmrc.crypto.SymmetricCryptoFactory
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
@@ -81,23 +81,18 @@ class SensitiveUserAnswersRepository @Inject() (
             .expireAfter(appConfig.dbTimeToLiveInSeconds, TimeUnit.SECONDS)
         )
       ),
-      extraCodecs = Seq(
-        Codecs.playFormatCodec(ReturnId.format)
-//        ,
-//        Codecs.playFormatCodec(UserAnswers.ssFormat),
-//        Codecs.playFormatCodec(UserAnswers.sbFormat)
-      ),
+      extraCodecs = Seq.empty,
       replaceIndexes = true
     ) {
 
   implicit val instantFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
 
-  private def byId(id: ReturnId) = Filters.equal("_id", id)
+  private def byId(appaId: String) = Filters.equal("_id", appaId)
 
-  def keepAlive(id: ReturnId): Future[Boolean] =
+  def keepAlive(appaId: String): Future[Boolean] =
     collection
       .updateOne(
-        filter = byId(id),
+        filter = byId(appaId),
         update = Updates.combine(
           Updates.set("lastUpdated", Instant.now(clock)),
           Updates.set("validUntil", Instant.now(clock).plusSeconds(appConfig.dbTimeToLiveInSeconds))
@@ -106,10 +101,10 @@ class SensitiveUserAnswersRepository @Inject() (
       .toFuture()
       .map(_ => true)
 
-  def get(id: ReturnId): Future[Option[UserAnswers]] =
-    keepAlive(id).flatMap { _ =>
+  def get(appaId: String): Future[Option[UserAnswers]] =
+    keepAlive(appaId).flatMap { _ =>
       collection
-        .find(byId(id))
+        .find(byId(appaId))
         .headOption()
     }
 
@@ -122,7 +117,7 @@ class SensitiveUserAnswersRepository @Inject() (
 
     collection
       .replaceOne(
-        filter = byId(updatedAnswers.returnId),
+        filter = byId(updatedAnswers.appaId),
         replacement = updatedAnswers,
         options = ReplaceOptions().upsert(false)
       )
@@ -145,6 +140,6 @@ class SensitiveUserAnswersRepository @Inject() (
       .map(_ => updatedAnswers)
   }
 
-  def clearUserAnswersById(returnId: ReturnId): Future[Unit] =
-    collection.deleteOne(filter = byId(returnId)).toFuture().map(_ => ())
+  def clearUserAnswersById(appaId: String): Future[Unit] =
+    collection.deleteOne(filter = byId(appaId)).toFuture().map(_ => ())
 }

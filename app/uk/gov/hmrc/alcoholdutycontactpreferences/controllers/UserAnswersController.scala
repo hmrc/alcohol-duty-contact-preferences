@@ -17,8 +17,10 @@
 package uk.gov.hmrc.alcoholdutycontactpreferences.controllers
 
 import com.google.inject.Inject
+import play.api.libs.json.{Json, OWrites}
 import play.api.mvc._
-import uk.gov.hmrc.alcoholdutycontactpreferences.models.{ReturnAndUserDetails, ReturnId, UserAnswers}
+import uk.gov.hmrc.alcoholdutycontactpreferences.controllers.actions.{AuthorisedAction, CheckAppaIdAction}
+import uk.gov.hmrc.alcoholdutycontactpreferences.models.{DecryptedUA, ReturnAndUserDetails, UserAnswers}
 import uk.gov.hmrc.alcoholdutycontactpreferences.repositories.SensitiveUserAnswersRepository
 import uk.gov.hmrc.crypto.Sensitive
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -27,13 +29,14 @@ import scala.concurrent.ExecutionContext
 
 class UserAnswersController @Inject() (
   cc: ControllerComponents,
-  sensitiveUserAnswersRepository: SensitiveUserAnswersRepository
+  sensitiveUserAnswersRepository: SensitiveUserAnswersRepository,
+  authorise: AuthorisedAction
 )(implicit ec: ExecutionContext)
     extends BackendController(cc) {
 
-  def createUserAnswers(): Action[AnyContent] = Action.async { implicit request =>
+  def createUserAnswers(): Action[AnyContent] = authorise.async { implicit request =>
     val testReturnAndUserDetails: ReturnAndUserDetails =
-      ReturnAndUserDetails(testReturnId, groupId = "test1", userId = "test2")
+      ReturnAndUserDetails(appaId = request.appaId, groupId = "test1", userId = request.userId)
 
     val userAnswers: UserAnswers = UserAnswers.createUserAnswers(
       returnAndUserDetails = testReturnAndUserDetails
@@ -41,18 +44,19 @@ class UserAnswersController @Inject() (
     )
 
     println("AAAAAAAAAA")
-    sensitiveUserAnswersRepository.add(userAnswers).map(_ => Ok("CreateUserAnswersSuccess"))
+    sensitiveUserAnswersRepository.add(userAnswers).map(ua => Ok(Json.toJson(DecryptedUA.fromUA(ua))))
   }
 
-  def getUserAnswers(): Action[AnyContent] = Action.async { implicit request =>
-    sensitiveUserAnswersRepository.get(testReturnId).map { result =>
+  def getUserAnswers(appaId: String): Action[AnyContent] = authorise.async { implicit request =>
+
+    sensitiveUserAnswersRepository.get(appaId).map { result =>
       println(s"QQQQQQ + ${result.get.sensitiveString.decryptedValue}")
-      Ok("get user answers was successful")
+      result match {
+        case Some(ua) => Ok(Json.toJson(DecryptedUA.fromUA(ua)))
+        case None => InternalServerError("Something went wrong...")
+      }
     }
   }
-
-  private val testReturnId =
-    ReturnId(appaId = "1234567890", periodKey = "25AA")
 
 //  val sensitiveUserInformation = SensitiveUserInformation(
 //    paperlessReference = false,
