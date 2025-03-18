@@ -25,22 +25,24 @@ import uk.gov.hmrc.alcoholdutycontactpreferences.repositories.SensitiveUserAnswe
 import uk.gov.hmrc.crypto.Sensitive
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
+import java.time.Clock
 import scala.concurrent.ExecutionContext
 
 class UserAnswersController @Inject() (
   cc: ControllerComponents,
   sensitiveUserAnswersRepository: SensitiveUserAnswersRepository,
-  authorise: AuthorisedAction
+  authorise: AuthorisedAction,
+  clock: Clock
 )(implicit ec: ExecutionContext)
     extends BackendController(cc) {
 
   def createUserAnswers(): Action[AnyContent] = authorise.async { implicit request =>
     val testReturnAndUserDetails: ReturnAndUserDetails =
-      ReturnAndUserDetails(appaId = request.appaId, groupId = "test1", userId = request.userId)
+      ReturnAndUserDetails(appaId = request.appaId, userId = request.userId)
 
     val userAnswers: UserAnswers = UserAnswers.createUserAnswers(
-      returnAndUserDetails = testReturnAndUserDetails
-//      sensitiveUserInformation = sensitiveUserInformation
+      returnAndUserDetails = testReturnAndUserDetails,
+      clock = clock
     )
 
     println("AAAAAAAAAA")
@@ -50,7 +52,7 @@ class UserAnswersController @Inject() (
   def getUserAnswers(appaId: String): Action[AnyContent] = authorise.async { implicit request =>
 
     sensitiveUserAnswersRepository.get(appaId).map { result =>
-      println(s"QQQQQQ + ${result.get.sensitiveString.decryptedValue}")
+      println(s"QQQQQQ + ${result.get.sensitiveUserInformation.emailAddress.get.decryptedValue}")
       result match {
         case Some(ua) => Ok(Json.toJson(DecryptedUA.fromUA(ua)))
         case None => InternalServerError("Something went wrong...")

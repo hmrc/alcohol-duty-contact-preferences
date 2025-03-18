@@ -16,117 +16,107 @@
 
 package uk.gov.hmrc.alcoholdutycontactpreferences.models
 
-import org.mongodb.scala.bson.ObjectId
-import play.api.Configuration
-import play.api.libs.functional.syntax.unlift
-import play.api.libs.json._
-import uk.gov.hmrc.crypto.Sensitive.{SensitiveBoolean, SensitiveString}
-import uk.gov.hmrc.crypto.{Crypted, Decrypter, Encrypter, PlainText, Sensitive, SymmetricCryptoFactory}
-import uk.gov.hmrc.mongo.play.json.formats.{MongoFormats, MongoJavatimeFormats}
-import uk.gov.hmrc.crypto.json.JsonEncryption
 import play.api.libs.functional.syntax._
+import play.api.libs.json._
+import uk.gov.hmrc.crypto.Sensitive.SensitiveString
+import uk.gov.hmrc.crypto.json.JsonEncryption
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
-import java.security.SecureRandom
-import java.time.Instant
-import java.util.Base64
+import java.time.{Clock, Instant}
 
 case class DecryptedUA(
-                      appaId: String,
-                      sensitiveString: String,
-                      data: JsObject = Json.obj(),
-                      lastUpdated: Instant = Instant.now,
+                        appaId: String,
+                        userId: String,
+                        paperlessReference: Boolean,
+                        emailVerification: Option[Boolean],
+                        bouncedEmail: Option[Boolean],
+                        decryptedSensitiveUserInformation: DecryptedSensitiveUserInformation,
+                        data: JsObject = Json.obj(),
+                        startedTime: Instant,
+                        lastUpdated: Instant,
+                        validUntil: Option[Instant] = None
                       )
 
 object DecryptedUA {
   def fromUA(userAnswers: UserAnswers): DecryptedUA = {
+
+    val sensitiveInfo = userAnswers.sensitiveUserInformation
     DecryptedUA(
       appaId = userAnswers.appaId,
-      sensitiveString = userAnswers.sensitiveString.decryptedValue,
-      data = userAnswers.data,
-      lastUpdated = userAnswers.lastUpdated
+      userId = userAnswers.userId,
+      paperlessReference = userAnswers.paperlessReference,
+      emailVerification = userAnswers.emailVerification,
+      bouncedEmail = userAnswers.bouncedEmail,
+      decryptedSensitiveUserInformation = DecryptedSensitiveUserInformation(
+        emailAddress = sensitiveInfo.emailAddress.map(_.decryptedValue),
+        emailEntered = sensitiveInfo.emailEntered.map(_.decryptedValue)),
+      startedTime = userAnswers.startedTime,
+      lastUpdated = userAnswers.lastUpdated,
+      validUntil = userAnswers.validUntil
     )
   }
 
   implicit val format: OFormat[DecryptedUA] = (
-      (__ \ "appaId").format[String] and
-        (__ \ "sensitiveString").format[String] and
-        (__ \ "data").formatWithDefault[JsObject](Json.obj()) and
-        (__ \ "lastUpdated").format(MongoJavatimeFormats.instantFormat)
+    (__ \ "appaId").format[String] and
+      (__ \ "userId").format[String] and
+      (__ \ "paperlessReference").format[Boolean] and
+      (__ \ "emailVerification").formatNullable[Boolean] and
+      (__ \ "bouncedEmail").formatNullable[Boolean] and
+      (__ \ "decryptedSensitiveUserInformation").format[DecryptedSensitiveUserInformation] and
+      (__ \ "data").formatWithDefault[JsObject](Json.obj()) and
+      (__ \ "startedTime").format(MongoJavatimeFormats.instantFormat) and
+      (__ \ "lastUpdated").format(MongoJavatimeFormats.instantFormat) and
+      (__ \ "validUntil").formatNullable(MongoJavatimeFormats.instantFormat)
     )(DecryptedUA.apply, unlift(DecryptedUA.unapply))
 
 }
 
 case class UserAnswers(
                         appaId: String,
-                        groupId: String,
-                        internalId: String,
-                        sensitiveString: SensitiveString,
+                        userId: String,
+                        paperlessReference: Boolean,
+                        emailVerification: Option[Boolean],
+                        bouncedEmail: Option[Boolean],
+                        sensitiveUserInformation: SensitiveUserInformation,
+                        //                        emailAddress: Option[SensitiveString],
+                        //                        emailEntered: Option[SensitiveString] = None,
                         data: JsObject = Json.obj(),
-                        //  sensitiveUserInformation: SensitiveUserInformation,
-                        startedTime: Instant = Instant.now,
-                        lastUpdated: Instant = Instant.now,
+                        startedTime: Instant,
+                        lastUpdated: Instant,
                         validUntil: Option[Instant] = None
                       )
 
 object UserAnswers {
   def createUserAnswers(
-                         returnAndUserDetails: ReturnAndUserDetails
-                         //    ,
-                         //    sensitiveUserInformation: SensitiveUserInformation
+                         returnAndUserDetails: ReturnAndUserDetails,
+                         clock: Clock
                        ): UserAnswers =
     UserAnswers(
       appaId = returnAndUserDetails.appaId,
-      groupId = returnAndUserDetails.groupId,
-      internalId = returnAndUserDetails.userId,
-      sensitiveString = SensitiveString("test123")
-      //      sensitiveUserInformation = sensitiveUserInformation
+      userId = returnAndUserDetails.userId,
+      paperlessReference = true,
+      emailVerification = None,
+      bouncedEmail = None,
+      sensitiveUserInformation = SensitiveUserInformation(Some(SensitiveString("@@@@@@@@")), Some(SensitiveString("#######"))),
+      startedTime = Instant.now(clock),
+      lastUpdated = Instant.now(clock),
+      validUntil = Some(Instant.now(clock))
     )
-
-
-  implicit def sensitiveStringFormat(implicit crypto: Encrypter with Decrypter): Format[SensitiveString] =
-    JsonEncryption.sensitiveEncrypterDecrypter(SensitiveString.apply)
 
   implicit def format(implicit crypto: Encrypter with Decrypter): OFormat[UserAnswers] =
     (
       (__ \ "_id").format[String] and
-        (__ \ "groupId").format[String] and
-        (__ \ "internalId").format[String] and
-        (__ \ "sensitiveString").format[SensitiveString] and
+        (__ \ "userId").format[String] and
+        (__ \ "paperlessReference").format[Boolean] and
+        (__ \ "emailVerification").formatNullable[Boolean] and
+        (__ \ "bouncedEmail").formatNullable[Boolean] and
+        (__ \ "sensitiveUserInformation").format[SensitiveUserInformation] and
         (__ \ "data").formatWithDefault[JsObject](Json.obj()) and
-        //        (__ \ "sensitiveUserInformation").format[SensitiveUserInformation] and
         (__ \ "startedTime").format(MongoJavatimeFormats.instantFormat) and
         (__ \ "lastUpdated").format(MongoJavatimeFormats.instantFormat) and
         (__ \ "validUntil").formatNullable(MongoJavatimeFormats.instantFormat)
       )(UserAnswers.apply, unlift(UserAnswers.unapply))
 
-  //  private implicit val crypto: Encrypter with Decrypter = {
-  //    val aesKey = {
-  //      val aesKey = new Array[Byte](32)
-  //      new SecureRandom().nextBytes(aesKey)
-  //      Base64.getEncoder.encodeToString(aesKey)
-  //    }
-  //    val config = Configuration("crypto.key" -> aesKey)
-  //    SymmetricCryptoFactory.aesGcmCryptoFromConfig("crypto", config.underlying)
-  //  }
-  //
-  //  implicit val oif: Format[ObjectId] = MongoFormats.Implicits.objectIdFormat
-  //
-  //  val cryptoFormat: OFormat[Crypted] =
-  //    ((__ \ "encrypted").format[Boolean]
-  //      ~ (__ \ "value").format[String])((_, v) => Crypted.apply(v), c => (true, c.value))
-  //
-  //  def sensitiveFormat[A: Format, B <: Sensitive[A]](apply: A => B, unapply: B => A)(implicit
-  //    crypto: Encrypter with Decrypter
-  //  ): OFormat[B] =
-  //    cryptoFormat
-  //      .inmap[B](
-  //        c => apply(Json.parse(crypto.decrypt(c).value).as[A]),
-  //        sn => crypto.encrypt(PlainText(implicitly[Format[A]].writes(unapply(sn)).toString))
-  //      )
-  //
-  //  implicit val ssFormat: Format[SensitiveString]  =
-  //    sensitiveFormat[String, SensitiveString](SensitiveString.apply, _.decryptedValue)
-  //  implicit val sbFormat: Format[SensitiveBoolean] =
-  //    sensitiveFormat[Boolean, SensitiveBoolean](SensitiveBoolean.apply, _.decryptedValue)
 
 }
