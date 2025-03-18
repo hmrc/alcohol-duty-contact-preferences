@@ -26,17 +26,17 @@ import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import java.time.{Clock, Instant}
 
 case class DecryptedUA(
-                        appaId: String,
-                        userId: String,
-                        paperlessReference: Boolean,
-                        emailVerification: Option[Boolean],
-                        bouncedEmail: Option[Boolean],
-                        decryptedSensitiveUserInformation: DecryptedSensitiveUserInformation,
-                        data: JsObject = Json.obj(),
-                        startedTime: Instant,
-                        lastUpdated: Instant,
-                        validUntil: Option[Instant] = None
-                      )
+  appaId: String,
+  userId: String,
+  paperlessReference: Boolean,
+  emailVerification: Option[Boolean],
+  bouncedEmail: Option[Boolean],
+  decryptedSensitiveUserInformation: DecryptedSensitiveUserInformation,
+  data: JsObject = Json.obj(),
+  startedTime: Instant,
+  lastUpdated: Instant,
+  validUntil: Option[Instant] = None
+)
 
 object DecryptedUA {
   def fromUA(userAnswers: UserAnswers): DecryptedUA = {
@@ -50,7 +50,8 @@ object DecryptedUA {
       bouncedEmail = userAnswers.bouncedEmail,
       decryptedSensitiveUserInformation = DecryptedSensitiveUserInformation(
         emailAddress = sensitiveInfo.emailAddress.map(_.decryptedValue),
-        emailEntered = sensitiveInfo.emailEntered.map(_.decryptedValue)),
+        emailEntered = sensitiveInfo.emailEntered.map(_.decryptedValue)
+      ),
       startedTime = userAnswers.startedTime,
       lastUpdated = userAnswers.lastUpdated,
       validUntil = userAnswers.validUntil
@@ -68,37 +69,40 @@ object DecryptedUA {
       (__ \ "startedTime").format(MongoJavatimeFormats.instantFormat) and
       (__ \ "lastUpdated").format(MongoJavatimeFormats.instantFormat) and
       (__ \ "validUntil").formatNullable(MongoJavatimeFormats.instantFormat)
-    )(DecryptedUA.apply, unlift(DecryptedUA.unapply))
+  )(DecryptedUA.apply, unlift(DecryptedUA.unapply))
 
 }
 
 case class UserAnswers(
-                        appaId: String,
-                        userId: String,
-                        paperlessReference: Boolean,
-                        emailVerification: Option[Boolean],
-                        bouncedEmail: Option[Boolean],
-                        sensitiveUserInformation: SensitiveUserInformation,
-                        //                        emailAddress: Option[SensitiveString],
-                        //                        emailEntered: Option[SensitiveString] = None,
-                        data: JsObject = Json.obj(),
-                        startedTime: Instant,
-                        lastUpdated: Instant,
-                        validUntil: Option[Instant] = None
-                      )
+  appaId: String,
+  userId: String,
+  paperlessReference: Boolean,
+  emailVerification: Option[Boolean],
+  bouncedEmail: Option[Boolean],
+  sensitiveUserInformation: SensitiveUserInformation,
+  //                        emailAddress: Option[SensitiveString],
+  //                        emailEntered: Option[SensitiveString] = None,
+  data: JsObject = Json.obj(),
+  startedTime: Instant,
+  lastUpdated: Instant,
+  validUntil: Option[Instant] = None
+)
 
 object UserAnswers {
   def createUserAnswers(
-                         returnAndUserDetails: ReturnAndUserDetails,
-                         clock: Clock
-                       ): UserAnswers =
+    returnAndUserDetails: ReturnAndUserDetails,
+    contactPreferences: SubscriptionContactPreferences,
+    clock: Clock
+  ): UserAnswers =
     UserAnswers(
       appaId = returnAndUserDetails.appaId,
       userId = returnAndUserDetails.userId,
-      paperlessReference = true,
-      emailVerification = None,
-      bouncedEmail = None,
-      sensitiveUserInformation = SensitiveUserInformation(Some(SensitiveString("@@@@@@@@")), Some(SensitiveString("#######"))),
+      paperlessReference = contactPreferences.paperlessReference,
+      emailVerification = contactPreferences.emailVerification,
+      bouncedEmail = contactPreferences.bouncedEmail,
+      sensitiveUserInformation = SensitiveUserInformation(
+        emailAddress = contactPreferences.emailAddress.map(SensitiveString(_))
+      ),
       startedTime = Instant.now(clock),
       lastUpdated = Instant.now(clock),
       validUntil = Some(Instant.now(clock))
@@ -116,7 +120,6 @@ object UserAnswers {
         (__ \ "startedTime").format(MongoJavatimeFormats.instantFormat) and
         (__ \ "lastUpdated").format(MongoJavatimeFormats.instantFormat) and
         (__ \ "validUntil").formatNullable(MongoJavatimeFormats.instantFormat)
-      )(UserAnswers.apply, unlift(UserAnswers.unapply))
-
+    )(UserAnswers.apply, unlift(UserAnswers.unapply))
 
 }

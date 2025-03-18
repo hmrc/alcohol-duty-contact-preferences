@@ -17,45 +17,64 @@
 package uk.gov.hmrc.alcoholdutycontactpreferences.controllers
 
 import com.google.inject.Inject
+import org.apache.pekko.util.ByteString
+import play.api.Logging
+import play.api.http.HttpEntity
 import play.api.libs.json.{Json, OWrites}
 import play.api.mvc._
+import uk.gov.hmrc.alcoholdutycontactpreferences.connectors.SubscriptionConnector
 import uk.gov.hmrc.alcoholdutycontactpreferences.controllers.actions.{AuthorisedAction, CheckAppaIdAction}
 import uk.gov.hmrc.alcoholdutycontactpreferences.models.{DecryptedUA, ReturnAndUserDetails, UserAnswers}
 import uk.gov.hmrc.alcoholdutycontactpreferences.repositories.SensitiveUserAnswersRepository
 import uk.gov.hmrc.crypto.Sensitive
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+import uk.gov.hmrc.play.bootstrap.backend.http.ErrorResponse
 
 import java.time.Clock
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class UserAnswersController @Inject() (
   cc: ControllerComponents,
   sensitiveUserAnswersRepository: SensitiveUserAnswersRepository,
+  subscriptionConnector: SubscriptionConnector,
   authorise: AuthorisedAction,
   clock: Clock
 )(implicit ec: ExecutionContext)
-    extends BackendController(cc) {
+    extends BackendController(cc) with Logging {
 
   def createUserAnswers(): Action[AnyContent] = authorise.async { implicit request =>
     val testReturnAndUserDetails: ReturnAndUserDetails =
       ReturnAndUserDetails(appaId = request.appaId, userId = request.userId)
 
-    val userAnswers: UserAnswers = UserAnswers.createUserAnswers(
-      returnAndUserDetails = testReturnAndUserDetails,
-      clock = clock
-    )
+    val subscriptionContactPreferences = subscriptionConnector.getSubscriptionContactPreferences(request.appaId)
+    subscriptionContactPreferences.foldF(
+      err => {
+        logger.warn(
+          s"Unable to get existing contact preferences for ${request.appaId} - ${err.statusCode} ${err.message}"
+        )
+        Future.successful(error(err))
+      },
+      contactPreferences => {
+        val userAnswers: UserAnswers = UserAnswers.createUserAnswers(
+          returnAndUserDetails = testReturnAndUserDetails,
+          contactPreferences = contactPreferences,
+          clock = clock
+        )
 
-    println("AAAAAAAAAA")
-    sensitiveUserAnswersRepository.add(userAnswers).map(ua => Ok(Json.toJson(DecryptedUA.fromUA(ua))))
+        println("AAAAAAAAAA")
+        sensitiveUserAnswersRepository.add(userAnswers).map(ua => Created(Json.toJson(DecryptedUA.fromUA(ua))))
+      }
+    )
   }
 
   def getUserAnswers(appaId: String): Action[AnyContent] = authorise.async { implicit request =>
 
     sensitiveUserAnswersRepository.get(appaId).map { result =>
-      println(s"QQQQQQ + ${result.get.sensitiveUserInformation.emailAddress.get.decryptedValue}")
+      println("QQQQQQ")
+//      println(s"QQQQQQ + ${result.get.sensitiveUserInformation.emailAddress.get.decryptedValue}")
       result match {
         case Some(ua) => Ok(Json.toJson(DecryptedUA.fromUA(ua)))
-        case None => InternalServerError("Something went wrong...")
+        case None => NotFound
       }
     }
   }
@@ -68,4 +87,8 @@ class UserAnswersController @Inject() (
 //    emailAddress = Some(Sensitive.SensitiveString("test123"))
 //  )
 
+  def error(errorResponse: ErrorResponse): Result = Result(
+    header = ResponseHeader(errorResponse.statusCode),
+    body = HttpEntity.Strict(ByteString(Json.toBytes(Json.toJson(errorResponse))), Some("application/json"))
+  )
 }

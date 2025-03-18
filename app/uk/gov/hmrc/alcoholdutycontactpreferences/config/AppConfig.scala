@@ -17,16 +17,33 @@
 package uk.gov.hmrc.alcoholdutycontactpreferences.config
 
 import play.api.Configuration
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class AppConfig @Inject() (config: Configuration) {
+class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig) {
 
   val appName: String = config.get[String]("appName")
+
+  private val subscriptionHost: String                  = servicesConfig.baseUrl("subscription")
+  lazy val subscriptionClientId: String                 = getConfStringAndThrowIfNotFound("subscription.clientId")
+  lazy val subscriptionSecret: String                   = getConfStringAndThrowIfNotFound("subscription.secret")
+  private lazy val subscriptionGetSubscriptionUrlPrefix = getConfStringAndThrowIfNotFound(
+    "subscription.url.subscriptionSummary"
+  )
+
+  val idType: String = config.get[String]("downstream-apis.idType")
+  val regime: String = config.get[String]("downstream-apis.regime")
 
   val enrolmentServiceName: String   = config.get[String]("enrolment.serviceName")
   val enrolmentIdentifierKey: String = config.get[String]("enrolment.identifierKey")
 
   val dbTimeToLiveInSeconds: Int = 125000
+
+  def getSubscriptionUrl(appaId: String): String =
+    s"$subscriptionHost$subscriptionGetSubscriptionUrlPrefix/$regime/$idType/$appaId"
+
+  private[config] def getConfStringAndThrowIfNotFound(key: String) =
+    servicesConfig.getConfString(key, throw new RuntimeException(s"Could not find services config key '$key'"))
 }
