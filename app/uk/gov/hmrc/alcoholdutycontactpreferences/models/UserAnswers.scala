@@ -19,7 +19,6 @@ package uk.gov.hmrc.alcoholdutycontactpreferences.models
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
-import uk.gov.hmrc.crypto.json.JsonEncryption
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
@@ -81,8 +80,6 @@ case class UserAnswers(
   emailVerification: Option[Boolean],
   bouncedEmail: Option[Boolean],
   sensitiveUserInformation: SensitiveUserInformation,
-  //                        emailAddress: Option[SensitiveString],
-  //                        emailEntered: Option[SensitiveString] = None,
   data: JsObject = Json.obj(),
   startedTime: Instant,
   lastUpdated: Instant,
@@ -105,8 +102,7 @@ object UserAnswers {
         emailAddress = contactPreferences.emailAddress.map(SensitiveString(_))
       ),
       startedTime = Instant.now(clock),
-      lastUpdated = Instant.now(clock),
-      validUntil = Some(Instant.now(clock))
+      lastUpdated = Instant.now(clock)
     )
 
   def fromDecryptedUA(decryptedUA: DecryptedUA): UserAnswers = {

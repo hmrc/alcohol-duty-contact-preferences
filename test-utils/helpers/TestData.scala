@@ -18,7 +18,8 @@ package helpers
 
 import generators.ModelGenerators
 import play.api.libs.json.{JsObject, Json, OFormat}
-import uk.gov.hmrc.alcoholdutycontactpreferences.models.{SubscriptionContactPreferences, UserAnswers, UserDetails}
+import uk.gov.hmrc.alcoholdutycontactpreferences.models._
+import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 
 import java.time._
 
@@ -33,11 +34,36 @@ trait TestData extends ModelGenerators {
   val userId: String           = "userId"
   val userDetails: UserDetails = UserDetails(appaId, userId)
 
-  val emailAddress                                                   = "john.doe@example.com"
+  val emailAddress                                                    = "john.doe@example.com"
   val contactPreferencesEmailSelected: SubscriptionContactPreferences =
     SubscriptionContactPreferences(true, Some(emailAddress), Some(true), Some(false))
 
-  val emptyUserAnswers: UserAnswers = UserAnswers.createUserAnswers(userDetails, contactPreferencesEmailSelected, clock)
+  val emptyUserAnswers: UserAnswers = UserAnswers(
+    appaId = appaId,
+    userId = userId,
+    paperlessReference = true,
+    emailVerification = Some(true),
+    bouncedEmail = Some(false),
+    sensitiveUserInformation = SensitiveUserInformation(emailAddress = Some(SensitiveString(emailAddress))),
+    startedTime = Instant.now(clock),
+    lastUpdated = Instant.now(clock)
+  )
+
+  val userAnswers: UserAnswers = emptyUserAnswers.copy(
+    data = JsObject(Seq("contactMethodEmail" -> Json.toJson(true)))
+  )
+
+  val decryptedUA: DecryptedUA = DecryptedUA(
+    appaId = appaId,
+    userId = userId,
+    paperlessReference = true,
+    emailVerification = Some(true),
+    bouncedEmail = Some(false),
+    decryptedSensitiveUserInformation = DecryptedSensitiveUserInformation(emailAddress = Some(emailAddress)),
+    data = JsObject(Seq("contactMethodEmail" -> Json.toJson(true))),
+    startedTime = Instant.now(clock),
+    lastUpdated = Instant.now(clock)
+  )
 
   case class DownstreamErrorDetails(code: String, message: String, logID: String)
 
