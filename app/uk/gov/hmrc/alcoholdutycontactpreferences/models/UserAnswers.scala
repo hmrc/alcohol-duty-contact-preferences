@@ -52,6 +52,7 @@ object DecryptedUA {
         emailAddress = sensitiveInfo.emailAddress.map(_.decryptedValue),
         emailEntered = sensitiveInfo.emailEntered.map(_.decryptedValue)
       ),
+      data = userAnswers.data,
       startedTime = userAnswers.startedTime,
       lastUpdated = userAnswers.lastUpdated,
       validUntil = userAnswers.validUntil
@@ -107,6 +108,25 @@ object UserAnswers {
       lastUpdated = Instant.now(clock),
       validUntil = Some(Instant.now(clock))
     )
+
+  def fromDecryptedUA(decryptedUA: DecryptedUA): UserAnswers = {
+    val decryptedSensitiveInfo = decryptedUA.decryptedSensitiveUserInformation
+    UserAnswers(
+      appaId = decryptedUA.appaId,
+      userId = decryptedUA.userId,
+      paperlessReference = decryptedUA.paperlessReference,
+      emailVerification = decryptedUA.emailVerification,
+      bouncedEmail = decryptedUA.bouncedEmail,
+      sensitiveUserInformation = SensitiveUserInformation(
+        emailAddress = decryptedSensitiveInfo.emailAddress.map(SensitiveString(_)),
+        emailEntered = decryptedSensitiveInfo.emailEntered.map(SensitiveString(_))
+      ),
+      data = decryptedUA.data,
+      startedTime = decryptedUA.startedTime,
+      lastUpdated = decryptedUA.lastUpdated,
+      validUntil = decryptedUA.validUntil
+    )
+  }
 
   implicit def format(implicit crypto: Encrypter with Decrypter): OFormat[UserAnswers] =
     (

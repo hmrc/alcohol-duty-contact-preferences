@@ -20,12 +20,12 @@ import com.google.inject.Inject
 import org.apache.pekko.util.ByteString
 import play.api.Logging
 import play.api.http.HttpEntity
-import play.api.libs.json.{Json, OWrites}
+import play.api.libs.json.{JsValue, Json, OWrites}
 import play.api.mvc._
 import uk.gov.hmrc.alcoholdutycontactpreferences.connectors.SubscriptionConnector
 import uk.gov.hmrc.alcoholdutycontactpreferences.controllers.actions.{AuthorisedAction, CheckAppaIdAction}
 import uk.gov.hmrc.alcoholdutycontactpreferences.models.{DecryptedUA, ReturnAndUserDetails, UserAnswers}
-import uk.gov.hmrc.alcoholdutycontactpreferences.repositories.SensitiveUserAnswersRepository
+import uk.gov.hmrc.alcoholdutycontactpreferences.repositories.{SensitiveUserAnswersRepository, UpdateFailure, UpdateSuccess}
 import uk.gov.hmrc.crypto.Sensitive
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.play.bootstrap.backend.http.ErrorResponse
@@ -38,6 +38,7 @@ class UserAnswersController @Inject() (
   sensitiveUserAnswersRepository: SensitiveUserAnswersRepository,
   subscriptionConnector: SubscriptionConnector,
   authorise: AuthorisedAction,
+  checkAppaId: CheckAppaIdAction,
   clock: Clock
 )(implicit ec: ExecutionContext)
     extends BackendController(cc) with Logging {
@@ -78,6 +79,18 @@ class UserAnswersController @Inject() (
       }
     }
   }
+
+  def set(): Action[JsValue] =
+    authorise(parse.json).async { implicit request =>
+      withJsonBody[DecryptedUA] { decryptedUA =>
+        val userAnswers = UserAnswers.fromDecryptedUA(decryptedUA)
+
+        sensitiveUserAnswersRepository.set(userAnswers).map {
+          case UpdateSuccess => Ok(Json.toJson(decryptedUA))
+          case UpdateFailure => NotFound
+        }
+      }
+    }
 
 //  val sensitiveUserInformation = SensitiveUserInformation(
 //    paperlessReference = false,
