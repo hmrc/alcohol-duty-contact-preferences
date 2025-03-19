@@ -18,8 +18,8 @@ package uk.gov.hmrc.alcoholdutycontactpreferences.models
 
 import play.api.libs.json.{Json, OFormat}
 
-case class ReturnAndUserDetails(appaId: String, userId: String)
+case class UserDetails(appaId: String, userId: String)
 
-object ReturnAndUserDetails {
-  implicit val returnAndUserDetailsFormat: OFormat[ReturnAndUserDetails] = Json.format[ReturnAndUserDetails]
+object UserDetails {
+  implicit val returnAndUserDetailsFormat: OFormat[UserDetails] = Json.format[UserDetails]
 }

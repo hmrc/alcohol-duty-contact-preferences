@@ -91,13 +91,13 @@ case class UserAnswers(
 
 object UserAnswers {
   def createUserAnswers(
-    returnAndUserDetails: ReturnAndUserDetails,
+    userDetails: UserDetails,
     contactPreferences: SubscriptionContactPreferences,
     clock: Clock
   ): UserAnswers =
     UserAnswers(
-      appaId = returnAndUserDetails.appaId,
-      userId = returnAndUserDetails.userId,
+      appaId = userDetails.appaId,
+      userId = userDetails.userId,
       paperlessReference = contactPreferences.paperlessReference,
       emailVerification = contactPreferences.emailVerification,
       bouncedEmail = contactPreferences.bouncedEmail,

@@ -24,7 +24,7 @@ import play.api.libs.json.{JsValue, Json, OWrites}
 import play.api.mvc._
 import uk.gov.hmrc.alcoholdutycontactpreferences.connectors.SubscriptionConnector
 import uk.gov.hmrc.alcoholdutycontactpreferences.controllers.actions.{AuthorisedAction, CheckAppaIdAction}
-import uk.gov.hmrc.alcoholdutycontactpreferences.models.{DecryptedUA, ReturnAndUserDetails, UserAnswers}
+import uk.gov.hmrc.alcoholdutycontactpreferences.models.{DecryptedUA, UserAnswers, UserDetails}
 import uk.gov.hmrc.alcoholdutycontactpreferences.repositories.{SensitiveUserAnswersRepository, UpdateFailure, UpdateSuccess}
 import uk.gov.hmrc.crypto.Sensitive
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -41,64 +41,65 @@ class UserAnswersController @Inject() (
   checkAppaId: CheckAppaIdAction,
   clock: Clock
 )(implicit ec: ExecutionContext)
-    extends BackendController(cc) with Logging {
+    extends BackendController(cc)
+    with Logging {
 
-  def createUserAnswers(): Action[AnyContent] = authorise.async { implicit request =>
-    val testReturnAndUserDetails: ReturnAndUserDetails =
-      ReturnAndUserDetails(appaId = request.appaId, userId = request.userId)
+  def createUserAnswers(): Action[JsValue] = authorise(parse.json).async { implicit request =>
+    withJsonBody[UserDetails] { userDetails =>
+      val appaId = userDetails.appaId
 
-    val subscriptionContactPreferences = subscriptionConnector.getSubscriptionContactPreferences(request.appaId)
-    subscriptionContactPreferences.foldF(
-      err => {
-        logger.warn(
-          s"Unable to get existing contact preferences for ${request.appaId} - ${err.statusCode} ${err.message}"
-        )
-        Future.successful(error(err))
-      },
-      contactPreferences => {
-        val userAnswers: UserAnswers = UserAnswers.createUserAnswers(
-          returnAndUserDetails = testReturnAndUserDetails,
-          contactPreferences = contactPreferences,
-          clock = clock
-        )
+      checkAppaId(appaId).invokeBlock[JsValue](
+        request,
+        { implicit request =>
+          val subscriptionContactPreferences = subscriptionConnector.getSubscriptionContactPreferences(appaId)
+          subscriptionContactPreferences.foldF(
+            err => {
+              logger.warn(
+                s"Unable to get existing contact preferences for $appaId - ${err.statusCode} ${err.message}"
+              )
+              Future.successful(error(err))
+            },
+            contactPreferences => {
+              val userAnswers: UserAnswers = UserAnswers.createUserAnswers(
+                userDetails = userDetails,
+                contactPreferences = contactPreferences,
+                clock = clock
+              )
 
-        println("AAAAAAAAAA")
-        sensitiveUserAnswersRepository.add(userAnswers).map(ua => Created(Json.toJson(DecryptedUA.fromUA(ua))))
-      }
-    )
+              println("AAAAAAAAAA")
+              sensitiveUserAnswersRepository.add(userAnswers).map(ua => Created(Json.toJson(DecryptedUA.fromUA(ua))))
+            }
+          )
+        }
+      )
+    }
   }
 
-  def getUserAnswers(appaId: String): Action[AnyContent] = authorise.async { implicit request =>
-
-    sensitiveUserAnswersRepository.get(appaId).map { result =>
-      println("QQQQQQ")
-//      println(s"QQQQQQ + ${result.get.sensitiveUserInformation.emailAddress.get.decryptedValue}")
-      result match {
-        case Some(ua) => Ok(Json.toJson(DecryptedUA.fromUA(ua)))
-        case None => NotFound
+  def getUserAnswers(appaId: String): Action[AnyContent] = (authorise andThen checkAppaId(appaId)).async {
+    implicit request =>
+      sensitiveUserAnswersRepository.get(appaId).map {
+        case Some(ua) =>
+          println(s"QQQQQQ + ${ua.sensitiveUserInformation.emailAddress.get.decryptedValue}")
+          Ok(Json.toJson(DecryptedUA.fromUA(ua)))
+        case None     => NotFound
       }
-    }
   }
 
   def set(): Action[JsValue] =
     authorise(parse.json).async { implicit request =>
       withJsonBody[DecryptedUA] { decryptedUA =>
-        val userAnswers = UserAnswers.fromDecryptedUA(decryptedUA)
-
-        sensitiveUserAnswersRepository.set(userAnswers).map {
-          case UpdateSuccess => Ok(Json.toJson(decryptedUA))
-          case UpdateFailure => NotFound
-        }
+        checkAppaId(decryptedUA.appaId).invokeBlock[JsValue](
+          request,
+          { implicit request =>
+            val userAnswers = UserAnswers.fromDecryptedUA(decryptedUA)
+            sensitiveUserAnswersRepository.set(userAnswers).map {
+              case UpdateSuccess => Ok(Json.toJson(decryptedUA))
+              case UpdateFailure => NotFound
+            }
+          }
+        )
       }
     }
-
-//  val sensitiveUserInformation = SensitiveUserInformation(
-//    paperlessReference = false,
-//    withEmail = true,
-//    emailVerification = None,
-//    bouncedEmail = None,
-//    emailAddress = Some(Sensitive.SensitiveString("test123"))
-//  )
 
   def error(errorResponse: ErrorResponse): Result = Result(
     header = ResponseHeader(errorResponse.statusCode),
