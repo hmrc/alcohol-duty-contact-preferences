@@ -23,11 +23,9 @@ import uk.gov.hmrc.alcoholdutycontactpreferences.models.requests.IdentifierReque
 import scala.concurrent.Future
 
 class CheckAppaIdActionSpec extends SpecBase {
-  val appaId: String                                                   = "SOMEAPPAID"
-  val internalId: String                                               = "internalId"
   val wrongAppaId: String                                              = appaId + "1"
   val fakeIdentifierRequest: IdentifierRequest[AnyContentAsEmpty.type] =
-    IdentifierRequest(fakeRequest, appaId, internalId)
+    IdentifierRequest(fakeRequest, appaId, userId)
   val testContent                                                      = "Test"
 
   val testAction: IdentifierRequest[_] => Future[Result] = { request =>

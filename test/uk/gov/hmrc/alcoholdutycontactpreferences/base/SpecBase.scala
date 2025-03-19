@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.alcoholdutycontactpreferences.base
 
+import generators.ModelGenerators
+import helpers.TestData
 import org.mockito.MockitoSugar
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AnyFreeSpec
@@ -31,6 +33,7 @@ import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test.{DefaultAwaitTimeout, FakeHeaders, FakeRequest, ResultExtractors}
 import uk.gov.hmrc.alcoholdutycontactpreferences.config.AppConfig
+import uk.gov.hmrc.alcoholdutycontactpreferences.connectors.helpers.RandomUUIDGenerator
 import uk.gov.hmrc.alcoholdutycontactpreferences.controllers.actions.{FakeAuthorisedAction, FakeCheckAppaIdAction}
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -50,7 +53,9 @@ trait SpecBase
     with GuiceOneAppPerSuite
     with MockitoSugar
     with ScalaCheckPropertyChecks
-    with BeforeAndAfterEach {
+    with BeforeAndAfterEach
+    with TestData
+    with ModelGenerators {
 
   def configOverrides: Map[String, Any] = Map()
 
@@ -72,6 +77,10 @@ trait SpecBase
   val fakeCheckAppaIdAction                            = new FakeCheckAppaIdAction()
 
   def fakeRequestWithJsonBody(json: JsValue): FakeRequest[JsValue] = FakeRequest("", "/", FakeHeaders(), json)
+
+  val fakeUUIDGenerator = new RandomUUIDGenerator {
+    override def uuid: String = dummyUUID
+  }
 
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
   implicit val hc: HeaderCarrier    = HeaderCarrier()
