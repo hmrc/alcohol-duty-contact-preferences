@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,17 @@ trait TestData extends ModelGenerators {
     emailVerification = Some(true),
     bouncedEmail = Some(false),
     sensitiveUserInformation = SensitiveUserInformation(emailAddress = Some(SensitiveString(emailAddress))),
+    startedTime = Instant.now(clock),
+    lastUpdated = Instant.now(clock)
+  )
+
+  val decryptedEmptyUA: DecryptedUA = DecryptedUA(
+    appaId = appaId,
+    userId = userId,
+    paperlessReference = true,
+    emailVerification = Some(true),
+    bouncedEmail = Some(false),
+    decryptedSensitiveUserInformation = DecryptedSensitiveUserInformation(emailAddress = Some(emailAddress)),
     startedTime = Instant.now(clock),
     lastUpdated = Instant.now(clock)
   )

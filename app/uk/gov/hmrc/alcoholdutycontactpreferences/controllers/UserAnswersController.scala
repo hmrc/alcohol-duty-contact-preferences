@@ -64,8 +64,6 @@ class UserAnswersController @Inject() (
                 contactPreferences = contactPreferences,
                 clock = clock
               )
-
-              println("AAAAAAAAAA")
               sensitiveUserAnswersRepository.add(userAnswers).map(ua => Created(Json.toJson(DecryptedUA.fromUA(ua))))
             }
           )
@@ -77,9 +75,7 @@ class UserAnswersController @Inject() (
   def getUserAnswers(appaId: String): Action[AnyContent] = (authorise andThen checkAppaId(appaId)).async {
     implicit request =>
       sensitiveUserAnswersRepository.get(appaId).map {
-        case Some(ua) =>
-          println(s"QQQQQQ + ${ua.sensitiveUserInformation.emailAddress.get.decryptedValue}")
-          Ok(Json.toJson(DecryptedUA.fromUA(ua)))
+        case Some(ua) => Ok(Json.toJson(DecryptedUA.fromUA(ua)))
         case None     => NotFound
       }
   }
