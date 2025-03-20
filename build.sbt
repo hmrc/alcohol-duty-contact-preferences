@@ -4,7 +4,7 @@ import scoverage.ScoverageKeys
 val playVersion = "play-30"
 
 ThisBuild / majorVersion := 0
-ThisBuild / scalaVersion := "2.13.14"
+ThisBuild / scalaVersion := "2.13.16"
 ThisBuild / excludeDependencies ++= Seq(
   // As of Play 3.0, groupId has changed to org.playframework; exclude transitive dependencies to the old artifacts
   // Specifically affects play-json-extensions dependency
@@ -17,7 +17,7 @@ lazy val microservice = Project("alcohol-duty-contact-preferences", file("."))
   .disablePlugins(JUnitXmlReportPlugin)
   .settings(
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
-    libraryDependencies += "uk.gov.hmrc" %% s"crypto-json-$playVersion" % "8.1.0",
+    libraryDependencies += "uk.gov.hmrc" %% s"crypto-json-$playVersion" % "8.2.0",
       // https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html
     // suppress warnings in generated routes files
     scalacOptions += "-Wconf:src=routes/.*:s",
