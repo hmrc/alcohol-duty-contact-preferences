@@ -1,0 +1,196 @@
+/*
+ * Copyright 2025 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package uk.gov.hmrc.alcoholdutycontactpreferences.repositories
+
+import org.mongodb.scala.model.Filters
+import uk.gov.hmrc.alcoholdutycontactpreferences.base.ISpecBase
+import uk.gov.hmrc.alcoholdutycontactpreferences.config.AppConfig
+import uk.gov.hmrc.alcoholdutycontactpreferences.models.UserAnswers
+import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
+
+import java.time.Instant
+import java.time.temporal.ChronoUnit
+
+class SensitiveUserAnswersRepositorySpec extends ISpecBase with DefaultPlayMongoRepositorySupport[UserAnswers] {
+  private val instant = Instant.now(clock)
+
+  private val DB_TTL_IN_SEC = 100
+
+  private val mockAppConfig = mock[AppConfig]
+  when(mockAppConfig.dbTimeToLiveInSeconds) thenReturn DB_TTL_IN_SEC
+
+  protected override val repository = new SensitiveUserAnswersRepository(
+    mongoComponent = mongoComponent,
+    appConfig = mockAppConfig,
+    config = app.configuration,
+    clock = clock
+  )
+
+  "add must" - {
+    "set the last updated time on the supplied user answers to `now`, and save them" in {
+      val expectedAddedUserAnswers = userAnswers.copy(
+        lastUpdated = instant,
+        validUntil = Some(instant.plusSeconds(DB_TTL_IN_SEC))
+      )
+
+      val expectedResult = expectedAddedUserAnswers.copy(
+        lastUpdated = expectedAddedUserAnswers.lastUpdated.truncatedTo(ChronoUnit.MILLIS),
+        validUntil = expectedAddedUserAnswers.validUntil.map(_.truncatedTo(ChronoUnit.MILLIS))
+      )
+
+      val updatedUserAnswers = repository.add(userAnswers).futureValue
+      val updatedRecord      = find(Filters.equal("_id", appaId)).futureValue.headOption.value
+
+      updatedUserAnswers mustEqual expectedAddedUserAnswers
+      verifyUserAnswerResult(updatedRecord, expectedResult)
+    }
+
+    "not fail (upsert) if called twice" in {
+      val expectedAddedUserAnswers = userAnswers.copy(
+        lastUpdated = instant,
+        validUntil = Some(instant.plusSeconds(DB_TTL_IN_SEC))
+      )
+
+      val expectedResult = expectedAddedUserAnswers.copy(
+        lastUpdated = expectedAddedUserAnswers.lastUpdated.truncatedTo(ChronoUnit.MILLIS),
+        validUntil = expectedAddedUserAnswers.validUntil.map(_.truncatedTo(ChronoUnit.MILLIS))
+      )
+
+      repository.add(userAnswers).futureValue
+      val updatedUserAnswers = repository.add(userAnswers).futureValue
+      val updatedRecord      = find(Filters.equal("_id", appaId)).futureValue.headOption.value
+
+      updatedUserAnswers mustEqual expectedAddedUserAnswers
+      verifyUserAnswerResult(updatedRecord, expectedResult)
+    }
+  }
+
+  "set must" - {
+    "set the last updated time on the supplied user answers to `now`, and update them" in {
+      val updatedUserAnswers = repository.add(userAnswers).futureValue
+
+      val updatedResult = userAnswers.copy(
+        userId = "new-user-id"
+      )
+
+      val expectedAddedUserAnswers = userAnswers.copy(
+        lastUpdated = instant,
+        validUntil = Some(instant.plusSeconds(DB_TTL_IN_SEC))
+      )
+
+      val expectedResult = expectedAddedUserAnswers.copy(
+        userId = "new-user-id",
+        lastUpdated = expectedAddedUserAnswers.lastUpdated.truncatedTo(ChronoUnit.MILLIS),
+        validUntil = expectedAddedUserAnswers.validUntil.map(_.truncatedTo(ChronoUnit.MILLIS))
+      )
+
+      val setResult     = repository.set(updatedResult).futureValue
+      val updatedRecord = find(Filters.equal("_id", appaId)).futureValue.headOption.value
+
+      updatedUserAnswers mustEqual expectedAddedUserAnswers
+      setResult          mustEqual UpdateSuccess
+      verifyUserAnswerResult(updatedRecord, expectedResult)
+    }
+
+    "fail to update a user answer if it wasn't previously saved" in {
+      val newUserAnswers = userAnswers.copy(appaId = "new-appa-id")
+      val setResult      = repository.set(newUserAnswers).futureValue
+      setResult mustEqual UpdateFailure
+    }
+  }
+
+  "get when" - {
+    "there is a record for this id must" - {
+      "update the lastUpdated time, validUntil time, and get the record" in {
+        insert(userAnswers).futureValue
+
+        val result         = repository.get(userAnswers.appaId).futureValue
+        val expectedResult = userAnswers.copy(
+          lastUpdated = instant,
+          validUntil = Some(instant.plusSeconds(DB_TTL_IN_SEC))
+        )
+
+        verifyUserAnswerResult(result.value, expectedResult)
+      }
+    }
+
+    "there is no record for this id must" - {
+      "return None" in {
+        repository
+          .get("APPA id that does not exist")
+          .futureValue must not be defined
+      }
+    }
+  }
+
+  "keepAlive when" - {
+    "there is a record for this id must" - {
+      "update its lastUpdated to `now` and return true" in {
+        insert(userAnswers).futureValue
+
+        val result = repository.keepAlive(userAnswers.appaId).futureValue
+
+        val expectedUpdatedAnswers = userAnswers.copy(
+          lastUpdated = instant,
+          validUntil = Some(instant.plusSeconds(DB_TTL_IN_SEC))
+        )
+
+        result mustEqual true
+        val updatedAnswers = find(Filters.equal("_id", appaId)).futureValue.headOption.value
+
+        verifyUserAnswerResult(updatedAnswers, expectedUpdatedAnswers)
+      }
+    }
+
+    "there is no record for this id must" - {
+      "return true" in {
+        repository
+          .keepAlive("APPA id that does not exist")
+          .futureValue mustEqual true
+      }
+    }
+  }
+
+  "clearUserAnswersById must" - {
+    "clear down existing user answers" in {
+      insert(userAnswers).futureValue
+      repository.get(userAnswers.appaId).futureValue.isEmpty          mustBe false
+      repository.clearUserAnswersById(userAnswers.appaId).futureValue mustBe ()
+      repository.get(userAnswers.appaId).futureValue.isEmpty          mustBe true
+    }
+
+    "not fail if user answers doesn't exist" in {
+      repository.get(userAnswers.appaId).futureValue.isEmpty          mustBe true
+      repository.clearUserAnswersById(userAnswers.appaId).futureValue mustBe ()
+    }
+  }
+
+  def verifyUserAnswerResult(actual: UserAnswers, expected: UserAnswers) = {
+    actual.appaId                                        mustEqual expected.appaId
+    actual.userId                                        mustEqual expected.userId
+    actual.paperlessReference                            mustEqual expected.paperlessReference
+    actual.emailVerification                             mustEqual expected.emailVerification
+    actual.bouncedEmail                                  mustEqual expected.bouncedEmail
+    actual.sensitiveUserInformation                      mustEqual expected.sensitiveUserInformation
+    actual.data                                          mustEqual expected.data
+    actual.startedTime.truncatedTo(ChronoUnit.MILLIS)    mustEqual expected.startedTime.truncatedTo(ChronoUnit.MILLIS)
+    actual.lastUpdated.truncatedTo(ChronoUnit.MILLIS)    mustEqual expected.lastUpdated.truncatedTo(ChronoUnit.MILLIS)
+    actual.validUntil.get.truncatedTo(ChronoUnit.MILLIS) mustEqual expected.validUntil.get.truncatedTo(
+      ChronoUnit.MILLIS
+    )
+  }
+}

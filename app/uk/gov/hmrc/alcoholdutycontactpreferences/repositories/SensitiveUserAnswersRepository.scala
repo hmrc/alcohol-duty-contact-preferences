@@ -16,16 +16,14 @@
 
 package uk.gov.hmrc.alcoholdutycontactpreferences.repositories
 
-import org.mongodb.scala.bson.BsonDocument
-import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions, Indexes, ReplaceOptions, Updates}
-import org.mongodb.scala.result.UpdateResult
+import org.mongodb.scala.model._
 import play.api.Configuration
 import play.api.libs.json.Format
 import uk.gov.hmrc.alcoholdutycontactpreferences.config.AppConfig
 import uk.gov.hmrc.alcoholdutycontactpreferences.models.UserAnswers
 import uk.gov.hmrc.crypto.SymmetricCryptoFactory
 import uk.gov.hmrc.mongo.MongoComponent
-import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
+import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
 import java.time.{Clock, Instant}
@@ -36,27 +34,6 @@ import scala.concurrent.{ExecutionContext, Future}
 sealed trait UpdateResult
 case object UpdateSuccess extends UpdateResult
 case object UpdateFailure extends UpdateResult
-
-//object TestObject {
-//  val userAnswersSchema =
-//    BsonDocument(
-//      """
-//        { bsonType: "object"
-//        , required: [ "_id", "returnId", "groupId", "internalId", "sensitiveString", "startedTime", "lastUpdated" ]
-//        , properties:
-//          { _id              : { bsonType: "objectId" }
-//          , returnId         : { bsonType: "string" }
-//          , groupId          : { bsonType: "string" }
-//          , internalId       : { bsonType: "string" }
-//          , sensitiveString  : { bsonType: "object", required: [ "encrypted", "value" ], properties: { "encrypted": { bsonType: "bool"}, value: { bsonType: "string" } } }
-//          , startedTime      : { bsonType: "date" }
-//          , lastUpdated      : { bsonType: "date" }
-//          , validUntil       : { bsonType: "date" }
-//          }
-//        }
-//      """
-//    )
-//}
 
 @Singleton
 class SensitiveUserAnswersRepository @Inject() (
@@ -71,8 +48,6 @@ class SensitiveUserAnswersRepository @Inject() (
       domainFormat = UserAnswers.format(
         SymmetricCryptoFactory.aesCryptoFromConfig("crypto", config.underlying)
       ),
-//      optSchema = None,
-//        Some(TestObject.userAnswersSchema),
       indexes = Seq(
         IndexModel(
           Indexes.ascending("lastUpdated"),
@@ -86,6 +61,9 @@ class SensitiveUserAnswersRepository @Inject() (
     ) {
 
   implicit val instantFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
+
+  private val replaceDontUpsert = ReplaceOptions().upsert(false)
+  private val replaceUpsert     = ReplaceOptions().upsert(true)
 
   private def byId(appaId: String) = Filters.equal("_id", appaId)
 
@@ -119,7 +97,7 @@ class SensitiveUserAnswersRepository @Inject() (
       .replaceOne(
         filter = byId(updatedAnswers.appaId),
         replacement = updatedAnswers,
-        options = ReplaceOptions().upsert(false)
+        options = replaceDontUpsert
       )
       .toFuture()
       .map(res => if (res.getModifiedCount == 1) UpdateSuccess else UpdateFailure)
@@ -132,10 +110,12 @@ class SensitiveUserAnswersRepository @Inject() (
       validUntil = Some(Instant.now(clock).plusSeconds(appConfig.dbTimeToLiveInSeconds))
     )
 
-//    println("BBBBBBBBB " + updatedAnswers.sensitiveUserInformation.emailAddress)
-
     collection
-      .insertOne(updatedAnswers)
+      .replaceOne(
+        filter = byId(updatedAnswers.appaId),
+        replacement = updatedAnswers,
+        options = replaceUpsert
+      )
       .toFuture()
       .map(_ => updatedAnswers)
   }

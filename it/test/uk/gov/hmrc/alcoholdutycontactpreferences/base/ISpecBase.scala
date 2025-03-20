@@ -20,6 +20,7 @@ import generators.ModelGenerators
 import helpers.TestData
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.stream.Materializer
+import org.mockito.MockitoSugar
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
@@ -54,6 +55,7 @@ abstract class ISpecBase
     with Results
     with Status
     with HeaderNames
+    with MockitoSugar
     with MimeTypes
     with HttpProtocol
     with HttpVerbs
