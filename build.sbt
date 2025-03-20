@@ -21,7 +21,7 @@ lazy val microservice = Project("alcohol-duty-contact-preferences", file("."))
       // https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html
     // suppress warnings in generated routes files
     scalacOptions += "-Wconf:src=routes/.*:s",
-    scalafmtOnCompile := false
+    scalafmtOnCompile := true
   )
   .settings(inConfig(Test)(testSettings): _*)
   .settings(resolvers += Resolver.jcenterRepo)
@@ -41,7 +41,7 @@ lazy val it = project
   .settings(
     Test / parallelExecution := false,
     Test / fork := true,
-    Test / scalafmtOnCompile := false
+    Test / scalafmtOnCompile := true
   )
 
 lazy val testSettings: Seq[Def.Setting[_]] = Seq(
