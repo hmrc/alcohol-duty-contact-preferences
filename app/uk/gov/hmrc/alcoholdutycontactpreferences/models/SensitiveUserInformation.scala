@@ -23,18 +23,18 @@ import uk.gov.hmrc.crypto.json.JsonEncryption
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 
 case class DecryptedSensitiveUserInformation(
-                                     emailAddress: Option[String],
-                                     emailEntered: Option[String] = None
-                                   )
+  emailAddress: Option[String],
+  emailEntered: Option[String] = None
+)
 
 object DecryptedSensitiveUserInformation {
   implicit val format: OFormat[DecryptedSensitiveUserInformation] = Json.format[DecryptedSensitiveUserInformation]
 }
 
 case class SensitiveUserInformation(
-                                     emailAddress: Option[SensitiveString],
-                                     emailEntered: Option[SensitiveString] = None
-                                   )
+  emailAddress: Option[SensitiveString],
+  emailEntered: Option[SensitiveString] = None
+)
 
 object SensitiveUserInformation {
 
@@ -42,7 +42,7 @@ object SensitiveUserInformation {
     (
       (__ \ "emailAddress").formatNullable[SensitiveString] and
         (__ \ "emailEntered").formatNullable[SensitiveString]
-      )(SensitiveUserInformation.apply, unlift(SensitiveUserInformation.unapply))
+    )(SensitiveUserInformation.apply, unlift(SensitiveUserInformation.unapply))
 
   implicit def sensitiveStringFormat(implicit crypto: Encrypter with Decrypter): Format[SensitiveString] =
     JsonEncryption.sensitiveEncrypterDecrypter(SensitiveString.apply)

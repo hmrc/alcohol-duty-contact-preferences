@@ -16,10 +16,9 @@
 
 package uk.gov.hmrc.alcoholdutycontactpreferences.utils
 
+import java.time.Instant
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
-import java.time.{Instant, LocalDate, ZoneId}
-import java.util.TimeZone
 
 object DateTimeHelper {
   def formatISOInstantSeconds(now: Instant): String =
