@@ -24,14 +24,14 @@ import play.api.libs.json.Json
 import play.api.mvc.Result
 import uk.gov.hmrc.alcoholdutycontactpreferences.base.SpecBase
 import uk.gov.hmrc.alcoholdutycontactpreferences.connectors.SubscriptionConnector
-import uk.gov.hmrc.alcoholdutycontactpreferences.repositories.{SensitiveUserAnswersRepository, UpdateFailure, UpdateSuccess}
+import uk.gov.hmrc.alcoholdutycontactpreferences.repositories.{UpdateFailure, UpdateSuccess, UserAnswersRepository}
 import uk.gov.hmrc.play.bootstrap.backend.http.ErrorResponse
 
 import scala.concurrent.Future
 
 class UserAnswersControllerSpec extends SpecBase {
-  val mockUserAnswersRepository: SensitiveUserAnswersRepository = mock[SensitiveUserAnswersRepository]
-  val mockSubscriptionConnector: SubscriptionConnector          = mock[SubscriptionConnector]
+  val mockUserAnswersRepository: UserAnswersRepository = mock[UserAnswersRepository]
+  val mockSubscriptionConnector: SubscriptionConnector = mock[SubscriptionConnector]
 
   val controller = new UserAnswersController(
     cc,

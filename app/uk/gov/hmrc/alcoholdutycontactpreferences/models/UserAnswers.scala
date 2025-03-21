@@ -30,7 +30,7 @@ case class DecryptedUA(
   paperlessReference: Boolean,
   emailVerification: Option[Boolean],
   bouncedEmail: Option[Boolean],
-  decryptedSensitiveUserInformation: DecryptedSensitiveUserInformation,
+  emailData: EmailData,
   data: JsObject = Json.obj(),
   startedTime: Instant,
   lastUpdated: Instant,
@@ -38,25 +38,22 @@ case class DecryptedUA(
 )
 
 object DecryptedUA {
-  def fromUA(userAnswers: UserAnswers): DecryptedUA = {
-
-    val sensitiveInfo = userAnswers.sensitiveUserInformation
+  def fromUA(userAnswers: UserAnswers): DecryptedUA =
     DecryptedUA(
       appaId = userAnswers.appaId,
       userId = userAnswers.userId,
       paperlessReference = userAnswers.paperlessReference,
       emailVerification = userAnswers.emailVerification,
       bouncedEmail = userAnswers.bouncedEmail,
-      decryptedSensitiveUserInformation = DecryptedSensitiveUserInformation(
-        emailAddress = sensitiveInfo.emailAddress.map(_.decryptedValue),
-        emailEntered = sensitiveInfo.emailEntered.map(_.decryptedValue)
+      emailData = EmailData(
+        emailAddress = userAnswers.emailData.emailAddress.map(_.decryptedValue),
+        emailEntered = userAnswers.emailData.emailEntered.map(_.decryptedValue)
       ),
       data = userAnswers.data,
       startedTime = userAnswers.startedTime,
       lastUpdated = userAnswers.lastUpdated,
       validUntil = userAnswers.validUntil
     )
-  }
 
   implicit val format: OFormat[DecryptedUA] = (
     (__ \ "appaId").format[String] and
@@ -64,7 +61,7 @@ object DecryptedUA {
       (__ \ "paperlessReference").format[Boolean] and
       (__ \ "emailVerification").formatNullable[Boolean] and
       (__ \ "bouncedEmail").formatNullable[Boolean] and
-      (__ \ "decryptedSensitiveUserInformation").format[DecryptedSensitiveUserInformation] and
+      (__ \ "emailData").format[EmailData] and
       (__ \ "data").formatWithDefault[JsObject](Json.obj()) and
       (__ \ "startedTime").format(MongoJavatimeFormats.instantFormat) and
       (__ \ "lastUpdated").format(MongoJavatimeFormats.instantFormat) and
@@ -79,7 +76,7 @@ case class UserAnswers(
   paperlessReference: Boolean,
   emailVerification: Option[Boolean],
   bouncedEmail: Option[Boolean],
-  sensitiveUserInformation: SensitiveUserInformation,
+  emailData: EmailDataBackend,
   data: JsObject = Json.obj(),
   startedTime: Instant,
   lastUpdated: Instant,
@@ -98,31 +95,29 @@ object UserAnswers {
       paperlessReference = contactPreferences.paperlessReference,
       emailVerification = contactPreferences.emailVerification,
       bouncedEmail = contactPreferences.bouncedEmail,
-      sensitiveUserInformation = SensitiveUserInformation(
+      emailData = EmailDataBackend(
         emailAddress = contactPreferences.emailAddress.map(SensitiveString(_))
       ),
       startedTime = Instant.now(clock),
       lastUpdated = Instant.now(clock)
     )
 
-  def fromDecryptedUA(decryptedUA: DecryptedUA): UserAnswers = {
-    val decryptedSensitiveInfo = decryptedUA.decryptedSensitiveUserInformation
+  def fromDecryptedUA(decryptedUA: DecryptedUA): UserAnswers =
     UserAnswers(
       appaId = decryptedUA.appaId,
       userId = decryptedUA.userId,
       paperlessReference = decryptedUA.paperlessReference,
       emailVerification = decryptedUA.emailVerification,
       bouncedEmail = decryptedUA.bouncedEmail,
-      sensitiveUserInformation = SensitiveUserInformation(
-        emailAddress = decryptedSensitiveInfo.emailAddress.map(SensitiveString(_)),
-        emailEntered = decryptedSensitiveInfo.emailEntered.map(SensitiveString(_))
+      emailData = EmailDataBackend(
+        emailAddress = decryptedUA.emailData.emailAddress.map(SensitiveString(_)),
+        emailEntered = decryptedUA.emailData.emailEntered.map(SensitiveString(_))
       ),
       data = decryptedUA.data,
       startedTime = decryptedUA.startedTime,
       lastUpdated = decryptedUA.lastUpdated,
       validUntil = decryptedUA.validUntil
     )
-  }
 
   implicit def format(implicit crypto: Encrypter with Decrypter): OFormat[UserAnswers] =
     (
@@ -131,7 +126,7 @@ object UserAnswers {
         (__ \ "paperlessReference").format[Boolean] and
         (__ \ "emailVerification").formatNullable[Boolean] and
         (__ \ "bouncedEmail").formatNullable[Boolean] and
-        (__ \ "sensitiveUserInformation").format[SensitiveUserInformation] and
+        (__ \ "emailData").format[EmailDataBackend] and
         (__ \ "data").formatWithDefault[JsObject](Json.obj()) and
         (__ \ "startedTime").format(MongoJavatimeFormats.instantFormat) and
         (__ \ "lastUpdated").format(MongoJavatimeFormats.instantFormat) and

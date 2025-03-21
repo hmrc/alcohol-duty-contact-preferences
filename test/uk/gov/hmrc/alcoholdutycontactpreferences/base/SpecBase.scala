@@ -19,7 +19,7 @@ package uk.gov.hmrc.alcoholdutycontactpreferences.base
 import generators.ModelGenerators
 import helpers.TestData
 import org.mockito.MockitoSugar
-import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.{BeforeAndAfterEach, OptionValues, TryValues}
@@ -55,7 +55,8 @@ trait SpecBase
     with ScalaCheckPropertyChecks
     with BeforeAndAfterEach
     with TestData
-    with ModelGenerators {
+    with ModelGenerators
+    with IntegrationPatience {
 
   def configOverrides: Map[String, Any] = Map()
 

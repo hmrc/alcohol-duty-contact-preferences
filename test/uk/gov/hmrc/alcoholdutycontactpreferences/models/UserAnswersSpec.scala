@@ -31,7 +31,7 @@ class UserAnswersSpec extends SpecBase {
 
   "UserAnswers must" - {
     val json =
-      s"""{"_id":"$appaId","userId":"$userId","paperlessReference":true,"emailVerification":true,"bouncedEmail":false,"sensitiveUserInformation":{"emailAddress":"QuEpxLZgVPo2eQybYbl9Yxq+hGWotDBesA31u/dlBBU="},"data":{"contactMethodEmail":true},"startedTime":{"$$date":{"$$numberLong":"1718118467838"}},"lastUpdated":{"$$date":{"$$numberLong":"1718118467838"}},"validUntil":{"$$date":{"$$numberLong":"1718118467839"}}}""".stripMargin
+      s"""{"_id":"$appaId","userId":"$userId","paperlessReference":true,"emailVerification":true,"bouncedEmail":false,"emailData":{"emailAddress":"QuEpxLZgVPo2eQybYbl9Yxq+hGWotDBesA31u/dlBBU="},"data":{"contactPreferenceEmail":true},"startedTime":{"$$date":{"$$numberLong":"1718118467838"}},"lastUpdated":{"$$date":{"$$numberLong":"1718118467838"}},"validUntil":{"$$date":{"$$numberLong":"1718118467839"}}}""".stripMargin
 
     "serialise to json" in {
       Json.toJson(ua).toString() mustBe json
@@ -56,7 +56,7 @@ class UserAnswersSpec extends SpecBase {
 
   "DecryptedUA must" - {
     val json =
-      s"""{"appaId":"$appaId","userId":"$userId","paperlessReference":true,"emailVerification":true,"bouncedEmail":false,"decryptedSensitiveUserInformation":{"emailAddress":"john.doe@example.com"},"data":{"contactMethodEmail":true},"startedTime":{"$$date":{"$$numberLong":"1718118467838"}},"lastUpdated":{"$$date":{"$$numberLong":"1718118467838"}},"validUntil":{"$$date":{"$$numberLong":"1718118467839"}}}""".stripMargin
+      s"""{"appaId":"$appaId","userId":"$userId","paperlessReference":true,"emailVerification":true,"bouncedEmail":false,"emailData":{"emailAddress":"john.doe@example.com"},"data":{"contactPreferenceEmail":true},"startedTime":{"$$date":{"$$numberLong":"1718118467838"}},"lastUpdated":{"$$date":{"$$numberLong":"1718118467838"}},"validUntil":{"$$date":{"$$numberLong":"1718118467839"}}}""".stripMargin
 
     "serialise to json" in {
       Json.toJson(uaDecrypted).toString() mustBe json

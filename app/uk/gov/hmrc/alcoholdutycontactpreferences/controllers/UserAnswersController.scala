@@ -25,7 +25,7 @@ import play.api.mvc._
 import uk.gov.hmrc.alcoholdutycontactpreferences.connectors.SubscriptionConnector
 import uk.gov.hmrc.alcoholdutycontactpreferences.controllers.actions.{AuthorisedAction, CheckAppaIdAction}
 import uk.gov.hmrc.alcoholdutycontactpreferences.models.{DecryptedUA, UserAnswers, UserDetails}
-import uk.gov.hmrc.alcoholdutycontactpreferences.repositories.{SensitiveUserAnswersRepository, UpdateFailure, UpdateSuccess}
+import uk.gov.hmrc.alcoholdutycontactpreferences.repositories.{UpdateFailure, UpdateSuccess, UserAnswersRepository}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.play.bootstrap.backend.http.ErrorResponse
 
@@ -34,7 +34,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class UserAnswersController @Inject() (
   cc: ControllerComponents,
-  sensitiveUserAnswersRepository: SensitiveUserAnswersRepository,
+  userAnswersRepository: UserAnswersRepository,
   subscriptionConnector: SubscriptionConnector,
   authorise: AuthorisedAction,
   checkAppaId: CheckAppaIdAction,
@@ -54,7 +54,7 @@ class UserAnswersController @Inject() (
           subscriptionContactPreferences.foldF(
             err => {
               logger.warn(
-                s"Unable to get existing contact preferences for $appaId - ${err.statusCode} ${err.message}"
+                s"Unable to get existing contact preferences for $appaId - status ${err.statusCode}"
               )
               Future.successful(error(err))
             },
@@ -64,7 +64,7 @@ class UserAnswersController @Inject() (
                 contactPreferences = contactPreferences,
                 clock = clock
               )
-              sensitiveUserAnswersRepository.add(userAnswers).map(ua => Created(Json.toJson(DecryptedUA.fromUA(ua))))
+              userAnswersRepository.add(userAnswers).map(ua => Created(Json.toJson(DecryptedUA.fromUA(ua))))
             }
           )
         }
@@ -74,7 +74,7 @@ class UserAnswersController @Inject() (
 
   def getUserAnswers(appaId: String): Action[AnyContent] = (authorise andThen checkAppaId(appaId)).async {
     implicit request =>
-      sensitiveUserAnswersRepository.get(appaId).map {
+      userAnswersRepository.get(appaId).map {
         case Some(ua) => Ok(Json.toJson(DecryptedUA.fromUA(ua)))
         case None     => NotFound
       }
@@ -87,7 +87,7 @@ class UserAnswersController @Inject() (
           request,
           { implicit request =>
             val userAnswers = UserAnswers.fromDecryptedUA(decryptedUA)
-            sensitiveUserAnswersRepository.set(userAnswers).map {
+            userAnswersRepository.set(userAnswers).map {
               case UpdateSuccess => Ok(Json.toJson(decryptedUA))
               case UpdateFailure => NotFound
             }

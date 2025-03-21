@@ -25,7 +25,7 @@ import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-class SensitiveUserAnswersRepositorySpec extends ISpecBase with DefaultPlayMongoRepositorySupport[UserAnswers] {
+class UserAnswersRepositorySpec extends ISpecBase with DefaultPlayMongoRepositorySupport[UserAnswers] {
   private val instant = Instant.now(clock)
 
   private val DB_TTL_IN_SEC = 100
@@ -33,7 +33,7 @@ class SensitiveUserAnswersRepositorySpec extends ISpecBase with DefaultPlayMongo
   private val mockAppConfig = mock[AppConfig]
   when(mockAppConfig.dbTimeToLiveInSeconds) thenReturn DB_TTL_IN_SEC
 
-  protected override val repository = new SensitiveUserAnswersRepository(
+  protected override val repository = new UserAnswersRepository(
     mongoComponent = mongoComponent,
     appConfig = mockAppConfig,
     config = app.configuration,
@@ -185,7 +185,7 @@ class SensitiveUserAnswersRepositorySpec extends ISpecBase with DefaultPlayMongo
     actual.paperlessReference                            mustEqual expected.paperlessReference
     actual.emailVerification                             mustEqual expected.emailVerification
     actual.bouncedEmail                                  mustEqual expected.bouncedEmail
-    actual.sensitiveUserInformation                      mustEqual expected.sensitiveUserInformation
+    actual.emailData                                     mustEqual expected.emailData
     actual.data                                          mustEqual expected.data
     actual.startedTime.truncatedTo(ChronoUnit.MILLIS)    mustEqual expected.startedTime.truncatedTo(ChronoUnit.MILLIS)
     actual.lastUpdated.truncatedTo(ChronoUnit.MILLIS)    mustEqual expected.lastUpdated.truncatedTo(ChronoUnit.MILLIS)

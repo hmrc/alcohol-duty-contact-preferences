@@ -36,14 +36,14 @@ case object UpdateSuccess extends UpdateResult
 case object UpdateFailure extends UpdateResult
 
 @Singleton
-class SensitiveUserAnswersRepository @Inject() (
+class UserAnswersRepository @Inject() (
   mongoComponent: MongoComponent,
   appConfig: AppConfig,
   config: Configuration,
   clock: Clock
 )(implicit ec: ExecutionContext)
     extends PlayMongoRepository[UserAnswers](
-      collectionName = "sensitive-user-answers",
+      collectionName = "user-answers",
       mongoComponent = mongoComponent,
       domainFormat = UserAnswers.format(
         SymmetricCryptoFactory.aesCryptoFromConfig("crypto", config.underlying)

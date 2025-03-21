@@ -44,7 +44,7 @@ trait TestData extends ModelGenerators {
     paperlessReference = true,
     emailVerification = Some(true),
     bouncedEmail = Some(false),
-    sensitiveUserInformation = SensitiveUserInformation(emailAddress = Some(SensitiveString(emailAddress))),
+    emailData = EmailDataBackend(emailAddress = Some(SensitiveString(emailAddress))),
     startedTime = Instant.now(clock),
     lastUpdated = Instant.now(clock)
   )
@@ -55,13 +55,13 @@ trait TestData extends ModelGenerators {
     paperlessReference = true,
     emailVerification = Some(true),
     bouncedEmail = Some(false),
-    decryptedSensitiveUserInformation = DecryptedSensitiveUserInformation(emailAddress = Some(emailAddress)),
+    emailData = EmailData(emailAddress = Some(emailAddress)),
     startedTime = Instant.now(clock),
     lastUpdated = Instant.now(clock)
   )
 
   val userAnswers: UserAnswers = emptyUserAnswers.copy(
-    data = JsObject(Seq("contactMethodEmail" -> Json.toJson(true)))
+    data = JsObject(Seq("contactPreferenceEmail" -> Json.toJson(true)))
   )
 
   val decryptedUA: DecryptedUA = DecryptedUA(
@@ -70,8 +70,8 @@ trait TestData extends ModelGenerators {
     paperlessReference = true,
     emailVerification = Some(true),
     bouncedEmail = Some(false),
-    decryptedSensitiveUserInformation = DecryptedSensitiveUserInformation(emailAddress = Some(emailAddress)),
-    data = JsObject(Seq("contactMethodEmail" -> Json.toJson(true))),
+    emailData = EmailData(emailAddress = Some(emailAddress)),
+    data = JsObject(Seq("contactPreferenceEmail" -> Json.toJson(true))),
     startedTime = Instant.now(clock),
     lastUpdated = Instant.now(clock)
   )
