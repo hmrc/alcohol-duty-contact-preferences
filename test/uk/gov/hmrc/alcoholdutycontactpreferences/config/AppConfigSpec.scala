@@ -29,6 +29,8 @@ class SpecBaseWithConfigOverrides extends SpecBase {
     "microservice.services.subscription.url.subscriptionSummary" -> "/etmp/RESTAdapter/excise/subscriptionsummary",
     "downstream-apis.idType"                                     -> "ZAD",
     "downstream-apis.regime"                                     -> "AD",
+    "crypto.key"                                                 -> "cryptokey",
+    "crypto.isEnabled"                                           -> true,
     "enrolment.serviceName"                                      -> "HMRC-AD-ORG"
   )
 }
@@ -54,29 +56,39 @@ class AppConfigSpec extends SpecBaseWithConfigOverrides {
         appConfig.subscriptionSecret mustBe "subscription secret"
       }
     }
-  }
 
-  "must return the config relating to downstream APIs" - {
-    "for idType" in {
-      appConfig.idType mustBe "ZAD"
+    "must return the config relating to downstream APIs" - {
+      "for idType" in {
+        appConfig.idType mustBe "ZAD"
+      }
+
+      "for regime" in {
+        appConfig.regime mustBe "AD"
+      }
     }
 
-    "for regime" in {
-      appConfig.regime mustBe "AD"
-    }
-  }
+    "for encryption" - {
+      "must return the encryption key" in {
+        appConfig.cryptoKey mustBe "cryptokey"
+      }
 
-  "must return the enrolment service name" in {
-    appConfig.enrolmentServiceName mustBe "HMRC-AD-ORG"
-  }
-
-  "getConfStringAndThrowIfNotFound must" - {
-    "return a key if found" in {
-      appConfig.getConfStringAndThrowIfNotFound("subscription.secret") mustBe "subscription secret"
+      "must return whether encryption is enabled" in {
+        appConfig.cryptoKeyEnabled mustBe true
+      }
     }
 
-    "throw an exception if not found" in {
-      a[RuntimeException] mustBe thrownBy(appConfig.getConfStringAndThrowIfNotFound("blah"))
+    "must return the enrolment service name" in {
+      appConfig.enrolmentServiceName mustBe "HMRC-AD-ORG"
+    }
+
+    "getConfStringAndThrowIfNotFound must" - {
+      "return a key if found" in {
+        appConfig.getConfStringAndThrowIfNotFound("subscription.secret") mustBe "subscription secret"
+      }
+
+      "throw an exception if not found" in {
+        a[RuntimeException] mustBe thrownBy(appConfig.getConfStringAndThrowIfNotFound("blah"))
+      }
     }
   }
 }
