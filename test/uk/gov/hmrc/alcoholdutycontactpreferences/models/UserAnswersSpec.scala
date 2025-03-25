@@ -18,6 +18,7 @@ package uk.gov.hmrc.alcoholdutycontactpreferences.models
 
 import play.api.libs.json.{JsPath, Json}
 import uk.gov.hmrc.alcoholdutycontactpreferences.base.SpecBase
+import uk.gov.hmrc.alcoholdutycontactpreferences.crypto.NoCrypto
 import uk.gov.hmrc.alcoholdutycontactpreferences.queries.{Gettable, Settable}
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
 
@@ -32,21 +33,36 @@ class UserAnswersSpec extends SpecBase {
     override def path: JsPath = JsPath \ toString
   }
 
-  implicit val crypto: Encrypter with Decrypter =
-    SymmetricCryptoFactory.aesCrypto(appConfig.cryptoKey)
-
   "UserAnswers must" - {
-    val json =
-      s"""{"_id":"$appaId","userId":"$userId","subscriptionSummary":{"paperlessReference":true,"emailAddress":"QuEpxLZgVPo2eQybYbl9Yxq+hGWotDBesA31u/dlBBU=","emailVerification":true,"bouncedEmail":false},"emailAddress":"QuEpxLZgVPo2eQybYbl9Yxq+hGWotDBesA31u/dlBBU=","data":{"contactPreferenceEmail":true},"startedTime":{"$$date":{"$$numberLong":"1718118467838"}},"lastUpdated":{"$$date":{"$$numberLong":"1718118467838"}},"validUntil":{"$$date":{"$$numberLong":"1718118467839"}}}"""
+    "when encryption is enabled" - {
+      val jsonWithEncrpytion =
+        s"""{"_id":"$appaId","userId":"$userId","subscriptionSummary":{"paperlessReference":true,"emailAddress":"QuEpxLZgVPo2eQybYbl9Yxq+hGWotDBesA31u/dlBBU=","emailVerification":true,"bouncedEmail":false},"emailAddress":"QuEpxLZgVPo2eQybYbl9Yxq+hGWotDBesA31u/dlBBU=","data":{"contactPreferenceEmail":true},"startedTime":{"$$date":{"$$numberLong":"1718118467838"}},"lastUpdated":{"$$date":{"$$numberLong":"1718118467838"}},"validUntil":{"$$date":{"$$numberLong":"1718118467839"}}}"""
 
-    "serialise to json" in {
-      Json.toJson(ua).toString() mustBe json
-    }
-    "deserialise from json" in {
-      Json.parse(json).as[UserAnswers] mustBe ua
+      implicit val crypto: Encrypter with Decrypter = SymmetricCryptoFactory.aesCrypto(appConfig.cryptoKey)
+
+      "serialise to json" in {
+        Json.toJson(ua).toString() mustBe jsonWithEncrpytion
+      }
+      "deserialise from json" in {
+        Json.parse(jsonWithEncrpytion).as[UserAnswers] mustBe ua
+      }
     }
 
-    "must set a value for a given page and get the same value" in {
+    "when encryption is disabled" - {
+      val jsonWithoutEncryption =
+        s"""{"_id":"$appaId","userId":"$userId","subscriptionSummary":{"paperlessReference":true,"emailAddress":"\\"john.doe@example.com\\"","emailVerification":true,"bouncedEmail":false},"emailAddress":"\\"john.doe@example.com\\"","data":{"contactPreferenceEmail":true},"startedTime":{"$$date":{"$$numberLong":"1718118467838"}},"lastUpdated":{"$$date":{"$$numberLong":"1718118467838"}},"validUntil":{"$$date":{"$$numberLong":"1718118467839"}}}"""
+
+      implicit val crypto: Encrypter with Decrypter = NoCrypto
+
+      "serialise to json" in {
+        Json.toJson(ua).toString() mustBe jsonWithoutEncryption
+      }
+      "deserialise from json" in {
+        Json.parse(jsonWithoutEncryption).as[UserAnswers] mustBe ua
+      }
+    }
+
+    "set a value for a given page and get the same value" in {
 
       val userAnswers = emptyUserAnswers
 
@@ -65,7 +81,7 @@ class UserAnswersSpec extends SpecBase {
       expectedValue mustBe actualValue
     }
 
-    "must remove a value for a given page" in {
+    "remove a value for a given page" in {
       val userAnswers = emptyUserAnswers.set(TestCacheable, "value").success.value
 
       val updatedUserAnswers = userAnswers.remove(TestCacheable) match {

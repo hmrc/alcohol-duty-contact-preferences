@@ -20,7 +20,9 @@ import org.mongodb.scala.model.Filters
 import org.scalatest.Assertion
 import uk.gov.hmrc.alcoholdutycontactpreferences.base.ISpecBase
 import uk.gov.hmrc.alcoholdutycontactpreferences.config.AppConfig
+import uk.gov.hmrc.alcoholdutycontactpreferences.crypto.CryptoProvider
 import uk.gov.hmrc.alcoholdutycontactpreferences.models.UserAnswers
+import uk.gov.hmrc.crypto.SymmetricCryptoFactory
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
 import java.time.Instant
@@ -34,10 +36,13 @@ class UserAnswersRepositorySpec extends ISpecBase with DefaultPlayMongoRepositor
   private val mockAppConfig = mock[AppConfig]
   when(mockAppConfig.dbTimeToLiveInSeconds) thenReturn DB_TTL_IN_SEC
 
+  private val mockCryptoProvider = mock[CryptoProvider]
+  when(mockCryptoProvider.getCrypto) thenReturn SymmetricCryptoFactory.aesCrypto(config.cryptoKey)
+
   protected override val repository = new UserAnswersRepository(
     mongoComponent = mongoComponent,
     appConfig = mockAppConfig,
-    config = app.configuration,
+    cryptoProvider = mockCryptoProvider,
     clock = clock
   )
 

@@ -17,11 +17,10 @@
 package uk.gov.hmrc.alcoholdutycontactpreferences.repositories
 
 import org.mongodb.scala.model._
-import play.api.Configuration
 import play.api.libs.json.Format
 import uk.gov.hmrc.alcoholdutycontactpreferences.config.AppConfig
+import uk.gov.hmrc.alcoholdutycontactpreferences.crypto.CryptoProvider
 import uk.gov.hmrc.alcoholdutycontactpreferences.models.UserAnswers
-import uk.gov.hmrc.crypto.SymmetricCryptoFactory
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
@@ -39,15 +38,13 @@ case object UpdateFailure extends UpdateResult
 class UserAnswersRepository @Inject() (
   mongoComponent: MongoComponent,
   appConfig: AppConfig,
-  config: Configuration,
+  cryptoProvider: CryptoProvider,
   clock: Clock
 )(implicit ec: ExecutionContext)
     extends PlayMongoRepository[UserAnswers](
       collectionName = "user-answers",
       mongoComponent = mongoComponent,
-      domainFormat = UserAnswers.format(
-        SymmetricCryptoFactory.aesCryptoFromConfig("crypto", config.underlying)
-      ),
+      domainFormat = UserAnswers.format(cryptoProvider.getCrypto),
       indexes = Seq(
         IndexModel(
           Indexes.ascending("lastUpdated"),

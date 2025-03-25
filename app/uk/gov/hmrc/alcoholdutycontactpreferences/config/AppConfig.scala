@@ -36,7 +36,8 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val idType: String = config.get[String]("downstream-apis.idType")
   val regime: String = config.get[String]("downstream-apis.regime")
 
-  val cryptoKey: String = config.get[String]("crypto.key")
+  val cryptoKey: String         = config.get[String]("crypto.key")
+  val cryptoKeyEnabled: Boolean = config.get[Boolean]("crypto.isEnabled")
 
   val enrolmentServiceName: String   = config.get[String]("enrolment.serviceName")
   val enrolmentIdentifierKey: String = config.get[String]("enrolment.identifierKey")
