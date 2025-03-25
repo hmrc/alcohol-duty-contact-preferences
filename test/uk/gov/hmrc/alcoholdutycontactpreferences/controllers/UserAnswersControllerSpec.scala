@@ -45,13 +45,13 @@ class UserAnswersControllerSpec extends SpecBase {
   "getUserAnswers must" - {
     "return 200 OK with an existing user answers when there is one for the id" in {
       when(mockUserAnswersRepository.get(ArgumentMatchers.eq(appaId)))
-        .thenReturn(Future.successful(Some(emptyUserAnswers)))
+        .thenReturn(Future.successful(Some(userAnswers)))
 
       val result: Future[Result] =
         controller.getUserAnswers(appaId)(fakeRequest)
 
       status(result)        mustBe OK
-      contentAsJson(result) mustBe Json.toJson(decryptedEmptyUA)
+      contentAsJson(result) mustBe Json.toJson(decryptedUA)
     }
 
     "return 404 NOT_FOUND when there is no user answers for the id" in {
@@ -71,11 +71,11 @@ class UserAnswersControllerSpec extends SpecBase {
 
       val result: Future[Result] =
         controller.set()(
-          fakeRequestWithJsonBody(Json.toJson(decryptedEmptyUA))
+          fakeRequestWithJsonBody(Json.toJson(decryptedUA))
         )
 
       status(result)        mustBe OK
-      contentAsJson(result) mustBe Json.toJson(decryptedEmptyUA)
+      contentAsJson(result) mustBe Json.toJson(decryptedUA)
     }
 
     "return 404 Not Found if the repository returns an error" in {
@@ -83,7 +83,7 @@ class UserAnswersControllerSpec extends SpecBase {
 
       val result: Future[Result] =
         controller.set()(
-          fakeRequestWithJsonBody(Json.toJson(decryptedEmptyUA))
+          fakeRequestWithJsonBody(Json.toJson(decryptedUA))
         )
 
       status(result) mustBe NOT_FOUND

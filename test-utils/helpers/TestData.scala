@@ -38,40 +38,46 @@ trait TestData extends ModelGenerators {
   val contactPreferencesEmailSelected: SubscriptionContactPreferences =
     SubscriptionContactPreferences(true, Some(emailAddress), Some(true), Some(false))
 
-  val emptyUserAnswers: UserAnswers = UserAnswers(
+  val userAnswers: UserAnswers = UserAnswers(
     appaId = appaId,
     userId = userId,
-    paperlessReference = true,
-    emailVerification = Some(true),
-    bouncedEmail = Some(false),
-    emailData = EmailDataBackend(emailAddress = Some(SensitiveString(emailAddress))),
+    subscriptionSummary = SubscriptionSummaryBackend(
+      paperlessReference = true,
+      emailAddress = Some(SensitiveString(emailAddress)),
+      emailVerification = Some(true),
+      bouncedEmail = Some(false)
+    ),
+    emailAddress = Some(SensitiveString(emailAddress)),
+    data = JsObject(Seq("contactPreferenceEmail" -> Json.toJson(true))),
     startedTime = Instant.now(clock),
     lastUpdated = Instant.now(clock)
-  )
-
-  val decryptedEmptyUA: DecryptedUA = DecryptedUA(
-    appaId = appaId,
-    userId = userId,
-    paperlessReference = true,
-    emailVerification = Some(true),
-    bouncedEmail = Some(false),
-    emailData = EmailData(emailAddress = Some(emailAddress)),
-    startedTime = Instant.now(clock),
-    lastUpdated = Instant.now(clock)
-  )
-
-  val userAnswers: UserAnswers = emptyUserAnswers.copy(
-    data = JsObject(Seq("contactPreferenceEmail" -> Json.toJson(true)))
   )
 
   val decryptedUA: DecryptedUA = DecryptedUA(
     appaId = appaId,
     userId = userId,
-    paperlessReference = true,
-    emailVerification = Some(true),
-    bouncedEmail = Some(false),
-    emailData = EmailData(emailAddress = Some(emailAddress)),
+    subscriptionSummary = SubscriptionSummary(
+      paperlessReference = true,
+      emailAddress = Some(emailAddress),
+      emailVerification = Some(true),
+      bouncedEmail = Some(false)
+    ),
+    emailAddress = Some(emailAddress),
     data = JsObject(Seq("contactPreferenceEmail" -> Json.toJson(true))),
+    startedTime = Instant.now(clock),
+    lastUpdated = Instant.now(clock)
+  )
+
+  val emptyUserAnswers: UserAnswers = UserAnswers(
+    appaId = appaId,
+    userId = userId,
+    subscriptionSummary = SubscriptionSummaryBackend(
+      paperlessReference = true,
+      emailAddress = Some(SensitiveString(emailAddress)),
+      emailVerification = Some(true),
+      bouncedEmail = Some(false)
+    ),
+    emailAddress = Some(SensitiveString(emailAddress)),
     startedTime = Instant.now(clock),
     lastUpdated = Instant.now(clock)
   )

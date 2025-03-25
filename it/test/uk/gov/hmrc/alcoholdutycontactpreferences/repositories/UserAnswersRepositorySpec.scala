@@ -17,6 +17,7 @@
 package uk.gov.hmrc.alcoholdutycontactpreferences.repositories
 
 import org.mongodb.scala.model.Filters
+import org.scalatest.Assertion
 import uk.gov.hmrc.alcoholdutycontactpreferences.base.ISpecBase
 import uk.gov.hmrc.alcoholdutycontactpreferences.config.AppConfig
 import uk.gov.hmrc.alcoholdutycontactpreferences.models.UserAnswers
@@ -47,16 +48,11 @@ class UserAnswersRepositorySpec extends ISpecBase with DefaultPlayMongoRepositor
         validUntil = Some(instant.plusSeconds(DB_TTL_IN_SEC))
       )
 
-      val expectedResult = expectedAddedUserAnswers.copy(
-        lastUpdated = expectedAddedUserAnswers.lastUpdated.truncatedTo(ChronoUnit.MILLIS),
-        validUntil = expectedAddedUserAnswers.validUntil.map(_.truncatedTo(ChronoUnit.MILLIS))
-      )
+      val addedUserAnswers = repository.add(userAnswers).futureValue
+      val addedRecord      = find(Filters.equal("_id", appaId)).futureValue.headOption.value
 
-      val updatedUserAnswers = repository.add(userAnswers).futureValue
-      val updatedRecord      = find(Filters.equal("_id", appaId)).futureValue.headOption.value
-
-      updatedUserAnswers mustEqual expectedAddedUserAnswers
-      verifyUserAnswerResult(updatedRecord, expectedResult)
+      addedUserAnswers mustEqual expectedAddedUserAnswers
+      verifyUserAnswerResult(addedRecord, expectedAddedUserAnswers)
     }
 
     "not fail (upsert) if called twice" in {
@@ -65,44 +61,38 @@ class UserAnswersRepositorySpec extends ISpecBase with DefaultPlayMongoRepositor
         validUntil = Some(instant.plusSeconds(DB_TTL_IN_SEC))
       )
 
-      val expectedResult = expectedAddedUserAnswers.copy(
-        lastUpdated = expectedAddedUserAnswers.lastUpdated.truncatedTo(ChronoUnit.MILLIS),
-        validUntil = expectedAddedUserAnswers.validUntil.map(_.truncatedTo(ChronoUnit.MILLIS))
-      )
-
       repository.add(userAnswers).futureValue
-      val updatedUserAnswers = repository.add(userAnswers).futureValue
-      val updatedRecord      = find(Filters.equal("_id", appaId)).futureValue.headOption.value
+      val addedUserAnswers = repository.add(userAnswers).futureValue
+      val addedRecord      = find(Filters.equal("_id", appaId)).futureValue.headOption.value
 
-      updatedUserAnswers mustEqual expectedAddedUserAnswers
-      verifyUserAnswerResult(updatedRecord, expectedResult)
+      addedUserAnswers mustEqual expectedAddedUserAnswers
+      verifyUserAnswerResult(addedRecord, expectedAddedUserAnswers)
     }
   }
 
   "set must" - {
     "set the last updated time on the supplied user answers to `now`, and update them" in {
-      val updatedUserAnswers = repository.add(userAnswers).futureValue
-
-      val updatedResult = userAnswers.copy(
-        userId = "new-user-id"
-      )
+      val addedUserAnswers = repository.add(userAnswers).futureValue
 
       val expectedAddedUserAnswers = userAnswers.copy(
         lastUpdated = instant,
         validUntil = Some(instant.plusSeconds(DB_TTL_IN_SEC))
       )
 
-      val expectedResult = expectedAddedUserAnswers.copy(
+      val updatedResult = userAnswers.copy(
         userId = "new-user-id",
-        lastUpdated = expectedAddedUserAnswers.lastUpdated.truncatedTo(ChronoUnit.MILLIS),
-        validUntil = expectedAddedUserAnswers.validUntil.map(_.truncatedTo(ChronoUnit.MILLIS))
+        validUntil = Some(instant.plusSeconds(DB_TTL_IN_SEC))
+      )
+
+      val expectedResult = expectedAddedUserAnswers.copy(
+        userId = "new-user-id"
       )
 
       val setResult     = repository.set(updatedResult).futureValue
       val updatedRecord = find(Filters.equal("_id", appaId)).futureValue.headOption.value
 
-      updatedUserAnswers mustEqual expectedAddedUserAnswers
-      setResult          mustEqual UpdateSuccess
+      addedUserAnswers mustEqual expectedAddedUserAnswers
+      setResult        mustEqual UpdateSuccess
       verifyUserAnswerResult(updatedRecord, expectedResult)
     }
 
@@ -115,8 +105,8 @@ class UserAnswersRepositorySpec extends ISpecBase with DefaultPlayMongoRepositor
 
   "get when" - {
     "there is a record for this id must" - {
-      "update the lastUpdated time, validUntil time, and get the record" in {
-        insert(userAnswers).futureValue
+      "update the lastUpdated time and get the record" in {
+        insert(userAnswers.copy(validUntil = Some(instant.plusSeconds(DB_TTL_IN_SEC)))).futureValue
 
         val result         = repository.get(userAnswers.appaId).futureValue
         val expectedResult = userAnswers.copy(
@@ -137,34 +127,6 @@ class UserAnswersRepositorySpec extends ISpecBase with DefaultPlayMongoRepositor
     }
   }
 
-  "keepAlive when" - {
-    "there is a record for this id must" - {
-      "update its lastUpdated to `now` and return true" in {
-        insert(userAnswers).futureValue
-
-        val result = repository.keepAlive(userAnswers.appaId).futureValue
-
-        val expectedUpdatedAnswers = userAnswers.copy(
-          lastUpdated = instant,
-          validUntil = Some(instant.plusSeconds(DB_TTL_IN_SEC))
-        )
-
-        result mustEqual true
-        val updatedAnswers = find(Filters.equal("_id", appaId)).futureValue.headOption.value
-
-        verifyUserAnswerResult(updatedAnswers, expectedUpdatedAnswers)
-      }
-    }
-
-    "there is no record for this id must" - {
-      "return true" in {
-        repository
-          .keepAlive("APPA id that does not exist")
-          .futureValue mustEqual true
-      }
-    }
-  }
-
   "clearUserAnswersById must" - {
     "clear down existing user answers" in {
       insert(userAnswers).futureValue
@@ -179,13 +141,11 @@ class UserAnswersRepositorySpec extends ISpecBase with DefaultPlayMongoRepositor
     }
   }
 
-  def verifyUserAnswerResult(actual: UserAnswers, expected: UserAnswers) = {
+  def verifyUserAnswerResult(actual: UserAnswers, expected: UserAnswers): Assertion = {
     actual.appaId                                        mustEqual expected.appaId
     actual.userId                                        mustEqual expected.userId
-    actual.paperlessReference                            mustEqual expected.paperlessReference
-    actual.emailVerification                             mustEqual expected.emailVerification
-    actual.bouncedEmail                                  mustEqual expected.bouncedEmail
-    actual.emailData                                     mustEqual expected.emailData
+    actual.subscriptionSummary                           mustEqual expected.subscriptionSummary
+    actual.emailAddress                                  mustEqual expected.emailAddress
     actual.data                                          mustEqual expected.data
     actual.startedTime.truncatedTo(ChronoUnit.MILLIS)    mustEqual expected.startedTime.truncatedTo(ChronoUnit.MILLIS)
     actual.lastUpdated.truncatedTo(ChronoUnit.MILLIS)    mustEqual expected.lastUpdated.truncatedTo(ChronoUnit.MILLIS)

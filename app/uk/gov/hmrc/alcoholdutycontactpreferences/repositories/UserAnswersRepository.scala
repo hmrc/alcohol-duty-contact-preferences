@@ -67,30 +67,15 @@ class UserAnswersRepository @Inject() (
 
   private def byId(appaId: String) = Filters.equal("_id", appaId)
 
-  def keepAlive(appaId: String): Future[Boolean] =
-    collection
-      .updateOne(
-        filter = byId(appaId),
-        update = Updates.combine(
-          Updates.set("lastUpdated", Instant.now(clock)),
-          Updates.set("validUntil", Instant.now(clock).plusSeconds(appConfig.dbTimeToLiveInSeconds))
-        )
-      )
-      .toFuture()
-      .map(_ => true)
-
   def get(appaId: String): Future[Option[UserAnswers]] =
-    keepAlive(appaId).flatMap { _ =>
-      collection
-        .find(byId(appaId))
-        .headOption()
-    }
+    collection
+      .find(byId(appaId))
+      .headOption()
 
   def set(answers: UserAnswers): Future[UpdateResult] = {
 
     val updatedAnswers = answers.copy(
-      lastUpdated = Instant.now(clock),
-      validUntil = Some(Instant.now(clock).plusSeconds(appConfig.dbTimeToLiveInSeconds))
+      lastUpdated = Instant.now(clock)
     )
 
     collection

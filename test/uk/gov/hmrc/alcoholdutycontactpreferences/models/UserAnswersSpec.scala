@@ -16,22 +16,28 @@
 
 package uk.gov.hmrc.alcoholdutycontactpreferences.models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{JsPath, Json}
 import uk.gov.hmrc.alcoholdutycontactpreferences.base.SpecBase
+import uk.gov.hmrc.alcoholdutycontactpreferences.queries.{Gettable, Settable}
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
 
 import java.time.Instant
+import scala.util.Success
 
 class UserAnswersSpec extends SpecBase {
   val ua          = userAnswers.copy(validUntil = Some(Instant.now(clock).plusMillis(1)))
   val uaDecrypted = decryptedUA.copy(validUntil = Some(Instant.now(clock).plusMillis(1)))
+
+  case object TestCacheable extends Gettable[String] with Settable[String] {
+    override def path: JsPath = JsPath \ toString
+  }
 
   implicit val crypto: Encrypter with Decrypter =
     SymmetricCryptoFactory.aesCrypto(appConfig.cryptoKey)
 
   "UserAnswers must" - {
     val json =
-      s"""{"_id":"$appaId","userId":"$userId","paperlessReference":true,"emailVerification":true,"bouncedEmail":false,"emailData":{"emailAddress":"QuEpxLZgVPo2eQybYbl9Yxq+hGWotDBesA31u/dlBBU="},"data":{"contactPreferenceEmail":true},"startedTime":{"$$date":{"$$numberLong":"1718118467838"}},"lastUpdated":{"$$date":{"$$numberLong":"1718118467838"}},"validUntil":{"$$date":{"$$numberLong":"1718118467839"}}}""".stripMargin
+      s"""{"_id":"$appaId","userId":"$userId","subscriptionSummary":{"paperlessReference":true,"emailAddress":"QuEpxLZgVPo2eQybYbl9Yxq+hGWotDBesA31u/dlBBU=","emailVerification":true,"bouncedEmail":false},"emailAddress":"QuEpxLZgVPo2eQybYbl9Yxq+hGWotDBesA31u/dlBBU=","data":{"contactPreferenceEmail":true},"startedTime":{"$$date":{"$$numberLong":"1718118467838"}},"lastUpdated":{"$$date":{"$$numberLong":"1718118467838"}},"validUntil":{"$$date":{"$$numberLong":"1718118467839"}}}"""
 
     "serialise to json" in {
       Json.toJson(ua).toString() mustBe json
@@ -40,13 +46,44 @@ class UserAnswersSpec extends SpecBase {
       Json.parse(json).as[UserAnswers] mustBe ua
     }
 
+    "must set a value for a given page and get the same value" in {
+
+      val userAnswers = emptyUserAnswers
+
+      val expectedValue = "value"
+
+      val updatedUserAnswers = userAnswers.set(TestCacheable, expectedValue) match {
+        case Success(value) => value
+        case _              => fail()
+      }
+
+      val actualValue = updatedUserAnswers.get(TestCacheable) match {
+        case Some(value) => value
+        case _           => fail()
+      }
+
+      expectedValue mustBe actualValue
+    }
+
+    "must remove a value for a given page" in {
+      val userAnswers = emptyUserAnswers.set(TestCacheable, "value").success.value
+
+      val updatedUserAnswers = userAnswers.remove(TestCacheable) match {
+        case Success(updatedUA) => updatedUA
+        case _           => fail()
+      }
+
+      val actualValueOption = updatedUserAnswers.get(TestCacheable)
+      actualValueOption mustBe None
+    }
+
     "create a UserAnswers from components" in {
       val createdUserAnswers = UserAnswers.createUserAnswers(
         userDetails,
         contactPreferencesEmailSelected,
         clock
       )
-      createdUserAnswers mustBe emptyUserAnswers
+      createdUserAnswers mustBe userAnswers
     }
 
     "convert a DecryptedUA to a UserAnswers" in {
@@ -56,7 +93,7 @@ class UserAnswersSpec extends SpecBase {
 
   "DecryptedUA must" - {
     val json =
-      s"""{"appaId":"$appaId","userId":"$userId","paperlessReference":true,"emailVerification":true,"bouncedEmail":false,"emailData":{"emailAddress":"john.doe@example.com"},"data":{"contactPreferenceEmail":true},"startedTime":{"$$date":{"$$numberLong":"1718118467838"}},"lastUpdated":{"$$date":{"$$numberLong":"1718118467838"}},"validUntil":{"$$date":{"$$numberLong":"1718118467839"}}}""".stripMargin
+      s"""{"appaId":"$appaId","userId":"$userId","subscriptionSummary":{"paperlessReference":true,"emailAddress":"john.doe@example.com","emailVerification":true,"bouncedEmail":false},"emailAddress":"john.doe@example.com","data":{"contactPreferenceEmail":true},"startedTime":{"$$date":{"$$numberLong":"1718118467838"}},"lastUpdated":{"$$date":{"$$numberLong":"1718118467838"}},"validUntil":{"$$date":{"$$numberLong":"1718118467839"}}}"""
 
     "serialise to json" in {
       Json.toJson(uaDecrypted).toString() mustBe json
