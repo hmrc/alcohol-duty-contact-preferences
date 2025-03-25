@@ -70,7 +70,7 @@ class UserAnswersSpec extends SpecBase {
 
       val updatedUserAnswers = userAnswers.remove(TestCacheable) match {
         case Success(updatedUA) => updatedUA
-        case _           => fail()
+        case _                  => fail()
       }
 
       val actualValueOption = updatedUserAnswers.get(TestCacheable)
