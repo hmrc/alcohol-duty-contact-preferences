@@ -73,7 +73,7 @@ class AppConfigSpec extends SpecBaseWithConfigOverrides {
       }
 
       "must return whether encryption is enabled" in {
-        appConfig.cryptoKeyEnabled mustBe true
+        appConfig.cryptoEnabled mustBe true
       }
     }
 

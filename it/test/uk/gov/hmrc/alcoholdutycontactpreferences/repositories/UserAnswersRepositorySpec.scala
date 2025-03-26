@@ -46,6 +46,10 @@ class UserAnswersRepositorySpec extends ISpecBase with DefaultPlayMongoRepositor
     clock = clock
   )
 
+  "CryptoProvider getCrypto must be called" in {
+    verify(mockCryptoProvider, times(1)).getCrypto
+  }
+
   "add must" - {
     "set the last updated time on the supplied user answers to `now`, and save them" in {
       val expectedAddedUserAnswers = userAnswers.copy(

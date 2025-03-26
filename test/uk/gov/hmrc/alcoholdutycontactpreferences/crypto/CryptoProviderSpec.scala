@@ -23,21 +23,18 @@ import uk.gov.hmrc.crypto.AesCrypto
 class CryptoProviderSpec extends SpecBase {
   val mockAppConfig: AppConfig = mock[AppConfig]
 
-  class Setup {
-    reset(mockAppConfig)
-    val cryptoProvider = new CryptoProvider(mockAppConfig)
-  }
+  val cryptoProvider = new CryptoProvider(mockAppConfig)
 
   "getCrypto must" - {
-    "use NoCrypto when the encryption feature switch is disabled" in new Setup {
-      when(mockAppConfig.cryptoKeyEnabled) thenReturn false
+    "use NoCrypto when the encryption feature switch is disabled" in {
+      when(mockAppConfig.cryptoEnabled) thenReturn false
 
       val result = cryptoProvider.getCrypto
       result.isInstanceOf[NoCrypto.type] mustBe true
     }
 
-    "use AES Crypto when the encryption feature switch is enabled" in new Setup {
-      when(mockAppConfig.cryptoKeyEnabled) thenReturn true
+    "use AES Crypto when the encryption feature switch is enabled" in {
+      when(mockAppConfig.cryptoEnabled) thenReturn true
 
       val result = cryptoProvider.getCrypto
       result.isInstanceOf[AesCrypto] mustBe true
