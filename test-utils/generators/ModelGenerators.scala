@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.alcoholdutycontactpreferences.config
+package generators
 
-import com.google.inject.AbstractModule
-import uk.gov.hmrc.alcoholdutycontactpreferences.controllers.actions.{AuthorisedAction, BaseAuthorisedAction}
+import org.scalacheck.Gen
 
-import java.time.{Clock, ZoneOffset}
+trait ModelGenerators {
 
-class Module extends AbstractModule {
-
-  override def configure(): Unit = {
-    bind(classOf[AppConfig]).asEagerSingleton()
-    bind(classOf[AuthorisedAction]).to(classOf[BaseAuthorisedAction]).asEagerSingleton()
-    bind(classOf[Clock]).toInstance(Clock.systemDefaultZone.withZone(ZoneOffset.UTC))
-  }
+  def appaIdGen: Gen[String] = Gen.listOfN(10, Gen.numChar).map(id => s"XMADP${id.mkString}")
 }

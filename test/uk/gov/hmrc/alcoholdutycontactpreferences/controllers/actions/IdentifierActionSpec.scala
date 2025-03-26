@@ -33,7 +33,6 @@ import scala.concurrent.Future
 class IdentifierActionSpec extends SpecBase {
   val enrolment: String                   = "HMRC-AD-ORG"
   val appaIdKey: String                   = "APPAID"
-  val appaId: String                      = "SOMEAPPAID"
   val state: String                       = "Activated"
   val internalId: String                  = "internalId"
   val enrolments: Enrolments              = Enrolments(Set(Enrolment(enrolment, Seq(EnrolmentIdentifier(appaIdKey, appaId)), state)))

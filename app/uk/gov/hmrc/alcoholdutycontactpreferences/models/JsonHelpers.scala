@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.alcoholdutycontactpreferences.config
+package uk.gov.hmrc.alcoholdutycontactpreferences.models
 
-import com.google.inject.AbstractModule
-import uk.gov.hmrc.alcoholdutycontactpreferences.controllers.actions.{AuthorisedAction, BaseAuthorisedAction}
+import play.api.libs.json._
 
-import java.time.{Clock, ZoneOffset}
-
-class Module extends AbstractModule {
-
-  override def configure(): Unit = {
-    bind(classOf[AppConfig]).asEagerSingleton()
-    bind(classOf[AuthorisedAction]).to(classOf[BaseAuthorisedAction]).asEagerSingleton()
-    bind(classOf[Clock]).toInstance(Clock.systemDefaultZone.withZone(ZoneOffset.UTC))
+object JsonHelpers {
+  implicit val booleanReads: Reads[Boolean] = {
+    case JsString("0") => JsSuccess(false)
+    case JsString("1") => JsSuccess(true)
+    case s: JsString   => JsError(s"$s is not a valid Boolean")
+    case v             => JsError(s"got $v was expecting a string representing a Boolean")
   }
+
+  implicit val booleanWrites: Writes[Boolean] = {
+    case false => JsString("0")
+    case true  => JsString("1")
+  }
+
+  implicit val booleanFormat: Format[Boolean] = Format[Boolean](booleanReads, booleanWrites)
 }

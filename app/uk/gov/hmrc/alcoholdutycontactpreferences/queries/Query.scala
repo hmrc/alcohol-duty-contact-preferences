@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.alcoholdutycontactpreferences.config
+package uk.gov.hmrc.alcoholdutycontactpreferences.queries
 
-import com.google.inject.AbstractModule
-import uk.gov.hmrc.alcoholdutycontactpreferences.controllers.actions.{AuthorisedAction, BaseAuthorisedAction}
+import play.api.libs.json.JsPath
+import uk.gov.hmrc.alcoholdutycontactpreferences.models.UserAnswers
 
-import java.time.{Clock, ZoneOffset}
+import scala.util.{Success, Try}
 
-class Module extends AbstractModule {
+sealed trait Query {
 
-  override def configure(): Unit = {
-    bind(classOf[AppConfig]).asEagerSingleton()
-    bind(classOf[AuthorisedAction]).to(classOf[BaseAuthorisedAction]).asEagerSingleton()
-    bind(classOf[Clock]).toInstance(Clock.systemDefaultZone.withZone(ZoneOffset.UTC))
-  }
+  def path: JsPath
+}
+
+trait Gettable[A] extends Query
+
+trait Settable[A] extends Query {
+
+  def cleanup(value: Option[A], userAnswers: UserAnswers): Try[UserAnswers] =
+    Success(userAnswers)
 }

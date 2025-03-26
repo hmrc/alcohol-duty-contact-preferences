@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.alcoholdutycontactpreferences.config
+package uk.gov.hmrc.alcoholdutycontactpreferences.utils
 
-import com.google.inject.AbstractModule
-import uk.gov.hmrc.alcoholdutycontactpreferences.controllers.actions.{AuthorisedAction, BaseAuthorisedAction}
+import java.time.Instant
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
-import java.time.{Clock, ZoneOffset}
-
-class Module extends AbstractModule {
-
-  override def configure(): Unit = {
-    bind(classOf[AppConfig]).asEagerSingleton()
-    bind(classOf[AuthorisedAction]).to(classOf[BaseAuthorisedAction]).asEagerSingleton()
-    bind(classOf[Clock]).toInstance(Clock.systemDefaultZone.withZone(ZoneOffset.UTC))
-  }
+object DateTimeHelper {
+  def formatISOInstantSeconds(now: Instant): String =
+    DateTimeFormatter.ISO_INSTANT.format(now.truncatedTo(ChronoUnit.SECONDS))
 }
