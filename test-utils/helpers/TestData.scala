@@ -17,7 +17,7 @@
 package helpers
 
 import generators.ModelGenerators
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{JsObject, Json, OFormat}
 import uk.gov.hmrc.alcoholdutycontactpreferences.models._
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 
@@ -48,6 +48,7 @@ trait TestData extends ModelGenerators {
       bouncedEmail = Some(false)
     ),
     emailAddress = Some(SensitiveString(emailAddress)),
+    data = JsObject(Seq("contactPreferenceEmail" -> Json.toJson(true))),
     startedTime = Instant.now(clock),
     lastUpdated = Instant.now(clock)
   )
@@ -62,6 +63,7 @@ trait TestData extends ModelGenerators {
       bouncedEmail = Some(false)
     ),
     emailAddress = Some(emailAddress),
+    data = JsObject(Seq("contactPreferenceEmail" -> Json.toJson(true))),
     startedTime = Instant.now(clock),
     lastUpdated = Instant.now(clock)
   )

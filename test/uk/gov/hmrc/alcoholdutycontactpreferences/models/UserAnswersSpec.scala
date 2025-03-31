@@ -36,7 +36,7 @@ class UserAnswersSpec extends SpecBase {
   "UserAnswers must" - {
     "when encryption is enabled" - {
       val jsonWithEncrpytion =
-        s"""{"_id":"$appaId","userId":"$userId","subscriptionSummary":{"paperlessReference":true,"emailAddress":"QuEpxLZgVPo2eQybYbl9Yxq+hGWotDBesA31u/dlBBU=","emailVerification":true,"bouncedEmail":false},"emailAddress":"QuEpxLZgVPo2eQybYbl9Yxq+hGWotDBesA31u/dlBBU=","data":{},"startedTime":{"$$date":{"$$numberLong":"1718118467838"}},"lastUpdated":{"$$date":{"$$numberLong":"1718118467838"}},"validUntil":{"$$date":{"$$numberLong":"1718118467839"}}}"""
+        s"""{"_id":"$appaId","userId":"$userId","subscriptionSummary":{"paperlessReference":true,"emailAddress":"QuEpxLZgVPo2eQybYbl9Yxq+hGWotDBesA31u/dlBBU=","emailVerification":true,"bouncedEmail":false},"emailAddress":"QuEpxLZgVPo2eQybYbl9Yxq+hGWotDBesA31u/dlBBU=","data":{"contactPreferenceEmail":true},"startedTime":{"$$date":{"$$numberLong":"1718118467838"}},"lastUpdated":{"$$date":{"$$numberLong":"1718118467838"}},"validUntil":{"$$date":{"$$numberLong":"1718118467839"}}}"""
 
       implicit val crypto: Encrypter with Decrypter = SymmetricCryptoFactory.aesCrypto(appConfig.cryptoKey)
 
@@ -50,7 +50,7 @@ class UserAnswersSpec extends SpecBase {
 
     "when encryption is disabled" - {
       val jsonWithoutEncryption =
-        s"""{"_id":"$appaId","userId":"$userId","subscriptionSummary":{"paperlessReference":true,"emailAddress":"\\"john.doe@example.com\\"","emailVerification":true,"bouncedEmail":false},"emailAddress":"\\"john.doe@example.com\\"","data":{},"startedTime":{"$$date":{"$$numberLong":"1718118467838"}},"lastUpdated":{"$$date":{"$$numberLong":"1718118467838"}},"validUntil":{"$$date":{"$$numberLong":"1718118467839"}}}"""
+        s"""{"_id":"$appaId","userId":"$userId","subscriptionSummary":{"paperlessReference":true,"emailAddress":"\\"john.doe@example.com\\"","emailVerification":true,"bouncedEmail":false},"emailAddress":"\\"john.doe@example.com\\"","data":{"contactPreferenceEmail":true},"startedTime":{"$$date":{"$$numberLong":"1718118467838"}},"lastUpdated":{"$$date":{"$$numberLong":"1718118467838"}},"validUntil":{"$$date":{"$$numberLong":"1718118467839"}}}"""
 
       implicit val crypto: Encrypter with Decrypter = NoCrypto
 
@@ -99,7 +99,7 @@ class UserAnswersSpec extends SpecBase {
         contactPreferencesEmailSelected,
         clock
       )
-      createdUserAnswers mustBe userAnswers
+      createdUserAnswers mustBe emptyUserAnswers
     }
 
     "convert a DecryptedUA to a UserAnswers" in {
@@ -109,7 +109,7 @@ class UserAnswersSpec extends SpecBase {
 
   "DecryptedUA must" - {
     val json =
-      s"""{"appaId":"$appaId","userId":"$userId","subscriptionSummary":{"paperlessReference":true,"emailAddress":"john.doe@example.com","emailVerification":true,"bouncedEmail":false},"emailAddress":"john.doe@example.com","data":{},"startedTime":{"$$date":{"$$numberLong":"1718118467838"}},"lastUpdated":{"$$date":{"$$numberLong":"1718118467838"}},"validUntil":{"$$date":{"$$numberLong":"1718118467839"}}}"""
+      s"""{"appaId":"$appaId","userId":"$userId","subscriptionSummary":{"paperlessReference":true,"emailAddress":"john.doe@example.com","emailVerification":true,"bouncedEmail":false},"emailAddress":"john.doe@example.com","data":{"contactPreferenceEmail":true},"startedTime":{"$$date":{"$$numberLong":"1718118467838"}},"lastUpdated":{"$$date":{"$$numberLong":"1718118467838"}},"validUntil":{"$$date":{"$$numberLong":"1718118467839"}}}"""
 
     "serialise to json" in {
       Json.toJson(uaDecrypted).toString() mustBe json
