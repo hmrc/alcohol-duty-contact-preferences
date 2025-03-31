@@ -47,7 +47,7 @@ trait TestData extends ModelGenerators {
       emailVerification = Some(true),
       bouncedEmail = Some(false)
     ),
-    emailAddress = None,
+    emailAddress = Some(SensitiveString(emailAddress)),
     startedTime = Instant.now(clock),
     lastUpdated = Instant.now(clock)
   )
@@ -61,7 +61,7 @@ trait TestData extends ModelGenerators {
       emailVerification = Some(true),
       bouncedEmail = Some(false)
     ),
-    emailAddress = None,
+    emailAddress = Some(emailAddress),
     startedTime = Instant.now(clock),
     lastUpdated = Instant.now(clock)
   )
