@@ -128,7 +128,7 @@ object UserAnswers {
         contactPreferences.emailVerification,
         contactPreferences.bouncedEmail
       ),
-      emailAddress = contactPreferences.emailAddress.map(SensitiveString(_)),
+      emailAddress = None,
       startedTime = Instant.now(clock),
       lastUpdated = Instant.now(clock)
     )
