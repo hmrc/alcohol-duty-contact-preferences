@@ -99,7 +99,7 @@ class UserAnswersSpec extends SpecBase {
         contactPreferencesEmailSelected,
         clock
       )
-      createdUserAnswers mustBe userAnswers
+      createdUserAnswers mustBe emptyUserAnswers
     }
 
     "convert a DecryptedUA to a UserAnswers" in {

@@ -18,7 +18,6 @@ package uk.gov.hmrc.alcoholdutycontactpreferences.models
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import uk.gov.hmrc.alcoholdutycontactpreferences.cacheables.ContactPreferenceCacheable
 import uk.gov.hmrc.alcoholdutycontactpreferences.queries.{Gettable, Settable}
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 import uk.gov.hmrc.crypto.json.JsonEncryption
@@ -129,10 +128,10 @@ object UserAnswers {
         contactPreferences.emailVerification,
         contactPreferences.bouncedEmail
       ),
-      emailAddress = contactPreferences.emailAddress.map(SensitiveString(_)),
+      emailAddress = None,
       startedTime = Instant.now(clock),
       lastUpdated = Instant.now(clock)
-    ).set(ContactPreferenceCacheable, contactPreferences.paperlessReference).get
+    )
 
   def fromDecryptedUA(decryptedUA: DecryptedUA): UserAnswers =
     UserAnswers(
