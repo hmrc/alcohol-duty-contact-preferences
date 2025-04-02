@@ -70,7 +70,7 @@ class SubscriptionConnectorSpec extends SpecBase with ConnectorTestHelpers {
       "if an exception is thrown when fetching subscription summary" in new SetUp {
         stubGetFault(url)
         whenReady(connector.getSubscriptionContactPreferences(appaId).value) { result =>
-          result mustBe Left(ErrorResponse(INTERNAL_SERVER_ERROR, "Connection reset by peer"))
+          result mustBe Left(ErrorResponse(INTERNAL_SERVER_ERROR, "Remotely closed"))
           verifyGet(url)
         }
       }
