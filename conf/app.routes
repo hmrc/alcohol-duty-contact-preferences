@@ -1,5 +1,7 @@
 # microservice specific routes
 
-POST         /user-answers                   uk.gov.hmrc.alcoholdutycontactpreferences.controllers.UserAnswersController.createUserAnswers()
-PUT          /user-answers                   uk.gov.hmrc.alcoholdutycontactpreferences.controllers.UserAnswersController.set()
-GET          /user-answers/:appaId           uk.gov.hmrc.alcoholdutycontactpreferences.controllers.UserAnswersController.getUserAnswers(appaId: String)
+POST         /user-answers                       uk.gov.hmrc.alcoholdutycontactpreferences.controllers.UserAnswersController.createUserAnswers()
+PUT          /user-answers                       uk.gov.hmrc.alcoholdutycontactpreferences.controllers.UserAnswersController.set()
+GET          /user-answers/:appaId               uk.gov.hmrc.alcoholdutycontactpreferences.controllers.UserAnswersController.getUserAnswers(appaId: String)
+
+GET          /get-email-verification             uk.gov.hmrc.alcoholdutycontactpreferences.controllers.EmailVerificationController.getEmailVerification()
