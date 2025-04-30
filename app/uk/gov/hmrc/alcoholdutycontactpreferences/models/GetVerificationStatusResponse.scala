@@ -31,3 +31,8 @@ case class GetVerificationStatusResponseEmailAddressDetails(
   verified: Boolean,
   locked: Boolean
 )
+
+case object GetVerificationStatusResponseEmailAddressDetails {
+  implicit val format: OFormat[GetVerificationStatusResponseEmailAddressDetails] =
+    Json.format[GetVerificationStatusResponseEmailAddressDetails]
+}

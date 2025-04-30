@@ -33,6 +33,11 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     "subscription.url.subscriptionSummary"
   )
 
+  private val emailVerificationHost: String                 = servicesConfig.baseUrl("email-verification")
+  private lazy val emailVerificationGetVerifiedEmailsPrefix = getConfStringAndThrowIfNotFound(
+    "email-verification.url.getVerifiedEmails"
+  )
+
   val idType: String = config.get[String]("downstream-apis.idType")
   val regime: String = config.get[String]("downstream-apis.regime")
 
@@ -47,9 +52,9 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   def getSubscriptionUrl(appaId: String): String =
     s"$subscriptionHost$subscriptionGetSubscriptionUrlPrefix/$regime/$idType/$appaId"
 
-  // TODO: find correct url
+  // TODO: check correct url
   def getVerifiedEmailsUrl(credId: String): String =
-    s"TESTESTESTSETST/verification-status/$credId"
+    s"$emailVerificationHost$emailVerificationGetVerifiedEmailsPrefix/$credId"
 
   private[config] def getConfStringAndThrowIfNotFound(key: String) =
     servicesConfig.getConfString(key, throw new RuntimeException(s"Could not find services config key '$key'"))
