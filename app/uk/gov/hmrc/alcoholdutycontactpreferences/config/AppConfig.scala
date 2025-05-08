@@ -52,7 +52,6 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   def getSubscriptionUrl(appaId: String): String =
     s"$subscriptionHost$subscriptionGetSubscriptionUrlPrefix/$regime/$idType/$appaId"
 
-  // TODO: check correct url
   def getVerifiedEmailsUrl(credId: String): String =
     s"$emailVerificationHost$emailVerificationGetVerifiedEmailsPrefix/$credId"
 
