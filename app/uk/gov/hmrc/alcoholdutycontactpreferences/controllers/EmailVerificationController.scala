@@ -20,14 +20,12 @@ import com.google.inject.Inject
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
-import uk.gov.hmrc.alcoholdutycontactpreferences.connectors.{EmailVerificationConnector, SubscriptionConnector}
-import uk.gov.hmrc.alcoholdutycontactpreferences.controllers.actions.{AuthorisedAction, CheckAppaIdAction}
-import uk.gov.hmrc.alcoholdutycontactpreferences.models.{GetVerificationStatusResponse, VerificationDetails}
-import uk.gov.hmrc.alcoholdutycontactpreferences.repositories.UserAnswersRepository
+import uk.gov.hmrc.alcoholdutycontactpreferences.connectors.EmailVerificationConnector
+import uk.gov.hmrc.alcoholdutycontactpreferences.controllers.actions.AuthorisedAction
+import uk.gov.hmrc.alcoholdutycontactpreferences.models.GetVerificationStatusResponse
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.play.bootstrap.backend.http.ErrorResponse
 
-import java.time.Clock
 import scala.concurrent.ExecutionContext
 
 class EmailVerificationController @Inject() (
@@ -38,12 +36,10 @@ class EmailVerificationController @Inject() (
     extends BackendController(cc)
     with Logging {
 
-  def getEmailVerification: Action[JsValue] = authorise(parse.json).async { implicit request =>
-    withJsonBody[VerificationDetails] { verificationDetails =>
-      emailVerificationConnector.getEmailVerification(verificationDetails.credId).value.map {
-        case Left(errorResponse: ErrorResponse)                    => InternalServerError(s"Error: ${errorResponse.message}")
-        case Right(successResponse: GetVerificationStatusResponse) => Ok(Json.toJson(successResponse))
-      }
+  def getEmailVerification(credId: String): Action[AnyContent] = authorise.async { implicit request =>
+    emailVerificationConnector.getEmailVerification(credId).value.map {
+      case Left(errorResponse: ErrorResponse)                    => InternalServerError(s"Error: ${errorResponse.message}")
+      case Right(successResponse: GetVerificationStatusResponse) => Ok(Json.toJson(successResponse))
     }
   }
 

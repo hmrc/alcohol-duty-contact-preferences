@@ -32,7 +32,6 @@ import scala.util.{Failure, Success, Try}
 
 class EmailVerificationConnector @Inject() (
   config: AppConfig,
-  headers: HIPHeaders,
   implicit val httpClient: HttpClientV2
 )(implicit ec: ExecutionContext)
     extends HttpReadsInstances
@@ -45,7 +44,7 @@ class EmailVerificationConnector @Inject() (
       logger.info(s"Fetching email verification list for credId $credId")
 
       httpClient
-        .get(url"$config.getVerifiedEmailsUrl")
+        .get(url"${config.getVerifiedEmailsUrl(credId)}")
         .execute[Either[UpstreamErrorResponse, HttpResponse]]
         .map {
           case Right(response) =>
@@ -63,14 +62,18 @@ class EmailVerificationConnector @Inject() (
           case Left(error)     =>
             error.statusCode match {
               case NOT_FOUND   =>
-                // TODO: Check if this is in the correct place
-                logger.info(s"There were no email address records for credId $credId")
+                // TODO: Check if this is in the correct place (or in success response)
+                logger.info(s"There were no email address records for credId $credId. status: ${error.statusCode}")
                 Right(GetVerificationStatusResponse(emails = List.empty))
               case BAD_REQUEST =>
-                logger.warn(s"Invalid request for email verification list for credId $credId")
+                logger.warn(
+                  s"Invalid request for email verification list for credId $credId. status: ${error.statusCode}"
+                )
                 Left(ErrorResponse(INTERNAL_SERVER_ERROR, "Invalid request for email verification list"))
               case _           =>
-                logger.warn(s"Unexpected response for email verification list for credId $credId")
+                logger.warn(
+                  s"Unexpected response for email verification list for credId: $credId. status: ${error.statusCode}"
+                )
                 Left(ErrorResponse(INTERNAL_SERVER_ERROR, "Unexpected response for email verification list"))
             }
         }
