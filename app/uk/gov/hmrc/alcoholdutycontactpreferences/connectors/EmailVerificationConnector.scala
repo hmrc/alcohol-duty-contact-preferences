@@ -18,10 +18,9 @@ package uk.gov.hmrc.alcoholdutycontactpreferences.connectors
 
 import cats.data.EitherT
 import play.api.Logging
-import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, UNAUTHORIZED}
+import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND}
 import uk.gov.hmrc.alcoholdutycontactpreferences.config.AppConfig
-import uk.gov.hmrc.alcoholdutycontactpreferences.connectors.helpers.HIPHeaders
-import uk.gov.hmrc.alcoholdutycontactpreferences.models.{GetVerificationStatusResponse, SubscriptionContactPreferences, SubscriptionSummarySuccess}
+import uk.gov.hmrc.alcoholdutycontactpreferences.models.GetVerificationStatusResponse
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.backend.http.ErrorResponse

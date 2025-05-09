@@ -62,7 +62,7 @@ class AppConfigSpec extends SpecBaseWithConfigOverrides {
     }
 
     "for email verification" - {
-      "must return the getVerifiedEmailsUrl url" in {
+      "must return the getVerifiedEmailsUrl" in {
         appConfig.getVerifiedEmailsUrl(
           credId
         ) mustBe s"http://emailverificationhost:12345/email-verification/verification-status/$credId"

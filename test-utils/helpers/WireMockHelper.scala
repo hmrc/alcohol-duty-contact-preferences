@@ -20,7 +20,7 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, getRequestedFor, postRequestedFor, urlEqualTo}
 import com.github.tomakehurst.wiremock.http.Fault
-import com.github.tomakehurst.wiremock.matching.EqualToPattern
+import com.github.tomakehurst.wiremock.matching.{EqualToJsonPattern, EqualToPattern}
 
 trait WireMockHelper {
   val wireMockServer: WireMockServer
@@ -82,9 +82,12 @@ trait WireMockHelper {
         .willReturn(aResponse().withFault(fault))
     )
 
-  def stubPost(url: String, status: Int, body: String): Unit =
+  def stubPost(url: String, status: Int, requestBody: String, returnBody: String): Unit =
     wireMockServer.stubFor(
-      WireMock.post(urlEqualTo(stripToPath(url))).willReturn(aResponse().withStatus(status).withBody(body))
+      WireMock
+        .post(urlEqualTo(stripToPath(url)))
+        .withRequestBody(new EqualToJsonPattern(requestBody, true, false))
+        .willReturn(aResponse().withStatus(status).withBody(returnBody))
     )
 
   def verifyGet(url: String): Unit =

@@ -18,7 +18,7 @@ package uk.gov.hmrc.alcoholdutycontactpreferences.controllers
 
 import com.google.inject.Inject
 import play.api.Logging
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.Json
 import play.api.mvc._
 import uk.gov.hmrc.alcoholdutycontactpreferences.connectors.EmailVerificationConnector
 import uk.gov.hmrc.alcoholdutycontactpreferences.controllers.actions.AuthorisedAction

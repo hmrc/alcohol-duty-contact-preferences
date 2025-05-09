@@ -86,6 +86,31 @@ trait TestData extends ModelGenerators {
     lastUpdated = Instant.now(clock)
   )
 
+  val getVerificationStatusResponse = GetVerificationStatusResponse(
+    List(
+      GetVerificationStatusResponseEmailAddressDetails(
+        emailAddress = "john.doe@example.com",
+        verified = true,
+        locked = false
+      ),
+      GetVerificationStatusResponseEmailAddressDetails(
+        emailAddress = "jane.doe@example.com",
+        verified = false,
+        locked = true
+      ),
+      GetVerificationStatusResponseEmailAddressDetails(
+        emailAddress = "john.doe2@example.com",
+        verified = false,
+        locked = false
+      ),
+      GetVerificationStatusResponseEmailAddressDetails(
+        emailAddress = "jane.doe2@example.com",
+        verified = true,
+        locked = true
+      )
+    )
+  )
+
   case class DownstreamErrorDetails(code: String, message: String, logID: String)
 
   object DownstreamErrorDetails {
