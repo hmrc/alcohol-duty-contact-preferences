@@ -32,6 +32,7 @@ case class DecryptedUA(
   userId: String,
   subscriptionSummary: SubscriptionSummary,
   emailAddress: Option[String],
+  verifiedEmailAddresses: Set[String],
   data: JsObject = Json.obj(),
   startedTime: Instant,
   lastUpdated: Instant,
@@ -50,6 +51,7 @@ object DecryptedUA {
         userAnswers.subscriptionSummary.bouncedEmail
       ),
       emailAddress = userAnswers.emailAddress.map(_.decryptedValue),
+      verifiedEmailAddresses = userAnswers.verifiedEmailAddresses.map(_.decryptedValue),
       data = userAnswers.data,
       startedTime = userAnswers.startedTime,
       lastUpdated = userAnswers.lastUpdated,
@@ -61,6 +63,7 @@ object DecryptedUA {
       (__ \ "userId").format[String] and
       (__ \ "subscriptionSummary").format[SubscriptionSummary] and
       (__ \ "emailAddress").formatNullable[String] and
+      (__ \ "verifiedEmailAddresses").format[Set[String]] and
       (__ \ "data").formatWithDefault[JsObject](Json.obj()) and
       (__ \ "startedTime").format(MongoJavatimeFormats.instantFormat) and
       (__ \ "lastUpdated").format(MongoJavatimeFormats.instantFormat) and
@@ -74,6 +77,7 @@ case class UserAnswers(
   userId: String,
   subscriptionSummary: SubscriptionSummaryBackend,
   emailAddress: Option[SensitiveString],
+  verifiedEmailAddresses: Set[SensitiveString],
   data: JsObject = Json.obj(),
   startedTime: Instant,
   lastUpdated: Instant,
@@ -124,11 +128,12 @@ object UserAnswers {
       userId = userDetails.userId,
       subscriptionSummary = SubscriptionSummaryBackend(
         contactPreferences.paperlessReference,
-        contactPreferences.emailAddress.map(SensitiveString(_)),
+        contactPreferences.emailAddress.map(SensitiveString),
         contactPreferences.emailVerification,
         contactPreferences.bouncedEmail
       ),
       emailAddress = None,
+      verifiedEmailAddresses = Set.empty[SensitiveString],
       startedTime = Instant.now(clock),
       lastUpdated = Instant.now(clock)
     )
@@ -139,11 +144,12 @@ object UserAnswers {
       userId = decryptedUA.userId,
       subscriptionSummary = SubscriptionSummaryBackend(
         decryptedUA.subscriptionSummary.paperlessReference,
-        decryptedUA.subscriptionSummary.emailAddress.map(SensitiveString(_)),
+        decryptedUA.subscriptionSummary.emailAddress.map(SensitiveString),
         decryptedUA.subscriptionSummary.emailVerification,
         decryptedUA.subscriptionSummary.bouncedEmail
       ),
-      emailAddress = decryptedUA.emailAddress.map(SensitiveString(_)),
+      emailAddress = decryptedUA.emailAddress.map(SensitiveString),
+      verifiedEmailAddresses = decryptedUA.verifiedEmailAddresses.map(SensitiveString),
       data = decryptedUA.data,
       startedTime = decryptedUA.startedTime,
       lastUpdated = decryptedUA.lastUpdated,
@@ -156,6 +162,7 @@ object UserAnswers {
         (__ \ "userId").format[String] and
         (__ \ "subscriptionSummary").format[SubscriptionSummaryBackend] and
         (__ \ "emailAddress").formatNullable[SensitiveString] and
+        (__ \ "verifiedEmailAddresses").format[Set[SensitiveString]] and
         (__ \ "data").formatWithDefault[JsObject](Json.obj()) and
         (__ \ "startedTime").format(MongoJavatimeFormats.instantFormat) and
         (__ \ "lastUpdated").format(MongoJavatimeFormats.instantFormat) and

@@ -50,7 +50,7 @@ class SubscriptionConnectorSpec extends SpecBase with ConnectorTestHelpers {
       }
     }
 
-    "return INTERNAL_SERVER_ERROR error" - {
+    "return INTERNAL_SERVER_ERROR" - {
       "if the data retrieved cannot be parsed" in new SetUp {
         stubGet(url, OK, "blah")
         whenReady(connector.getSubscriptionContactPreferences(appaId).value) { result =>
