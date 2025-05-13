@@ -33,6 +33,7 @@ trait TestData extends ModelGenerators {
   val appaId: String           = appaIdGen.sample.get
   val userId: String           = "userId"
   val userDetails: UserDetails = UserDetails(appaId, userId)
+  val credId: String           = "TESTCREDID00000"
 
   val emailAddress                                                    = "john.doe@example.com"
   val contactPreferencesEmailSelected: SubscriptionContactPreferences =
@@ -48,6 +49,7 @@ trait TestData extends ModelGenerators {
       bouncedEmail = Some(false)
     ),
     emailAddress = Some(SensitiveString(emailAddress)),
+    verifiedEmailAddresses = Set(SensitiveString(emailAddress)),
     data = JsObject(Seq("contactPreferenceEmail" -> Json.toJson(true))),
     startedTime = Instant.now(clock),
     lastUpdated = Instant.now(clock)
@@ -63,6 +65,7 @@ trait TestData extends ModelGenerators {
       bouncedEmail = Some(false)
     ),
     emailAddress = Some(emailAddress),
+    verifiedEmailAddresses = Set(emailAddress),
     data = JsObject(Seq("contactPreferenceEmail" -> Json.toJson(true))),
     startedTime = Instant.now(clock),
     lastUpdated = Instant.now(clock)
@@ -78,8 +81,34 @@ trait TestData extends ModelGenerators {
       bouncedEmail = Some(false)
     ),
     emailAddress = None,
+    verifiedEmailAddresses = Set.empty,
     startedTime = Instant.now(clock),
     lastUpdated = Instant.now(clock)
+  )
+
+  val getVerificationStatusResponse = GetVerificationStatusResponse(
+    List(
+      GetVerificationStatusResponseEmailAddressDetails(
+        emailAddress = "john.doe@example.com",
+        verified = true,
+        locked = false
+      ),
+      GetVerificationStatusResponseEmailAddressDetails(
+        emailAddress = "jane.doe@example.com",
+        verified = false,
+        locked = true
+      ),
+      GetVerificationStatusResponseEmailAddressDetails(
+        emailAddress = "john.doe2@example.com",
+        verified = false,
+        locked = false
+      ),
+      GetVerificationStatusResponseEmailAddressDetails(
+        emailAddress = "jane.doe2@example.com",
+        verified = true,
+        locked = true
+      )
+    )
   )
 
   case class DownstreamErrorDetails(code: String, message: String, logID: String)
