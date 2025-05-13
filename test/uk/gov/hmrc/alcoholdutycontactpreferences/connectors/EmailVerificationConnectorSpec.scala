@@ -69,7 +69,9 @@ class EmailVerificationConnectorSpec extends SpecBase with ConnectorTestHelpers 
       "if an exception is thrown when fetching email verification statuses" in new SetUp {
         stubGetFault(url)
         whenReady(connector.getEmailVerification(credId).value) { result =>
-          result mustBe Left(ErrorResponse(INTERNAL_SERVER_ERROR, "Remotely closed"))
+          result mustBe Left(
+            ErrorResponse(INTERNAL_SERVER_ERROR, "Exception returned while trying to fetch email verification list")
+          )
           verifyGet(url)
         }
       }

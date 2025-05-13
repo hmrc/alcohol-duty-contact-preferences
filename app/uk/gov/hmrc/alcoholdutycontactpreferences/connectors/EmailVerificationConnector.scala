@@ -61,7 +61,6 @@ class EmailVerificationConnector @Inject() (
           case Left(error)     =>
             error.statusCode match {
               case NOT_FOUND   =>
-                // TODO: Check if this is in the correct place (or in success response)
                 logger.info(s"There were no email address records for credId $credId. status: ${error.statusCode}")
                 Right(GetVerificationStatusResponse(emails = List.empty))
               case BAD_REQUEST =>
@@ -76,9 +75,13 @@ class EmailVerificationConnector @Inject() (
                 Left(ErrorResponse(INTERNAL_SERVER_ERROR, "Unexpected response for email verification list"))
             }
         }
-        .recoverWith { case e: Exception =>
+        .recoverWith { case _: Exception =>
           logger.warn(s"An exception was returned while trying to fetch the email verification list for credId $credId")
-          Future.successful(Left(ErrorResponse(INTERNAL_SERVER_ERROR, e.getMessage)))
+          Future.successful(
+            Left(
+              ErrorResponse(INTERNAL_SERVER_ERROR, "Exception returned while trying to fetch email verification list")
+            )
+          )
         }
     }
 
