@@ -20,18 +20,22 @@ import uk.gov.hmrc.alcoholdutycontactpreferences.base.SpecBase
 
 class SpecBaseWithConfigOverrides extends SpecBase {
   override def configOverrides: Map[String, Any] = Map(
-    "appName"                                                    -> "appName",
-    "microservice.services.subscription.protocol"                -> "http",
-    "microservice.services.subscription.host"                    -> "subscriptionhost",
-    "microservice.services.subscription.port"                    -> 12345,
-    "microservice.services.subscription.clientId"                -> "subscription clientId",
-    "microservice.services.subscription.secret"                  -> "subscription secret",
-    "microservice.services.subscription.url.subscriptionSummary" -> "/etmp/RESTAdapter/excise/subscriptionsummary",
-    "downstream-apis.idType"                                     -> "ZAD",
-    "downstream-apis.regime"                                     -> "AD",
-    "crypto.key"                                                 -> "cryptokey",
-    "crypto.isEnabled"                                           -> true,
-    "enrolment.serviceName"                                      -> "HMRC-AD-ORG"
+    "appName"                                                        -> "appName",
+    "microservice.services.subscription.protocol"                    -> "http",
+    "microservice.services.subscription.host"                        -> "subscriptionhost",
+    "microservice.services.subscription.port"                        -> 12345,
+    "microservice.services.subscription.clientId"                    -> "subscription clientId",
+    "microservice.services.subscription.secret"                      -> "subscription secret",
+    "microservice.services.subscription.url.subscriptionSummary"     -> "/etmp/RESTAdapter/excise/subscriptionsummary",
+    "microservice.services.email-verification.protocol"              -> "http",
+    "microservice.services.email-verification.host"                  -> "emailverificationhost",
+    "microservice.services.email-verification.port"                  -> 12345,
+    "microservice.services.email-verification.url.getVerifiedEmails" -> "/email-verification/verification-status",
+    "downstream-apis.idType"                                         -> "ZAD",
+    "downstream-apis.regime"                                         -> "AD",
+    "crypto.key"                                                     -> "cryptokey",
+    "crypto.isEnabled"                                               -> true,
+    "enrolment.serviceName"                                          -> "HMRC-AD-ORG"
   )
 }
 
@@ -54,6 +58,14 @@ class AppConfigSpec extends SpecBaseWithConfigOverrides {
 
       "must return the secret" in {
         appConfig.subscriptionSecret mustBe "subscription secret"
+      }
+    }
+
+    "for email verification" - {
+      "must return the getVerifiedEmailsUrl" in {
+        appConfig.getVerifiedEmailsUrl(
+          credId
+        ) mustBe s"http://emailverificationhost:12345/email-verification/verification-status/$credId"
       }
     }
 

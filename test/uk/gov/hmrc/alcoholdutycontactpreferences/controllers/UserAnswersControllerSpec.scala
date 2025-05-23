@@ -17,7 +17,6 @@
 package uk.gov.hmrc.alcoholdutycontactpreferences.controllers
 
 import cats.data.EitherT
-import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
 import play.api.libs.json.Json
@@ -44,7 +43,7 @@ class UserAnswersControllerSpec extends SpecBase {
 
   "getUserAnswers must" - {
     "return 200 OK with an existing user answers when there is one for the id" in {
-      when(mockUserAnswersRepository.get(ArgumentMatchers.eq(appaId)))
+      when(mockUserAnswersRepository.get(eqTo(appaId)))
         .thenReturn(Future.successful(Some(userAnswers)))
 
       val result: Future[Result] =
@@ -55,7 +54,7 @@ class UserAnswersControllerSpec extends SpecBase {
     }
 
     "return 404 NOT_FOUND when there is no user answers for the id" in {
-      when(mockUserAnswersRepository.get(ArgumentMatchers.eq(appaId)))
+      when(mockUserAnswersRepository.get(eqTo(appaId)))
         .thenReturn(Future.successful(None))
 
       val result: Future[Result] =
