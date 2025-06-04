@@ -73,7 +73,7 @@ class TestOnlyUserAnswersController @Inject() (
                   clock = clock
                 )
                 val submittedEmail                = (verified, locked) match {
-                  case (true, false) => "john.doe2@example.com"
+                  case (true, false) => "john.doe@example.com"
                   case (true, true)  => "jane.doe2@example.com"
                   case _             => "jane.doe@example.com"
                 }
