@@ -1,4 +1,5 @@
 # Add all the application routes to the app.routes file
+DELETE       /user-answers/clear-all                               uk.gov.hmrc.alcoholdutycontactpreferences.testOnly.controllers.TestOnlyUserAnswersController.clearAllData()
+POST         /create-and-fill-user-answers/:verified/:locked       uk.gov.hmrc.alcoholdutycontactpreferences.testOnly.controllers.TestOnlyUserAnswersController.createAndFillUserAnswers(verified: Boolean, locked: Boolean)
 
 POST         /event-hub/bounce               uk.gov.hmrc.alcoholdutycontactpreferences.testOnly.controllers.EventHubBounceController.handleBouncedEmail()
-

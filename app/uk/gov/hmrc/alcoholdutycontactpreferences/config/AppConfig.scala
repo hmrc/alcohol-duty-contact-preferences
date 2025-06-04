@@ -35,9 +35,8 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
 
   val emailVerificationIntegrationEnabled: Boolean = config.get[Boolean]("features.email-verification-integration")
 
-  private val emailVerificationHost: String                 =
-    if (emailVerificationIntegrationEnabled) { servicesConfig.baseUrl("email-verification") }
-    else { servicesConfig.baseUrl("alcohol-duty-stubs") }
+  private val stubsHost: String                             = servicesConfig.baseUrl("alcohol-duty-stubs")
+  private val emailVerificationHost: String                 = servicesConfig.baseUrl("email-verification")
   private lazy val emailVerificationGetVerifiedEmailsPrefix = getConfStringAndThrowIfNotFound(
     "email-verification.url.getVerifiedEmails"
   )
@@ -57,7 +56,11 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     s"$subscriptionHost$subscriptionGetSubscriptionUrlPrefix/$regime/$idType/$appaId"
 
   def getVerifiedEmailsUrl(credId: String): String =
-    s"$emailVerificationHost$emailVerificationGetVerifiedEmailsPrefix/$credId"
+    if (emailVerificationIntegrationEnabled) {
+      s"$emailVerificationHost$emailVerificationGetVerifiedEmailsPrefix/$credId"
+    } else {
+      s"$stubsHost$emailVerificationGetVerifiedEmailsPrefix/$credId"
+    }
 
   private[config] def getConfStringAndThrowIfNotFound(key: String) =
     servicesConfig.getConfString(key, throw new RuntimeException(s"Could not find services config key '$key'"))
