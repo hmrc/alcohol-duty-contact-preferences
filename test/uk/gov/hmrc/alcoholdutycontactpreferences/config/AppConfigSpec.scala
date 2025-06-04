@@ -35,7 +35,18 @@ class SpecBaseWithConfigOverrides extends SpecBase {
     "downstream-apis.regime"                                         -> "AD",
     "crypto.key"                                                     -> "cryptokey",
     "crypto.isEnabled"                                               -> true,
-    "enrolment.serviceName"                                          -> "HMRC-AD-ORG"
+    "enrolment.serviceName"                                          -> "HMRC-AD-ORG",
+    "features.email-verification-integration"                        -> true
+  )
+}
+
+class SpecBaseWithoutEmailVerificationIntegration extends SpecBase {
+  override def configOverrides: Map[String, Any] = Map(
+    "microservice.services.alcohol-duty-stubs.protocol"              -> "http",
+    "microservice.services.alcohol-duty-stubs.host"                  -> "stubshost",
+    "microservice.services.alcohol-duty-stubs.port"                  -> 54321,
+    "microservice.services.email-verification.url.getVerifiedEmails" -> "/email-verification/verification-status",
+    "features.email-verification-integration"                        -> false
   )
 }
 
@@ -62,7 +73,7 @@ class AppConfigSpec extends SpecBaseWithConfigOverrides {
     }
 
     "for email verification" - {
-      "must return the getVerifiedEmailsUrl" in {
+      "must return the getVerifiedEmailsUrl when email verification integration is toggled on" in {
         appConfig.getVerifiedEmailsUrl(
           credId
         ) mustBe s"http://emailverificationhost:12345/email-verification/verification-status/$credId"
@@ -101,6 +112,16 @@ class AppConfigSpec extends SpecBaseWithConfigOverrides {
       "throw an exception if not found" in {
         a[RuntimeException] mustBe thrownBy(appConfig.getConfStringAndThrowIfNotFound("blah"))
       }
+    }
+  }
+}
+
+class AppConfigWithoutEmailVerificationIntegrationSpec extends SpecBaseWithoutEmailVerificationIntegration {
+  "for email verification" - {
+    "must return the getVerifiedEmailsUrl when email verification integration is toggled off" in {
+      appConfig.getVerifiedEmailsUrl(
+        credId
+      ) mustBe s"http://stubshost:54321/email-verification/verification-status/$credId"
     }
   }
 }

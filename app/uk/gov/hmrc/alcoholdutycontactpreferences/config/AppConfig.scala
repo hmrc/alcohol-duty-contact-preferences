@@ -33,7 +33,11 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     "subscription.url.subscriptionSummary"
   )
 
-  private val emailVerificationHost: String                 = servicesConfig.baseUrl("email-verification")
+  val emailVerificationIntegrationEnabled: Boolean = config.get[Boolean]("features.email-verification-integration")
+
+  private val emailVerificationHost: String                 =
+    if (emailVerificationIntegrationEnabled) { servicesConfig.baseUrl("email-verification") }
+    else { servicesConfig.baseUrl("alcohol-duty-stubs") }
   private lazy val emailVerificationGetVerifiedEmailsPrefix = getConfStringAndThrowIfNotFound(
     "email-verification.url.getVerifiedEmails"
   )
