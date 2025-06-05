@@ -24,7 +24,6 @@ lazy val microservice = Project("alcohol-duty-contact-preferences", file("."))
     scalafmtOnCompile := true
   )
   .settings(inConfig(Test)(testSettings): _*)
-  .settings(resolvers += Resolver.jcenterRepo)
   .settings(
     ScoverageKeys.coverageExcludedFiles := scoverageExcludedList.mkString(";"),
     ScoverageKeys.coverageMinimumStmtTotal := 80,
