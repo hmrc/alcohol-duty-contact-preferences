@@ -33,7 +33,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     "subscription.url.subscriptionSummary"
   )
 
-  val emailVerificationIntegrationEnabled: Boolean = config.get[Boolean]("features.email-verification-integration")
+  val emailVerificationStubsEnabled: Boolean = config.get[Boolean]("features.email-verification-stub")
 
   private val stubsHost: String                             = servicesConfig.baseUrl("alcohol-duty-stubs")
   private val emailVerificationHost: String                 = servicesConfig.baseUrl("email-verification")
@@ -56,10 +56,10 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     s"$subscriptionHost$subscriptionGetSubscriptionUrlPrefix/$regime/$idType/$appaId"
 
   def getVerifiedEmailsUrl(credId: String): String =
-    if (emailVerificationIntegrationEnabled) {
-      s"$emailVerificationHost$emailVerificationGetVerifiedEmailsPrefix/$credId"
-    } else {
+    if (emailVerificationStubsEnabled) {
       s"$stubsHost$emailVerificationGetVerifiedEmailsPrefix/$credId"
+    } else {
+      s"$emailVerificationHost$emailVerificationGetVerifiedEmailsPrefix/$credId"
     }
 
   private[config] def getConfStringAndThrowIfNotFound(key: String) =

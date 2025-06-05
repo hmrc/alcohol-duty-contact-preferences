@@ -22,7 +22,7 @@ import uk.gov.hmrc.alcoholdutycontactpreferences.models.GetVerificationStatusRes
 import uk.gov.hmrc.play.bootstrap.backend.http.ErrorResponse
 
 class EmailVerificationConnectorSpec extends SpecBase with ConnectorTestHelpers {
-  protected val endpointName = "alcohol-duty-stubs"
+  protected val endpointName = "email-verification"
 
   "EmailVerificationConnector must" - {
     "successfully get a list of email verification statuses" in new SetUp {
