@@ -72,12 +72,11 @@ class UserAnswersController @Inject() (
     }
   }
 
-  def getUserAnswers(appaId: String): Action[AnyContent] = (authorise andThen checkAppaId(appaId)).async {
-    implicit request =>
-      userAnswersRepository.get(appaId).map {
-        case Some(ua) => Ok(Json.toJson(DecryptedUA.fromUA(ua)))
-        case None     => NotFound
-      }
+  def getUserAnswers(appaId: String): Action[AnyContent] = (authorise andThen checkAppaId(appaId)).async { _ =>
+    userAnswersRepository.get(appaId).map {
+      case Some(ua) => Ok(Json.toJson(DecryptedUA.fromUA(ua)))
+      case None     => NotFound
+    }
   }
 
   def set(): Action[JsValue] =
@@ -85,7 +84,7 @@ class UserAnswersController @Inject() (
       withJsonBody[DecryptedUA] { decryptedUA =>
         checkAppaId(decryptedUA.appaId).invokeBlock[JsValue](
           request,
-          { implicit request =>
+          { _ =>
             val userAnswers = UserAnswers.fromDecryptedUA(decryptedUA)
             userAnswersRepository.set(userAnswers).map {
               case UpdateSuccess => Ok(Json.toJson(decryptedUA))

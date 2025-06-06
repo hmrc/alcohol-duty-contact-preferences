@@ -122,21 +122,25 @@ object UserAnswers {
     userDetails: UserDetails,
     contactPreferences: SubscriptionContactPreferences,
     clock: Clock
-  ): UserAnswers =
+  ): UserAnswers = {
+    val existingEmail: Option[SensitiveString] = contactPreferences.emailAddress.map(SensitiveString)
+    val hasVerifiedEmail: Boolean              = existingEmail.nonEmpty && contactPreferences.emailVerification.contains(true)
+
     UserAnswers(
       appaId = userDetails.appaId,
       userId = userDetails.userId,
       subscriptionSummary = SubscriptionSummaryBackend(
         contactPreferences.paperlessReference,
-        contactPreferences.emailAddress.map(SensitiveString),
+        existingEmail,
         contactPreferences.emailVerification,
         contactPreferences.bouncedEmail
       ),
       emailAddress = None,
-      verifiedEmailAddresses = Set.empty[SensitiveString],
+      verifiedEmailAddresses = if (hasVerifiedEmail) existingEmail.toSet else Set.empty[SensitiveString],
       startedTime = Instant.now(clock),
       lastUpdated = Instant.now(clock)
     )
+  }
 
   def fromDecryptedUA(decryptedUA: DecryptedUA): UserAnswers =
     UserAnswers(

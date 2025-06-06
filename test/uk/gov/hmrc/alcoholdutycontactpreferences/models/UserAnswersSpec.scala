@@ -93,13 +93,22 @@ class UserAnswersSpec extends SpecBase {
       actualValueOption mustBe None
     }
 
-    "create a UserAnswers from components" in {
+    "create a UserAnswers from components when there is an existing verified email" in {
       val createdUserAnswers = UserAnswers.createUserAnswers(
         userDetails,
         contactPreferencesEmailSelected,
         clock
       )
       createdUserAnswers mustBe emptyUserAnswers
+    }
+
+    "create a UserAnswers from components when there is no email in the system" in {
+      val createdUserAnswers = UserAnswers.createUserAnswers(
+        userDetails,
+        contactPreferencesPostNoEmail,
+        clock
+      )
+      createdUserAnswers mustBe emptyUserAnswersNoEmail
     }
 
     "convert a DecryptedUA to a UserAnswers" in {

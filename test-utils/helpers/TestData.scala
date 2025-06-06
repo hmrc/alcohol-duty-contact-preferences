@@ -38,6 +38,8 @@ trait TestData extends ModelGenerators {
   val emailAddress                                                    = "john.doe@example.com"
   val contactPreferencesEmailSelected: SubscriptionContactPreferences =
     SubscriptionContactPreferences(true, Some(emailAddress), Some(true), Some(false))
+  val contactPreferencesPostNoEmail: SubscriptionContactPreferences   =
+    SubscriptionContactPreferences(false, None, None, None)
 
   val userAnswers: UserAnswers = UserAnswers(
     appaId = appaId,
@@ -79,6 +81,21 @@ trait TestData extends ModelGenerators {
       emailAddress = Some(SensitiveString(emailAddress)),
       emailVerification = Some(true),
       bouncedEmail = Some(false)
+    ),
+    emailAddress = None,
+    verifiedEmailAddresses = Set(SensitiveString(emailAddress)),
+    startedTime = Instant.now(clock),
+    lastUpdated = Instant.now(clock)
+  )
+
+  val emptyUserAnswersNoEmail: UserAnswers = UserAnswers(
+    appaId = appaId,
+    userId = userId,
+    subscriptionSummary = SubscriptionSummaryBackend(
+      paperlessReference = false,
+      emailAddress = None,
+      emailVerification = None,
+      bouncedEmail = None
     ),
     emailAddress = None,
     verifiedEmailAddresses = Set.empty,
