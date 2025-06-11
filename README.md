@@ -1,8 +1,30 @@
 # alcohol-duty-contact-preferences
 
-This is the backend service to capture an alcohol producers communication preference
+This is the backend microservice to capture an alcohol producer's communication preference.
+
+## API Endpoints
+
+- [Create User Answers](api-docs/createUserAnswers.md): `POST /alcohol-duty-contact-preferences/user-answers`
+- [Get User Answers](api-docs/getUserAnswers): `GET /alcohol-duty-contact-preferences/user-answers/:appaId`
+- [Set User Answers](api-docs/setUserAnswers): `PUT /alcohol-duty-contact-preferences/user-answers`
+- [Get Email Verification Status](https://github.com/hmrc/email-verification?tab=readme-ov-file#get-verification-status):
+  `GET /alcohol-duty-contact-preferences/get-email-verification/:credId` (link to email-verification README)
+
+## Running the service
+
+> `sbt run`
+
+The service runs on port `16006` by default.
 
 ## Test only endpoints
+
+To run the service with test only routes enabled:
+> `sbt "run -Dapplication.router=testOnlyDoNotUseInAppConf.Routes"`
+
+### Clear all data
+
+This endpoint clears all user answers data in the repository.
+> `DELETE /alcohol-duty-contact-preferences/test-only/user-answers/clear-all`
 
 ### Event hub bounced email endpoint
 
@@ -12,13 +34,11 @@ we will tell ETMP that this has happened. At the moment this functionality has n
 the development of the ECP microservice.
 
 The endpoint route is:
-> `POST /event-hub/bounce`
+> `POST /alcohol-duty-contact-preferences/test-only/event-hub/bounce`
 
-For it to work you need this service running with test only routes enabled:
-> `sbt "run -Dapplication.router=testOnlyDoNotUseInAppConf.Routes"`
-
-and all the event hub running service manager with the correct config. This can be added alongside all ADR microservices
-via:
+For it to work you need this service running with test only routes enabled 
+and all the event hub running service manager with the correct config.
+This can be added alongside all ADR microservices via:
 > `sm2 --start ALCOHOL_DUTY_ALL`
 
 or independently with:
@@ -63,6 +83,30 @@ curl -v -X POST -H "Content-Type: application/json" http://localhost:16006/alcoh
     }
 }'
 ```
+
+## Running tests
+
+### Unit tests
+> `sbt test`
+
+### Integration tests
+> `sbt it/test`
+
+## Scalafmt and Scalastyle
+
+To check if all the scala files in the project are formatted correctly:
+> `sbt scalafmtCheckAll`
+
+To format all the scala files in the project correctly:
+> `sbt scalafmtAll`
+
+To check if there are any scalastyle errors, warnings or infos:
+> `sbt scalastyle`
+
+### All tests and checks
+This is an sbt command alias specific to this project. It will run a scala format
+check, run a scala style check, run unit tests, run integration tests and produce a coverage report:
+> `sbt runAllChecks`
 
 ### License
 
