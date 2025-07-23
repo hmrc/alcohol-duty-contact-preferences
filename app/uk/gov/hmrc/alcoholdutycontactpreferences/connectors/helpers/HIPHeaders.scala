@@ -35,16 +35,33 @@ class HIPHeaders @Inject() (randomUUIDGenerator: RandomUUIDGenerator, appConfig:
 
   def subscriptionHeaders(): Seq[(String, String)] =
     Seq(
-      (HeaderNames.AUTHORIZATION, authorization()),
+      (HeaderNames.AUTHORIZATION, authorizationForSubscription()),
       (correlationIdHeader, randomUUIDGenerator.uuid),
       (xOriginatingSystemHeader, mdtp),
       (xReceiptDateHeader, DateTimeHelper.formatISOInstantSeconds(Instant.now(clock))),
       (xTransmittingSystemHeader, hip)
     )
 
-  private def authorization(): String = {
+  def submissionHeaders(): Seq[(String, String)] =
+    Seq(
+      (HeaderNames.AUTHORIZATION, authorizationForSubmission()),
+      (correlationIdHeader, randomUUIDGenerator.uuid),
+      (xOriginatingSystemHeader, mdtp),
+      (xReceiptDateHeader, DateTimeHelper.formatISOInstantSeconds(Instant.now(clock))),
+      (xTransmittingSystemHeader, hip)
+    )
+
+  private def authorizationForSubscription(): String = {
     val clientId = appConfig.subscriptionClientId
     val secret   = appConfig.subscriptionSecret
+
+    val encoded = Base64.getEncoder.encodeToString(s"$clientId:$secret".getBytes("UTF-8"))
+    s"Basic $encoded"
+  }
+
+  private def authorizationForSubmission(): String = {
+    val clientId = appConfig.submitPreferencesClientId
+    val secret   = appConfig.submitPreferencesSecret
 
     val encoded = Base64.getEncoder.encodeToString(s"$clientId:$secret".getBytes("UTF-8"))
     s"Basic $encoded"
