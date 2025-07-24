@@ -75,7 +75,9 @@ abstract class ISpecBase
   val additionalAppConfig: Map[String, Any] = Map(
     "metrics.enabled"  -> false,
     "auditing.enabled" -> false
-  ) ++ getWireMockAppConfig(Seq("auth", "subscription", "email-verification", "alcohol-duty-stubs"))
+  ) ++ getWireMockAppConfig(
+    Seq("auth", "subscription", "email-verification", "alcohol-duty-stubs", "submit-preferences")
+  )
 
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()

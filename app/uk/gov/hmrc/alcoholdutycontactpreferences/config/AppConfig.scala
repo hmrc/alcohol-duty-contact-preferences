@@ -19,7 +19,6 @@ package uk.gov.hmrc.alcoholdutycontactpreferences.config
 import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import java.text.MessageFormat
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.duration.FiniteDuration
 

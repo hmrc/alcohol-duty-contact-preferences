@@ -75,8 +75,7 @@ class SubmitPreferencesConnector @Inject() (
                 logger.info(s"Contact preferences submitted successfully for appaId $appaId")
                 Future.successful(Right(submissionResponse.success))
               case Failure(e)                  =>
-                logger
-                  .warn(s"Parsing failed for submission response for appaId $appaId", e)
+                logger.warn(s"Parsing failed for submission response for appaId $appaId", e)
                 Future.successful(Left(ErrorCodes.unexpectedResponse))
             }
           case response if response.status == BAD_REQUEST          =>
