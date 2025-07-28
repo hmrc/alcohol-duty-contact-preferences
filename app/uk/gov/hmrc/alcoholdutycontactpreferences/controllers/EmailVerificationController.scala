@@ -24,7 +24,7 @@ import uk.gov.hmrc.alcoholdutycontactpreferences.connectors.EmailVerificationCon
 import uk.gov.hmrc.alcoholdutycontactpreferences.controllers.actions.AuthorisedAction
 import uk.gov.hmrc.alcoholdutycontactpreferences.models.GetVerificationStatusResponse
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-import uk.gov.hmrc.play.bootstrap.backend.http.ErrorResponse
+import uk.gov.hmrc.play.bootstrap.http.ErrorResponse
 
 import scala.concurrent.ExecutionContext
 
