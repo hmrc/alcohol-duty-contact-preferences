@@ -22,17 +22,17 @@ import play.api.Logging
 import play.api.http.HttpEntity
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
+import uk.gov.hmrc.alcoholdutycontactpreferences.connectors.SubmitPreferencesConnector
 import uk.gov.hmrc.alcoholdutycontactpreferences.controllers.actions.{AuthorisedAction, CheckAppaIdAction}
 import uk.gov.hmrc.alcoholdutycontactpreferences.models.PaperlessPreferenceSubmission
-import uk.gov.hmrc.alcoholdutycontactpreferences.services.SubmitPreferencesService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-import uk.gov.hmrc.play.bootstrap.backend.http.ErrorResponse
+import uk.gov.hmrc.play.bootstrap.http.ErrorResponse
 
 import scala.concurrent.ExecutionContext
 
 class SubmitPreferencesController @Inject() (
   cc: ControllerComponents,
-  submitPreferencesService: SubmitPreferencesService,
+  submitPreferencesConnector: SubmitPreferencesConnector,
   authorise: AuthorisedAction,
   checkAppaId: CheckAppaIdAction
 )(implicit ec: ExecutionContext)
@@ -42,7 +42,7 @@ class SubmitPreferencesController @Inject() (
   def submitContactPreferences(appaId: String): Action[JsValue] =
     (authorise(parse.json) andThen checkAppaId(appaId)).async { implicit request =>
       withJsonBody[PaperlessPreferenceSubmission] { contactPreferenceSubmission =>
-        submitPreferencesService
+        submitPreferencesConnector
           .submitContactPreferences(contactPreferenceSubmission, appaId)
           .fold(
             e => error(e),

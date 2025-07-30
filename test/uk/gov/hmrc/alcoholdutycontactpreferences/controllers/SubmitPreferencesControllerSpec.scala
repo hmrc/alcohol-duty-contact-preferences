@@ -22,18 +22,18 @@ import org.mockito.ArgumentMatchersSugar.eqTo
 import play.api.libs.json.Json
 import play.api.mvc.Result
 import uk.gov.hmrc.alcoholdutycontactpreferences.base.SpecBase
+import uk.gov.hmrc.alcoholdutycontactpreferences.connectors.SubmitPreferencesConnector
 import uk.gov.hmrc.alcoholdutycontactpreferences.models.{ErrorCodes, PaperlessPreferenceSubmittedResponse}
-import uk.gov.hmrc.alcoholdutycontactpreferences.services.SubmitPreferencesService
-import uk.gov.hmrc.play.bootstrap.backend.http.ErrorResponse
+import uk.gov.hmrc.play.bootstrap.http.ErrorResponse
 
 import scala.concurrent.Future
 
 class SubmitPreferencesControllerSpec extends SpecBase {
-  val mockSubmitPreferencesService: SubmitPreferencesService = mock[SubmitPreferencesService]
+  val mockSubmitPreferencesConnector: SubmitPreferencesConnector = mock[SubmitPreferencesConnector]
 
   val controller = new SubmitPreferencesController(
     cc,
-    mockSubmitPreferencesService,
+    mockSubmitPreferencesConnector,
     fakeAuthorisedAction,
     fakeCheckAppaIdAction
   )
@@ -41,7 +41,7 @@ class SubmitPreferencesControllerSpec extends SpecBase {
   "submitContactPreferences must" - {
     "return 200 OK and the submission response when successful" in {
       when(
-        mockSubmitPreferencesService
+        mockSubmitPreferencesConnector
           .submitContactPreferences(eqTo(contactPreferenceSubmissionEmail), eqTo(appaId))(any())
       ).thenReturn(EitherT.rightT[Future, ErrorResponse](testSubmissionResponse))
 
@@ -56,7 +56,7 @@ class SubmitPreferencesControllerSpec extends SpecBase {
 
     "return 422 UNPROCESSABLE_ENTITY when the submission response could not be parsed" in {
       when(
-        mockSubmitPreferencesService
+        mockSubmitPreferencesConnector
           .submitContactPreferences(eqTo(contactPreferenceSubmissionEmail), eqTo(appaId))(any())
       ).thenReturn(EitherT.leftT[Future, PaperlessPreferenceSubmittedResponse](ErrorCodes.invalidJson))
 
@@ -70,7 +70,7 @@ class SubmitPreferencesControllerSpec extends SpecBase {
 
     "return 400 BAD_REQUEST when there is a BAD_REQUEST" in {
       when(
-        mockSubmitPreferencesService
+        mockSubmitPreferencesConnector
           .submitContactPreferences(eqTo(contactPreferenceSubmissionEmail), eqTo(appaId))(any())
       ).thenReturn(EitherT.leftT[Future, PaperlessPreferenceSubmittedResponse](ErrorCodes.badRequest))
 
@@ -84,7 +84,7 @@ class SubmitPreferencesControllerSpec extends SpecBase {
 
     "return 404 NOT_FOUND when not found" in {
       when(
-        mockSubmitPreferencesService
+        mockSubmitPreferencesConnector
           .submitContactPreferences(eqTo(contactPreferenceSubmissionEmail), eqTo(appaId))(any())
       ).thenReturn(EitherT.leftT[Future, PaperlessPreferenceSubmittedResponse](ErrorCodes.entityNotFound))
 
@@ -98,7 +98,7 @@ class SubmitPreferencesControllerSpec extends SpecBase {
 
     "return 500 INTERNAL_SERVER_ERROR when there is an unexpected response" in {
       when(
-        mockSubmitPreferencesService
+        mockSubmitPreferencesConnector
           .submitContactPreferences(eqTo(contactPreferenceSubmissionEmail), eqTo(appaId))(any())
       ).thenReturn(EitherT.leftT[Future, PaperlessPreferenceSubmittedResponse](ErrorCodes.unexpectedResponse))
 

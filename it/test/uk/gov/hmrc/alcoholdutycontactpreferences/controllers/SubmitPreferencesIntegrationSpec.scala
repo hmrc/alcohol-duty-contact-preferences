@@ -41,9 +41,6 @@ class SubmitPreferencesIntegrationSpec extends ISpecBase {
             .withBody(Json.toJson(contactPreferenceSubmissionEmail))
         )
 
-//        println(s"Route: $submitPreferencesUrl")
-//        println(s"Response body: ${contentAsJson(response)}")
-
         status(response)        mustBe OK
         contentAsJson(response) mustBe Json.toJson(testSubmissionResponse)
 
