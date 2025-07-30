@@ -24,7 +24,7 @@ import uk.gov.hmrc.alcoholdutycontactpreferences.connectors.helpers.HIPHeaders
 import uk.gov.hmrc.alcoholdutycontactpreferences.models.{SubscriptionContactPreferences, SubscriptionSummarySuccess}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.play.bootstrap.backend.http.ErrorResponse
+import uk.gov.hmrc.play.bootstrap.http.ErrorResponse
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}

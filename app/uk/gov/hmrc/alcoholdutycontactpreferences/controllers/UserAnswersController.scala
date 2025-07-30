@@ -27,7 +27,7 @@ import uk.gov.hmrc.alcoholdutycontactpreferences.controllers.actions.{Authorised
 import uk.gov.hmrc.alcoholdutycontactpreferences.models.{DecryptedUA, UserAnswers, UserDetails}
 import uk.gov.hmrc.alcoholdutycontactpreferences.repositories.{UpdateFailure, UpdateSuccess, UserAnswersRepository}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-import uk.gov.hmrc.play.bootstrap.backend.http.ErrorResponse
+import uk.gov.hmrc.play.bootstrap.http.ErrorResponse
 
 import java.time.Clock
 import scala.concurrent.{ExecutionContext, Future}

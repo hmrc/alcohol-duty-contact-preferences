@@ -35,11 +35,35 @@ trait TestData extends ModelGenerators {
   val userDetails: UserDetails = UserDetails(appaId, userId)
   val credId: String           = "TESTCREDID00000"
 
-  val emailAddress                                                    = "john.doe@example.com"
+  val emailAddress          = "john.doe@example.com"
+  val correspondenceAddress = "Flat 123\n1 Example Road\nLondon\nAB1 2CD\nUnited Kingdom"
+
   val contactPreferencesEmailSelected: SubscriptionContactPreferences =
-    SubscriptionContactPreferences(true, Some(emailAddress), Some(true), Some(false))
+    SubscriptionContactPreferences(
+      paperlessReference = true,
+      emailAddress = Some(emailAddress),
+      emailVerificationFlag = Some(true),
+      bouncedEmailFlag = Some(false),
+      addressLine1 = Some("Flat 123"),
+      addressLine2 = Some("1 Example Road"),
+      addressLine3 = None,
+      addressLine4 = Some("London"),
+      postcode = Some("AB1 2CD"),
+      country = Some("United Kingdom")
+    )
   val contactPreferencesPostNoEmail: SubscriptionContactPreferences   =
-    SubscriptionContactPreferences(false, None, None, None)
+    SubscriptionContactPreferences(
+      paperlessReference = false,
+      emailAddress = None,
+      emailVerificationFlag = None,
+      bouncedEmailFlag = None,
+      addressLine1 = Some("Flat 123"),
+      addressLine2 = Some("1 Example Road"),
+      addressLine3 = None,
+      addressLine4 = Some("London"),
+      postcode = Some("AB1 2CD"),
+      country = Some("United Kingdom")
+    )
 
   val userAnswers: UserAnswers = UserAnswers(
     appaId = appaId,
@@ -48,7 +72,8 @@ trait TestData extends ModelGenerators {
       paperlessReference = true,
       emailAddress = Some(SensitiveString(emailAddress)),
       emailVerification = Some(true),
-      bouncedEmail = Some(false)
+      bouncedEmail = Some(false),
+      correspondenceAddress = SensitiveString(correspondenceAddress)
     ),
     emailAddress = Some(SensitiveString(emailAddress)),
     verifiedEmailAddresses = Set(SensitiveString(emailAddress)),
@@ -64,7 +89,8 @@ trait TestData extends ModelGenerators {
       paperlessReference = true,
       emailAddress = Some(emailAddress),
       emailVerification = Some(true),
-      bouncedEmail = Some(false)
+      bouncedEmail = Some(false),
+      correspondenceAddress = correspondenceAddress
     ),
     emailAddress = Some(emailAddress),
     verifiedEmailAddresses = Set(emailAddress),
@@ -80,7 +106,8 @@ trait TestData extends ModelGenerators {
       paperlessReference = true,
       emailAddress = Some(SensitiveString(emailAddress)),
       emailVerification = Some(true),
-      bouncedEmail = Some(false)
+      bouncedEmail = Some(false),
+      correspondenceAddress = SensitiveString(correspondenceAddress)
     ),
     emailAddress = None,
     verifiedEmailAddresses = Set(SensitiveString(emailAddress)),
@@ -95,7 +122,8 @@ trait TestData extends ModelGenerators {
       paperlessReference = false,
       emailAddress = None,
       emailVerification = None,
-      bouncedEmail = None
+      bouncedEmail = None,
+      correspondenceAddress = SensitiveString(correspondenceAddress)
     ),
     emailAddress = None,
     verifiedEmailAddresses = Set.empty,

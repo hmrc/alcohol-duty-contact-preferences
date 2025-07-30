@@ -48,7 +48,8 @@ object DecryptedUA {
         userAnswers.subscriptionSummary.paperlessReference,
         userAnswers.subscriptionSummary.emailAddress.map(_.decryptedValue),
         userAnswers.subscriptionSummary.emailVerification,
-        userAnswers.subscriptionSummary.bouncedEmail
+        userAnswers.subscriptionSummary.bouncedEmail,
+        userAnswers.subscriptionSummary.correspondenceAddress.decryptedValue
       ),
       emailAddress = userAnswers.emailAddress.map(_.decryptedValue),
       verifiedEmailAddresses = userAnswers.verifiedEmailAddresses.map(_.decryptedValue),
@@ -124,7 +125,16 @@ object UserAnswers {
     clock: Clock
   ): UserAnswers = {
     val existingEmail: Option[SensitiveString] = contactPreferences.emailAddress.map(SensitiveString)
-    val hasVerifiedEmail: Boolean              = existingEmail.nonEmpty && contactPreferences.emailVerification.contains(true)
+    val hasVerifiedEmail: Boolean              = existingEmail.nonEmpty && contactPreferences.emailVerificationFlag.contains(true)
+
+    val correspondenceAddress: String = Seq(
+      contactPreferences.addressLine1,
+      contactPreferences.addressLine2,
+      contactPreferences.addressLine3,
+      contactPreferences.addressLine4,
+      contactPreferences.postcode,
+      contactPreferences.country
+    ).flatten.mkString("\n")
 
     UserAnswers(
       appaId = userDetails.appaId,
@@ -132,8 +142,9 @@ object UserAnswers {
       subscriptionSummary = SubscriptionSummaryBackend(
         contactPreferences.paperlessReference,
         existingEmail,
-        contactPreferences.emailVerification,
-        contactPreferences.bouncedEmail
+        contactPreferences.emailVerificationFlag,
+        contactPreferences.bouncedEmailFlag,
+        SensitiveString(correspondenceAddress)
       ),
       emailAddress = None,
       verifiedEmailAddresses = if (hasVerifiedEmail) existingEmail.toSet else Set.empty[SensitiveString],
@@ -150,7 +161,8 @@ object UserAnswers {
         decryptedUA.subscriptionSummary.paperlessReference,
         decryptedUA.subscriptionSummary.emailAddress.map(SensitiveString),
         decryptedUA.subscriptionSummary.emailVerification,
-        decryptedUA.subscriptionSummary.bouncedEmail
+        decryptedUA.subscriptionSummary.bouncedEmail,
+        SensitiveString(decryptedUA.subscriptionSummary.correspondenceAddress)
       ),
       emailAddress = decryptedUA.emailAddress.map(SensitiveString),
       verifiedEmailAddresses = decryptedUA.verifiedEmailAddresses.map(SensitiveString),
@@ -181,7 +193,8 @@ case class SubscriptionSummary(
   paperlessReference: Boolean,
   emailAddress: Option[String],
   emailVerification: Option[Boolean],
-  bouncedEmail: Option[Boolean]
+  bouncedEmail: Option[Boolean],
+  correspondenceAddress: String
 )
 
 object SubscriptionSummary {
@@ -192,7 +205,8 @@ case class SubscriptionSummaryBackend(
   paperlessReference: Boolean,
   emailAddress: Option[SensitiveString],
   emailVerification: Option[Boolean],
-  bouncedEmail: Option[Boolean]
+  bouncedEmail: Option[Boolean],
+  correspondenceAddress: SensitiveString
 )
 
 object SubscriptionSummaryBackend {
@@ -202,7 +216,8 @@ object SubscriptionSummaryBackend {
       (__ \ "paperlessReference").format[Boolean] and
         (__ \ "emailAddress").formatNullable[SensitiveString] and
         (__ \ "emailVerification").formatNullable[Boolean] and
-        (__ \ "bouncedEmail").formatNullable[Boolean]
+        (__ \ "bouncedEmail").formatNullable[Boolean] and
+        (__ \ "correspondenceAddress").format[SensitiveString]
     )(SubscriptionSummaryBackend.apply, unlift(SubscriptionSummaryBackend.unapply))
 
   implicit def sensitiveStringFormat(implicit crypto: Encrypter with Decrypter): Format[SensitiveString] =
