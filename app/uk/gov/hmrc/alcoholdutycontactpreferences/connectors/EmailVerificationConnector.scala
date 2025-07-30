@@ -23,7 +23,7 @@ import uk.gov.hmrc.alcoholdutycontactpreferences.config.AppConfig
 import uk.gov.hmrc.alcoholdutycontactpreferences.models.GetVerificationStatusResponse
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.play.bootstrap.backend.http.ErrorResponse
+import uk.gov.hmrc.play.bootstrap.http.ErrorResponse
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}

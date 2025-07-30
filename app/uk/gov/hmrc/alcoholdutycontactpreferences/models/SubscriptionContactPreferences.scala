@@ -29,8 +29,14 @@ object SubscriptionSummarySuccess {
 final case class SubscriptionContactPreferences(
   paperlessReference: Boolean,
   emailAddress: Option[String],
-  emailVerification: Option[Boolean],
-  bouncedEmail: Option[Boolean]
+  emailVerificationFlag: Option[Boolean],
+  bouncedEmailFlag: Option[Boolean],
+  addressLine1: Option[String],
+  addressLine2: Option[String],
+  addressLine3: Option[String],
+  addressLine4: Option[String],
+  postcode: Option[String],
+  country: Option[String]
 )
 
 object SubscriptionContactPreferences {

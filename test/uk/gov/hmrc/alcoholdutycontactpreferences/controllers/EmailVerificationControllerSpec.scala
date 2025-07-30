@@ -23,7 +23,7 @@ import play.api.libs.json.Json
 import play.api.mvc.Result
 import uk.gov.hmrc.alcoholdutycontactpreferences.base.SpecBase
 import uk.gov.hmrc.alcoholdutycontactpreferences.connectors.EmailVerificationConnector
-import uk.gov.hmrc.play.bootstrap.backend.http.ErrorResponse
+import uk.gov.hmrc.play.bootstrap.http.ErrorResponse
 
 import scala.concurrent.Future
 

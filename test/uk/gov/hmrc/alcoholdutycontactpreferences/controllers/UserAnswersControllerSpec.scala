@@ -24,7 +24,7 @@ import play.api.mvc.Result
 import uk.gov.hmrc.alcoholdutycontactpreferences.base.SpecBase
 import uk.gov.hmrc.alcoholdutycontactpreferences.connectors.SubscriptionConnector
 import uk.gov.hmrc.alcoholdutycontactpreferences.repositories.{UpdateFailure, UpdateSuccess, UserAnswersRepository}
-import uk.gov.hmrc.play.bootstrap.backend.http.ErrorResponse
+import uk.gov.hmrc.play.bootstrap.http.ErrorResponse
 
 import scala.concurrent.Future
 
