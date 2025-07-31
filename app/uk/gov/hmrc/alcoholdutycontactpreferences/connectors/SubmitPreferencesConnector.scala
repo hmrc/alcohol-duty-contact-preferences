@@ -74,26 +74,22 @@ class SubmitPreferencesConnector @Inject() (
               case Success(submissionResponse) =>
                 logger.info(s"Contact preferences submitted successfully for appaId $appaId")
                 Future.successful(Right(submissionResponse.success))
-              case Failure(e)                  =>
-                logger.warn(s"Parsing failed for submission response for appaId $appaId", e)
+              case Failure(_)                  =>
+                logger.warn(s"Parsing failed for submission response for appaId $appaId")
                 Future.successful(Left(ErrorCodes.unexpectedResponse))
             }
           case response if response.status == BAD_REQUEST          =>
-            logger.warn(
-              s"Bad request returned for contact preference submission for appaId $appaId: ${response.body}"
-            )
+            logger.warn(s"Bad request returned for contact preference submission for appaId $appaId")
             Future.successful(Left(ErrorCodes.badRequest))
           case response if response.status == NOT_FOUND            =>
             logger.warn(s"Not found returned for contact preference submission for appaId $appaId")
             Future.successful(Left(ErrorCodes.entityNotFound))
           case response if response.status == UNPROCESSABLE_ENTITY =>
-            logger.warn(
-              s"Unprocessable entity returned for contact preference submission for appaId $appaId: ${response.body}"
-            )
+            logger.warn(s"Unprocessable entity returned for contact preference submission for appaId $appaId")
             Future.successful(Left(ErrorCodes.invalidJson))
           case response                                            =>
             logger.warn(
-              s"Received unexpected response from contact preference submission API (appaId $appaId). Status: ${response.status}, Body: ${response.body}"
+              s"Received unexpected response from contact preference submission API (appaId $appaId). Status: ${response.status}"
             )
             Future.failed(new InternalServerException(response.body))
         }
