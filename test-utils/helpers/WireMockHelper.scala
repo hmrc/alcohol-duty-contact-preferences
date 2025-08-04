@@ -18,7 +18,7 @@ package helpers
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, getRequestedFor, postRequestedFor, urlEqualTo}
+import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, getRequestedFor, postRequestedFor, putRequestedFor, urlEqualTo}
 import com.github.tomakehurst.wiremock.http.Fault
 import com.github.tomakehurst.wiremock.matching.{EqualToJsonPattern, EqualToPattern}
 
@@ -35,6 +35,17 @@ trait WireMockHelper {
         Seq(
           s"$endpointConfigurationPath.$endpointName.host" -> wireMockHost,
           s"$endpointConfigurationPath.$endpointName.port" -> wireMockPort
+        )
+      )
+      .toMap
+
+  protected def getWireMockAppConfigWithRetry(endpointNames: Seq[String]): Map[String, Any] =
+    endpointNames
+      .flatMap(endpointName =>
+        Seq(
+          s"$endpointConfigurationPath.$endpointName.host"   -> wireMockHost,
+          s"$endpointConfigurationPath.$endpointName.port"   -> wireMockPort,
+          s"$endpointConfigurationPath.retry.retry-attempts" -> 1
         )
       )
       .toMap
@@ -90,6 +101,14 @@ trait WireMockHelper {
         .willReturn(aResponse().withStatus(status).withBody(returnBody))
     )
 
+  def stubPut(url: String, status: Int, requestBody: String, returnBody: String): Unit =
+    wireMockServer.stubFor(
+      WireMock
+        .put(urlEqualTo(stripToPath(url)))
+        .withRequestBody(new EqualToJsonPattern(requestBody, true, false))
+        .willReturn(aResponse().withStatus(status).withBody(returnBody))
+    )
+
   def verifyGet(url: String): Unit =
     wireMockServer.verify(getRequestedFor(urlEqualTo(stripToPath(url))))
 
@@ -108,6 +127,21 @@ trait WireMockHelper {
     wireMockServer.verify(requestPatternWithHeaders)
   }
 
+  def verifyGetWithoutRetry(url: String): Unit =
+    wireMockServer.verify(1, getRequestedFor(urlEqualTo(stripToPath(url))))
+
+  def verifyGetWithRetry(url: String): Unit =
+    wireMockServer.verify(2, getRequestedFor(urlEqualTo(stripToPath(url))))
+
   def verifyPost(url: String): Unit =
     wireMockServer.verify(postRequestedFor(urlEqualTo(stripToPath(url))))
+
+  def verifyPut(url: String): Unit =
+    wireMockServer.verify(putRequestedFor(urlEqualTo(stripToPath(url))))
+
+  def verifyPutWithoutRetry(url: String): Unit =
+    wireMockServer.verify(1, putRequestedFor(urlEqualTo(stripToPath(url))))
+
+  def verifyPutWithRetry(url: String): Unit =
+    wireMockServer.verify(2, putRequestedFor(urlEqualTo(stripToPath(url))))
 }

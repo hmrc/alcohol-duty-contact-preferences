@@ -156,6 +156,16 @@ trait TestData extends ModelGenerators {
     )
   )
 
+  val contactPreferenceSubmissionEmail = PaperlessPreferenceSubmission(
+    paperlessPreference = true,
+    emailAddress = Some(emailAddress),
+    emailVerification = Some(true),
+    bouncedEmail = Some(false)
+  )
+
+  val testSubmissionResponse = PaperlessPreferenceSubmittedResponse(Instant.now(clock), "910000000000")
+  val testSubmissionSuccess  = PaperlessPreferenceSubmittedSuccess(testSubmissionResponse)
+
   case class DownstreamErrorDetails(code: String, message: String, logID: String)
 
   object DownstreamErrorDetails {
@@ -163,5 +173,6 @@ trait TestData extends ModelGenerators {
   }
 
   val badRequest          = DownstreamErrorDetails("400", "You messed up", "id")
+  val unprocessable       = DownstreamErrorDetails("422", "Unprocessable", "id")
   val internalServerError = DownstreamErrorDetails("500", "Computer says No!", "id")
 }

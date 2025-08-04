@@ -31,6 +31,12 @@ class SpecBaseWithConfigOverrides extends SpecBase {
     "microservice.services.email-verification.host"                  -> "emailverificationhost",
     "microservice.services.email-verification.port"                  -> 12345,
     "microservice.services.email-verification.url.getVerifiedEmails" -> "/email-verification/verification-status",
+    "microservice.services.submit-preferences.protocol"              -> "http",
+    "microservice.services.submit-preferences.host"                  -> "submissionhost",
+    "microservice.services.submit-preferences.port"                  -> 12345,
+    "microservice.services.submit-preferences.clientId"              -> "submission clientId",
+    "microservice.services.submit-preferences.secret"                -> "submission secret",
+    "microservice.services.submit-preferences.url.submitPreferences" -> "/etmp/RESTAdapter/excise/emailcontactpreference",
     "downstream-apis.idType"                                         -> "ZAD",
     "downstream-apis.regime"                                         -> "AD",
     "crypto.key"                                                     -> "cryptokey",
@@ -77,6 +83,22 @@ class AppConfigSpec extends SpecBaseWithConfigOverrides {
         appConfig.getVerifiedEmailsUrl(
           credId
         ) mustBe s"http://emailverificationhost:12345/email-verification/verification-status/$credId"
+      }
+    }
+
+    "for contact preference submission" - {
+      "must return the submitContactPreferences url" in {
+        appConfig.submitPreferencesUrl(
+          appaId
+        ) mustBe s"http://submissionhost:12345/etmp/RESTAdapter/excise/emailcontactpreference/AD/ZAD/$appaId"
+      }
+
+      "must return the client id" in {
+        appConfig.submitPreferencesClientId mustBe "submission clientId"
+      }
+
+      "must return the secret" in {
+        appConfig.submitPreferencesSecret mustBe "submission secret"
       }
     }
 
