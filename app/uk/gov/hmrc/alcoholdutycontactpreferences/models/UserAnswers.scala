@@ -125,7 +125,8 @@ object UserAnswers {
     clock: Clock
   ): UserAnswers = {
     val existingEmail: Option[SensitiveString] = contactPreferences.emailAddress.map(SensitiveString)
-    val hasVerifiedEmail: Boolean              = existingEmail.nonEmpty && contactPreferences.emailVerificationFlag.contains(true)
+    val hasVerifiedAndValidEmail: Boolean      = existingEmail.nonEmpty &&
+      contactPreferences.emailVerificationFlag.contains(true) && !contactPreferences.bouncedEmailFlag.contains(true)
 
     val correspondenceAddress: String = Seq(
       contactPreferences.addressLine1,
@@ -147,7 +148,7 @@ object UserAnswers {
         SensitiveString(correspondenceAddress)
       ),
       emailAddress = None,
-      verifiedEmailAddresses = if (hasVerifiedEmail) existingEmail.toSet else Set.empty[SensitiveString],
+      verifiedEmailAddresses = if (hasVerifiedAndValidEmail) existingEmail.toSet else Set.empty[SensitiveString],
       startedTime = Instant.now(clock),
       lastUpdated = Instant.now(clock)
     )
