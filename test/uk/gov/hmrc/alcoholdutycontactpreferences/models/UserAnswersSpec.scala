@@ -111,6 +111,15 @@ class UserAnswersSpec extends SpecBase {
       createdUserAnswers mustBe emptyUserAnswersNoEmail
     }
 
+    "create a UserAnswers from components when the email in the system has bounced" in {
+      val createdUserAnswers = UserAnswers.createUserAnswers(
+        userDetails,
+        contactPreferencesEmailSelected.copy(paperlessReference = false, bouncedEmailFlag = Some(true)),
+        clock
+      )
+      createdUserAnswers mustBe emptyUserAnswersBouncedEmail
+    }
+
     "convert a DecryptedUA to a UserAnswers" in {
       UserAnswers.fromDecryptedUA(decryptedUA) mustBe userAnswers
     }

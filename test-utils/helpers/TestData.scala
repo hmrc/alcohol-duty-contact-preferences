@@ -131,6 +131,22 @@ trait TestData extends ModelGenerators {
     lastUpdated = Instant.now(clock)
   )
 
+  val emptyUserAnswersBouncedEmail: UserAnswers = UserAnswers(
+    appaId = appaId,
+    userId = userId,
+    subscriptionSummary = SubscriptionSummaryBackend(
+      paperlessReference = false,
+      emailAddress = Some(SensitiveString(emailAddress)),
+      emailVerification = Some(true),
+      bouncedEmail = Some(true),
+      correspondenceAddress = SensitiveString(correspondenceAddress)
+    ),
+    emailAddress = None,
+    verifiedEmailAddresses = Set.empty,
+    startedTime = Instant.now(clock),
+    lastUpdated = Instant.now(clock)
+  )
+
   val getVerificationStatusResponse = GetVerificationStatusResponse(
     List(
       GetVerificationStatusResponseEmailAddressDetails(
