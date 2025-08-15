@@ -19,9 +19,6 @@ package uk.gov.hmrc.alcoholdutycontactpreferences.services
 import cats.data.EitherT
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
-import play.api.http.Status.BAD_REQUEST
-import play.api.libs.json.Json
-import play.api.mvc.Result
 import uk.gov.hmrc.alcoholdutycontactpreferences.base.SpecBase
 import uk.gov.hmrc.alcoholdutycontactpreferences.connectors.SubmitPreferencesConnector
 import uk.gov.hmrc.alcoholdutycontactpreferences.models.{ErrorCodes, PaperlessPreferenceSubmittedResponse}

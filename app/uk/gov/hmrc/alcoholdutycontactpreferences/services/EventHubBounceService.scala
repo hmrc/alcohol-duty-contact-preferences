@@ -19,7 +19,6 @@ package uk.gov.hmrc.alcoholdutycontactpreferences.services
 import cats.data.EitherT
 import play.api.Logging
 import play.api.http.Status.BAD_REQUEST
-import play.api.mvc.ControllerComponents
 import uk.gov.hmrc.alcoholdutycontactpreferences.config.AppConfig
 import uk.gov.hmrc.alcoholdutycontactpreferences.connectors.SubmitPreferencesConnector
 import uk.gov.hmrc.alcoholdutycontactpreferences.models.{EventDetails, PaperlessPreferenceSubmission, PaperlessPreferenceSubmittedResponse}
