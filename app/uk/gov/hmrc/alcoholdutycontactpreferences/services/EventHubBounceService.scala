@@ -30,7 +30,6 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class EventHubBounceService @Inject() (
-  cc: ControllerComponents,
   submitPreferencesConnector: SubmitPreferencesConnector,
   appConfig: AppConfig
 )(implicit ec: ExecutionContext)

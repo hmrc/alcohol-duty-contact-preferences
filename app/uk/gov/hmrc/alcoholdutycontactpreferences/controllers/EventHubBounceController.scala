@@ -47,11 +47,13 @@ class EventHubBounceController @Inject() (
           )
           eventHubBounceService.handleBouncedEmail(event.event).value.map {
             case Right(submissionResponse) =>
-              logger.info("Successfully updated contact preferences.")
+              logger.info("Successfully updated contact preferences for bounced email event.")
               Ok(Json.toJson(submissionResponse))
             case Left(error)               =>
-              logger.warn(s"Error updating contact preferences. eventID: ${event.eventId}, status: ${error.statusCode}")
-              Status(error.statusCode)("Error updating contact preferences")
+              logger.warn(
+                s"Error updating contact preferences for bounced email event. eventID: ${event.eventId}, status: ${error.statusCode}"
+              )
+              Status(error.statusCode)("Error updating contact preferences for bounced email event")
           }
         }
       )

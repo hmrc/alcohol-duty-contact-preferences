@@ -1,8 +1,7 @@
 # Handle Bounced Email
 
-This endpoint is be used by Event Hub in the instance that an email sent out has bounced. When this happens, we tell
-ETMP that this has happened by submitting an update to the user's contact preferences with the bounced email indicator
-set to true.
+This endpoint is used by Event Hub in the instance that an email to an alcohol producer has bounced. When this happens,
+we update the user's contact preference in ETMP to post, with the bounced email indicator set to true.
 
 **URL**: `/alcohol-duty-contact-preferences/event-hub/bounce`
 
@@ -13,7 +12,7 @@ set to true.
 | Field Name         | Description                                         | Data Type    | Mandatory/Optional | Notes                                   |
 |--------------------|-----------------------------------------------------|--------------|--------------------|-----------------------------------------|
 | eventId            | The event id                                        | UUID         | Mandatory          |                                         |
-| subject            | The event subject                                   | String       | Mandatory          |                                         |
+| subject            | The event subject                                   | String       | Mandatory          | Non-empty string                        |
 | groupId            | The group id                                        | String       | Mandatory          |                                         |
 | timestamp          | The timestamp for this event instance               | Timestamp    | Mandatory          | e.g. 2021-07-01T13:09:29Z               |
 | event              | Object containing event details                     | EventDetails | Mandatory          |                                         |
