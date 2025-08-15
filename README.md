@@ -9,6 +9,10 @@ This is the backend microservice to capture an alcohol producer's communication 
 - [Set User Answers](api-docs/setUserAnswers): `PUT /alcohol-duty-contact-preferences/user-answers`
 - [Get Email Verification Status](https://github.com/hmrc/email-verification?tab=readme-ov-file#get-verification-status):
   `GET /alcohol-duty-contact-preferences/get-email-verification/:credId` (link to email-verification README)
+- [Submit Contact Preferences](api-docs/submitContactPreferences.md):
+  `PUT /alcohol-duty-contact-preferences/submit-preferences/:appaId`
+- [Handle Bounced Email](api-docs/handleBouncedEmail.md):
+  `POST /alcohol-duty-contact-preferences/event-hub/bounce`
 
 ## Running the service
 
@@ -26,70 +30,27 @@ To run the service with test only routes enabled:
 This endpoint clears all user answers data in the repository.
 > `DELETE /alcohol-duty-contact-preferences/test-only/user-answers/clear-all`
 
-### Event hub bounced email endpoint
+## Testing the event hub bounced email endpoint
 
-This is a test only endpoint used for checking that we can successfully integrate with Event Hub in the local environment.
-In future, this endpoint will be used by Event Hub in the instance that an email sent out has bounced. When this happens
-we will tell ETMP that this has happened. At the moment this functionality has not been implemented, but will be during
-the development of the ECP microservice.
+To test this endpoint, you need this service running locally and the event hub running in service manager with the
+correct config. You can start all ADR microservices, then stop this microservice as follows:
+> `sm2 --start ALCOHOL_DUTY_CONTACT_PREFERENCES_ALL`
+> `sm2 --stop ALCOHOL_DUTY_CONTACT_PREFERENCES`
 
-The endpoint route is:
-> `POST /alcohol-duty-contact-preferences/test-only/event-hub/bounce`
-
-For it to work you need this service running with test only routes enabled 
-and all the event hub running service manager with the correct config.
-This can be added alongside all ADR microservices via:
-> `sm2 --start ALCOHOL_DUTY_ALL`
-
-or independently with:
+Event hub can be started independently with:
 > `sm2 --start EVENT_HUB_FOR_ADR`
 
-An example request, via an API client like Bruno, to Event Hub, to hit this endpoint is:
-
-```
-curl -v -X POST -H "Content-Type: application/json" http://localhost:9050/event-hub/publish/email -d '
-{
-    "eventId": "623b6f96-d36f-4014-8874-7f3f8287f9e6", 
-    "subject": "calling", 
-    "groupId": "su users",
-    "timestamp": "2021-07-01T13:09:29Z",
-    "event" : {
-        "event": "failed",
-        "emailAddress": "hmrc-customer@some-domain.org",
-        "detected": "2021-04-07T09:46:29+00:00",
-        "code": 605,
-        "reason": "Not delivering to previously bounced address",
-        "enrolment": "HMRC-AD-ORG~APPAID~XMADP0000100208"
-    }
-}'
-```
-
-to hit this endpoint directly, without going through event hub you can use this request:
-
-```
-curl -v -X POST -H "Content-Type: application/json" http://localhost:16006/alcohol-duty-contact-preferences/test-only/event-hub/bounce -d '
-{
-    "eventId": "550e8400-e29b-41d4-a716-446655440000",
-    "subject": "testSubject",
-    "groupId": "testGroupId",
-    "timestamp": "2021-07-01T13:09:29",
-    "event": {
-        "event":"failed",
-        "emailAddress":"hmrc-customer@some-domain.org",
-        "detected":"2021-04-07T09:46:29+00:00",
-        "code":605,
-        "reason":"Not delivering to previously bounced address",
-        "enrolment":"HMRC-AD-ORG~APPAID~XMADP0000100208"
-    }
-}'
-```
+For an example request, via an API client like Bruno, to Event Hub, see
+the [readme for this endpoint](api-docs/handleBouncedEmail.md).
 
 ## Running tests
 
 ### Unit tests
+
 > `sbt test`
 
 ### Integration tests
+
 > `sbt it/test`
 
 ## Scalafmt and Scalastyle
@@ -104,6 +65,7 @@ To check if there are any scalastyle errors, warnings or infos:
 > `sbt scalastyle`
 
 ### All tests and checks
+
 This is an sbt command alias specific to this project. It will run a scala format
 check, run a scala style check, run unit tests, run integration tests and produce a coverage report:
 > `sbt runAllChecks`

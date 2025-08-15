@@ -33,25 +33,29 @@ returned.
 
 **Response Body**
 
-The response body returns the user answers entry if set up which relates to the contact preference details for a specific appaId.
+The response body returns the user answers entry if set up which relates to the contact preference details for a
+specific appaId.
 
-The data section contains the actual user answers. The content will depend on the specific questions answered and will not be documented in detail here.
+The data section contains the actual user answers. The content will depend on the specific questions answered and will
+not be documented in detail here.
 
-| Field Name                             | Description                                                       | Data Type           | Mandatory/Optional | Notes                          |
-|----------------------------------------|-------------------------------------------------------------------|---------------------|--------------------|--------------------------------|
-| appaId                                 | The appaId                                                        | String              | Mandatory          |                                |
-| userId                                 | The user's id                                                     | String              | Mandatory          |                                |
-| subscriptionSummary                    | The user's existing contact preferences from the subscription API | SubscriptionSummary | Mandatory          |                                |
-| subscriptionSummary.paperlessReference | Whether the user is currently on email                            | Boolean             | Mandatory          |                                |
-| subscriptionSummary.emailAddress       | The user's existing email address in ETMP                         | String              | Optional           | Encrypted in the backend       |
-| subscriptionSummary.emailVerification  | Whether the user's existing email address is verified             | Boolean             | Optional           |                                |
-| subscriptionSummary.bouncedEmail       | Whether emails to the user's existing email address have bounced  | Boolean             | Optional           |                                |
-| emailAddress                           | The email address submitted by the user                           | String              | Optional           | Encrypted in the backend       |
-| verifiedEmailAddresses                 | The email addresses that are already verified for the user        | Set(String)         | Mandatory          | Encrypted in the backend       | 
-| data                                   | The user answers data                                             | Object              | Mandatory          | 'Free form'                    |
-| startedTime                            | The timestamp of the creation of the user answers                 | Timestamp           | Mandatory          | value inside $date.$numberLong |
-| lastUpdated                            | The timestamp of the last update                                  | Timestamp           | Mandatory          | value inside $date.$numberLong |
-| validUntil                             | The timestamp of the validity expiry                              | Timestamp           | Mandatory          | value inside $date.$numberLong |
+| Field Name                                | Description                                                       | Data Type           | Mandatory/Optional | Notes                          |
+|-------------------------------------------|-------------------------------------------------------------------|---------------------|--------------------|--------------------------------|
+| appaId                                    | The appaId                                                        | String              | Mandatory          |                                |
+| userId                                    | The user's id                                                     | String              | Mandatory          |                                |
+| subscriptionSummary                       | The user's existing contact preferences from the subscription API | SubscriptionSummary | Mandatory          |                                |
+| subscriptionSummary.paperlessReference    | Whether the user is currently on email                            | Boolean             | Mandatory          |                                |
+| subscriptionSummary.emailAddress          | The user's existing email address in ETMP                         | String              | Optional           | Encrypted in the backend       |
+| subscriptionSummary.emailVerification     | Whether the user's existing email address is verified             | Boolean             | Optional           |                                |
+| subscriptionSummary.bouncedEmail          | Whether emails to the user's existing email address have bounced  | Boolean             | Optional           |                                |
+| subscriptionSummary.correspondenceAddress | The user's correspondence address (lines 1-4 and postcode)        | String              | Mandatory          |                                |
+| subscriptionSummary.countryCode           | The country code of the user's correspondence address             | String              | Optional           |                                |
+| emailAddress                              | The email address submitted by the user                           | String              | Optional           | Encrypted in the backend       |
+| verifiedEmailAddresses                    | The email addresses that are already verified for the user        | Set(String)         | Mandatory          | Encrypted in the backend       | 
+| data                                      | The user answers data                                             | Object              | Mandatory          | 'Free form'                    |
+| startedTime                               | The timestamp of the creation of the user answers                 | Timestamp           | Mandatory          | value inside $date.$numberLong |
+| lastUpdated                               | The timestamp of the last update                                  | Timestamp           | Mandatory          | value inside $date.$numberLong |
+| validUntil                                | The timestamp of the validity expiry                              | Timestamp           | Mandatory          | value inside $date.$numberLong |
 
 **Response Body Examples**
 
@@ -63,7 +67,9 @@ The data section contains the actual user answers. The content will depend on th
     "paperlessReference": false,
     "emailAddress": "john.doe@example.com",
     "emailVerification": true,
-    "bouncedEmail": false
+    "bouncedEmail": false,
+    "correspondenceAddress": "Flat 123\n1 Example Road\nLondon\nAB1 2CD",
+    "countryCode": "GB"
   },
   "emailAddress": "jane.doe@example.com",
   "verifiedEmailAddresses": [
@@ -91,7 +97,7 @@ The data section contains the actual user answers. The content will depend on th
 }
 ```
 
-### Responses
+### Error responses
 
 **Code**: `401 UNAUTHORIZED`
 This response can occur when a call is made by any consumer without an authorized session that has an ADR enrolment.
