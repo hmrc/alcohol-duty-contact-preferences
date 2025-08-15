@@ -14,27 +14,46 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.alcoholdutycontactpreferences.testOnly.models
+package uk.gov.hmrc.alcoholdutycontactpreferences.models
 
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.Reads.verifying
 import play.api.libs.json._
 
-import java.time.LocalDateTime
+import java.time.{Instant, LocalDateTime}
 import java.util.UUID
 
-final case class Event(eventId: UUID, subject: String, groupId: String, timestamp: LocalDateTime, event: JsValue)
+case class EmailBouncedEvent(
+  eventId: UUID,
+  subject: String,
+  groupId: String,
+  timestamp: LocalDateTime,
+  event: EventDetails
+)
 
-object Event {
+object EmailBouncedEvent {
 
-  implicit val requestDetailReads: Reads[Event] = (
+  implicit val eventReads: Reads[EmailBouncedEvent] = (
     (JsPath \ "eventId").read[UUID] and
       (JsPath \ "subject").read[String](verifying[String](a => a.trim.nonEmpty)) and
       (JsPath \ "groupId").read[String] and
       (JsPath \ "timestamp").read[LocalDateTime] and
-      (JsPath \ "event").read[JsValue]
-  )(Event.apply _)
+      (JsPath \ "event").read[EventDetails]
+  )(EmailBouncedEvent.apply _)
 
-  implicit val eventWrites: Writes[Event] = Json.writes[Event]
+  implicit val eventWrites: Writes[EmailBouncedEvent] = Json.writes[EmailBouncedEvent]
 
+}
+
+case class EventDetails(
+  event: String,
+  emailAddress: String,
+  detected: Instant,
+  code: Int,
+  reason: String,
+  enrolment: String
+)
+
+object EventDetails {
+  implicit val returnAndUserDetailsFormat: OFormat[EventDetails] = Json.format[EventDetails]
 }
