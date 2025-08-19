@@ -49,7 +49,8 @@ object DecryptedUA {
         userAnswers.subscriptionSummary.emailAddress.map(_.decryptedValue),
         userAnswers.subscriptionSummary.emailVerification,
         userAnswers.subscriptionSummary.bouncedEmail,
-        userAnswers.subscriptionSummary.correspondenceAddress.decryptedValue
+        userAnswers.subscriptionSummary.correspondenceAddress.decryptedValue,
+        userAnswers.subscriptionSummary.countryCode.map(_.decryptedValue)
       ),
       emailAddress = userAnswers.emailAddress.map(_.decryptedValue),
       verifiedEmailAddresses = userAnswers.verifiedEmailAddresses.map(_.decryptedValue),
@@ -133,8 +134,7 @@ object UserAnswers {
       contactPreferences.addressLine2,
       contactPreferences.addressLine3,
       contactPreferences.addressLine4,
-      contactPreferences.postcode,
-      contactPreferences.country
+      contactPreferences.postcode
     ).flatten.mkString("\n")
 
     UserAnswers(
@@ -145,7 +145,8 @@ object UserAnswers {
         existingEmail,
         contactPreferences.emailVerificationFlag,
         contactPreferences.bouncedEmailFlag,
-        SensitiveString(correspondenceAddress)
+        SensitiveString(correspondenceAddress),
+        contactPreferences.country.map(SensitiveString)
       ),
       emailAddress = None,
       verifiedEmailAddresses = if (hasVerifiedAndValidEmail) existingEmail.toSet else Set.empty[SensitiveString],
@@ -163,7 +164,8 @@ object UserAnswers {
         decryptedUA.subscriptionSummary.emailAddress.map(SensitiveString),
         decryptedUA.subscriptionSummary.emailVerification,
         decryptedUA.subscriptionSummary.bouncedEmail,
-        SensitiveString(decryptedUA.subscriptionSummary.correspondenceAddress)
+        SensitiveString(decryptedUA.subscriptionSummary.correspondenceAddress),
+        decryptedUA.subscriptionSummary.countryCode.map(SensitiveString)
       ),
       emailAddress = decryptedUA.emailAddress.map(SensitiveString),
       verifiedEmailAddresses = decryptedUA.verifiedEmailAddresses.map(SensitiveString),
@@ -195,7 +197,8 @@ case class SubscriptionSummary(
   emailAddress: Option[String],
   emailVerification: Option[Boolean],
   bouncedEmail: Option[Boolean],
-  correspondenceAddress: String
+  correspondenceAddress: String,
+  countryCode: Option[String]
 )
 
 object SubscriptionSummary {
@@ -207,7 +210,8 @@ case class SubscriptionSummaryBackend(
   emailAddress: Option[SensitiveString],
   emailVerification: Option[Boolean],
   bouncedEmail: Option[Boolean],
-  correspondenceAddress: SensitiveString
+  correspondenceAddress: SensitiveString,
+  countryCode: Option[SensitiveString]
 )
 
 object SubscriptionSummaryBackend {
@@ -218,7 +222,8 @@ object SubscriptionSummaryBackend {
         (__ \ "emailAddress").formatNullable[SensitiveString] and
         (__ \ "emailVerification").formatNullable[Boolean] and
         (__ \ "bouncedEmail").formatNullable[Boolean] and
-        (__ \ "correspondenceAddress").format[SensitiveString]
+        (__ \ "correspondenceAddress").format[SensitiveString] and
+        (__ \ "countryCode").formatNullable[SensitiveString]
     )(SubscriptionSummaryBackend.apply, unlift(SubscriptionSummaryBackend.unapply))
 
   implicit def sensitiveStringFormat(implicit crypto: Encrypter with Decrypter): Format[SensitiveString] =
