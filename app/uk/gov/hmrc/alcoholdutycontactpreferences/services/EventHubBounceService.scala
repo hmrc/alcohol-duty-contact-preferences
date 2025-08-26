@@ -41,8 +41,8 @@ class EventHubBounceService @Inject() (
       case Right(appaId) =>
         val contactPreferenceSubmission = PaperlessPreferenceSubmission(
           paperlessPreference = false,
-          emailAddress = Some(eventDetails.emailAddress),
-          emailVerification = Some(true),
+          emailAddress = None,
+          emailVerification = None,
           bouncedEmail = Some(true)
         )
         submitPreferencesConnector.submitContactPreferences(contactPreferenceSubmission, appaId)

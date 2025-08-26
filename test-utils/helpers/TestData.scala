@@ -182,8 +182,8 @@ trait TestData extends ModelGenerators {
 
   val contactPreferenceSubmissionBouncedEmail = PaperlessPreferenceSubmission(
     paperlessPreference = false,
-    emailAddress = Some(emailAddress),
-    emailVerification = Some(true),
+    emailAddress = None,
+    emailVerification = None,
     bouncedEmail = Some(true)
   )
 
