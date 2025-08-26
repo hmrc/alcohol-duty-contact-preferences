@@ -36,7 +36,8 @@ trait TestData extends ModelGenerators {
   val credId: String           = "TESTCREDID00000"
 
   val emailAddress          = "john.doe@example.com"
-  val correspondenceAddress = "Flat 123\n1 Example Road\nLondon\nAB1 2CD\nUnited Kingdom"
+  val correspondenceAddress = "Flat 123\n1 Example Road\nLondon\nAB1 2CD"
+  val countryCode           = "GB"
 
   val contactPreferencesEmailSelected: SubscriptionContactPreferences =
     SubscriptionContactPreferences(
@@ -49,7 +50,7 @@ trait TestData extends ModelGenerators {
       addressLine3 = None,
       addressLine4 = Some("London"),
       postcode = Some("AB1 2CD"),
-      country = Some("United Kingdom")
+      country = Some(countryCode)
     )
   val contactPreferencesPostNoEmail: SubscriptionContactPreferences   =
     SubscriptionContactPreferences(
@@ -62,7 +63,7 @@ trait TestData extends ModelGenerators {
       addressLine3 = None,
       addressLine4 = Some("London"),
       postcode = Some("AB1 2CD"),
-      country = Some("United Kingdom")
+      country = Some(countryCode)
     )
 
   val userAnswers: UserAnswers = UserAnswers(
@@ -73,7 +74,8 @@ trait TestData extends ModelGenerators {
       emailAddress = Some(SensitiveString(emailAddress)),
       emailVerification = Some(true),
       bouncedEmail = Some(false),
-      correspondenceAddress = SensitiveString(correspondenceAddress)
+      correspondenceAddress = SensitiveString(correspondenceAddress),
+      countryCode = Some(SensitiveString(countryCode))
     ),
     emailAddress = Some(SensitiveString(emailAddress)),
     verifiedEmailAddresses = Set(SensitiveString(emailAddress)),
@@ -90,7 +92,8 @@ trait TestData extends ModelGenerators {
       emailAddress = Some(emailAddress),
       emailVerification = Some(true),
       bouncedEmail = Some(false),
-      correspondenceAddress = correspondenceAddress
+      correspondenceAddress = correspondenceAddress,
+      countryCode = Some(countryCode)
     ),
     emailAddress = Some(emailAddress),
     verifiedEmailAddresses = Set(emailAddress),
@@ -107,7 +110,8 @@ trait TestData extends ModelGenerators {
       emailAddress = Some(SensitiveString(emailAddress)),
       emailVerification = Some(true),
       bouncedEmail = Some(false),
-      correspondenceAddress = SensitiveString(correspondenceAddress)
+      correspondenceAddress = SensitiveString(correspondenceAddress),
+      countryCode = Some(SensitiveString(countryCode))
     ),
     emailAddress = None,
     verifiedEmailAddresses = Set(SensitiveString(emailAddress)),
@@ -123,7 +127,8 @@ trait TestData extends ModelGenerators {
       emailAddress = None,
       emailVerification = None,
       bouncedEmail = None,
-      correspondenceAddress = SensitiveString(correspondenceAddress)
+      correspondenceAddress = SensitiveString(correspondenceAddress),
+      countryCode = Some(SensitiveString(countryCode))
     ),
     emailAddress = None,
     verifiedEmailAddresses = Set.empty,
@@ -139,7 +144,8 @@ trait TestData extends ModelGenerators {
       emailAddress = Some(SensitiveString(emailAddress)),
       emailVerification = Some(true),
       bouncedEmail = Some(true),
-      correspondenceAddress = SensitiveString(correspondenceAddress)
+      correspondenceAddress = SensitiveString(correspondenceAddress),
+      countryCode = Some(SensitiveString(countryCode))
     ),
     emailAddress = None,
     verifiedEmailAddresses = Set.empty,
