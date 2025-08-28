@@ -22,6 +22,7 @@ import uk.gov.hmrc.alcoholdutycontactpreferences.models._
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 
 import java.time._
+import java.util.UUID
 
 trait TestData extends ModelGenerators {
   val clockMillis: Long = 1718118467838L
@@ -185,8 +186,32 @@ trait TestData extends ModelGenerators {
     bouncedEmail = Some(false)
   )
 
+  val contactPreferenceSubmissionBouncedEmail = PaperlessPreferenceSubmission(
+    paperlessPreference = false,
+    emailAddress = None,
+    emailVerification = None,
+    bouncedEmail = Some(true)
+  )
+
   val testSubmissionResponse = PaperlessPreferenceSubmittedResponse(Instant.now(clock), "910000000000")
   val testSubmissionSuccess  = PaperlessPreferenceSubmittedSuccess(testSubmissionResponse)
+
+  val emailBouncedEventDetails = EventDetails(
+    event = "failed",
+    emailAddress = emailAddress,
+    detected = Instant.now(clock),
+    code = 605,
+    reason = "Not delivering to previously bounced address",
+    enrolment = s"HMRC-AD-ORG~APPAID~$appaId"
+  )
+
+  val emailBouncedEvent = EmailBouncedEvent(
+    eventId = UUID.fromString(dummyUUID),
+    subject = "calling",
+    groupId = "su users",
+    timestamp = LocalDateTime.now(clock),
+    event = emailBouncedEventDetails
+  )
 
   case class DownstreamErrorDetails(code: String, message: String, logID: String)
 

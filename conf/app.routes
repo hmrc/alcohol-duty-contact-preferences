@@ -7,3 +7,5 @@ GET          /user-answers/:appaId               uk.gov.hmrc.alcoholdutycontactp
 GET          /get-email-verification/:credId     uk.gov.hmrc.alcoholdutycontactpreferences.controllers.EmailVerificationController.getEmailVerification(credId: String)
 
 PUT          /submit-preferences/:appaId         uk.gov.hmrc.alcoholdutycontactpreferences.controllers.SubmitPreferencesController.submitContactPreferences(appaId: String)
+
+POST         /event-hub/bounce                   uk.gov.hmrc.alcoholdutycontactpreferences.controllers.EventHubBounceController.handleBouncedEmail()
