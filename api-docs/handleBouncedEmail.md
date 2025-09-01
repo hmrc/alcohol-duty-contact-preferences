@@ -48,7 +48,7 @@ curl -v -X POST -H "Content-Type: application/json" http://localhost:9050/event-
 To hit this endpoint directly without going through Event Hub, you can use this request:
 
 ```
-curl -v -X POST -H "Content-Type: application/json" https://www.staging.tax.service.gov.uk/alcohol-duty-contact-preferences/event-hub/bounce -d '
+curl -v -X POST -H "Content-Type: application/json" http://localhost:16006/alcohol-duty-contact-preferences/event-hub/bounce -d '
 {
     "eventId": "550e8400-e29b-41d4-a716-446655440000",
     "subject": "testSubject",
