@@ -21,7 +21,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
 import uk.gov.hmrc.alcoholdutycontactpreferences.base.SpecBase
 import uk.gov.hmrc.alcoholdutycontactpreferences.connectors.SubmitPreferencesConnector
-import uk.gov.hmrc.alcoholdutycontactpreferences.models.{ErrorCodes, PaperlessPreferenceSubmittedResponse}
+import uk.gov.hmrc.alcoholdutycontactpreferences.models.{ErrorCodes, PaperlessPreferenceSubmittedResponse, Tags}
 import uk.gov.hmrc.play.bootstrap.http.ErrorResponse
 
 import scala.concurrent.Future
@@ -65,7 +65,8 @@ class EventHubBounceServiceSpec extends SpecBase {
       when(mockSubmitPreferencesConnector.submitContactPreferences(any(), any())(any()))
         .thenReturn(EitherT.rightT[Future, ErrorResponse](testSubmissionResponse))
 
-      val eventDetails = emailBouncedEventDetails.copy(enrolment = "invalid")
+      val eventTags    = Tags(Some("invalid"))
+      val eventDetails = emailBouncedEventDetails.copy(tags = Some(eventTags))
 
       whenReady(service.handleBouncedEmail(eventDetails).value) { result =>
         result mustBe Left(ErrorResponse(BAD_REQUEST, "Invalid format for enrolment in bounced email event"))
@@ -78,10 +79,38 @@ class EventHubBounceServiceSpec extends SpecBase {
       when(mockSubmitPreferencesConnector.submitContactPreferences(any(), any())(any()))
         .thenReturn(EitherT.rightT[Future, ErrorResponse](testSubmissionResponse))
 
-      val eventDetails = emailBouncedEventDetails.copy(enrolment = "HMRC-AD-ORG~APPAID~A12345")
+      val eventTags    = Tags(Some("HMRC-AD-ORG~APPAID~A12345"))
+      val eventDetails = emailBouncedEventDetails.copy(tags = Some(eventTags))
 
       whenReady(service.handleBouncedEmail(eventDetails).value) { result =>
         result mustBe Left(ErrorResponse(BAD_REQUEST, "Invalid format for APPA ID in bounced email event"))
+
+        verify(mockSubmitPreferencesConnector, times(0)).submitContactPreferences(any(), any())(any())
+      }
+    }
+
+    "return an ErrorReponse when the tags data item is not present" in {
+      when(mockSubmitPreferencesConnector.submitContactPreferences(any(), any())(any()))
+        .thenReturn(EitherT.rightT[Future, ErrorResponse](testSubmissionResponse))
+
+      val eventDetails = emailBouncedEventDetails.copy(tags = None)
+
+      whenReady(service.handleBouncedEmail(eventDetails).value) { result =>
+        result mustBe Left(ErrorResponse(BAD_REQUEST, "Tags property not found in bounced email event"))
+
+        verify(mockSubmitPreferencesConnector, times(0)).submitContactPreferences(any(), any())(any())
+      }
+    }
+
+    "return an ErrorReponse when the enrolment data item is not present in the tags" in {
+      val eventTags = Tags(None)
+      when(mockSubmitPreferencesConnector.submitContactPreferences(any(), any())(any()))
+        .thenReturn(EitherT.rightT[Future, ErrorResponse](testSubmissionResponse))
+
+      val eventDetails = emailBouncedEventDetails.copy(tags = Some(eventTags))
+
+      whenReady(service.handleBouncedEmail(eventDetails).value) { result =>
+        result mustBe Left(ErrorResponse(BAD_REQUEST, "Enrolment property not found in bounced email event tags"))
 
         verify(mockSubmitPreferencesConnector, times(0)).submitContactPreferences(any(), any())(any())
       }

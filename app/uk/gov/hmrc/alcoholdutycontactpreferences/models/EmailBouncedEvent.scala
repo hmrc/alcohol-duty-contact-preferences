@@ -45,13 +45,21 @@ object EmailBouncedEvent {
 
 }
 
+case class Tags(
+  enrolment: Option[String]
+)
+
+object Tags {
+  implicit val tagsFormat: OFormat[Tags] = Json.format[Tags]
+}
+
 case class EventDetails(
   event: String,
   emailAddress: String,
   detected: Instant,
   code: Int,
   reason: String,
-  enrolment: String
+  tags: Option[Tags]
 )
 
 object EventDetails {

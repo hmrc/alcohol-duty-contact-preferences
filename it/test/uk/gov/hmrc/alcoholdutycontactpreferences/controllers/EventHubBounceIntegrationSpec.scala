@@ -19,6 +19,7 @@ package uk.gov.hmrc.alcoholdutycontactpreferences.controllers
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import uk.gov.hmrc.alcoholdutycontactpreferences.base.ISpecBase
+import uk.gov.hmrc.alcoholdutycontactpreferences.models.Tags
 
 class EventHubBounceIntegrationSpec extends ISpecBase {
   val submitPreferencesUrl = config.submitPreferencesUrl(appaId)
@@ -53,7 +54,8 @@ class EventHubBounceIntegrationSpec extends ISpecBase {
     }
 
     "return 400 BAD_REQUEST if the enrolment field does not start with HMRC-AD-ORG~APPAID~" in {
-      val event = emailBouncedEvent.copy(event = emailBouncedEventDetails.copy(enrolment = "invalid"))
+      val eventTags = Tags(Some("invalid"))
+      val event     = emailBouncedEvent.copy(event = emailBouncedEventDetails.copy(tags = Some(eventTags)))
 
       val response = callRoute(
         FakeRequest("POST", routes.EventHubBounceController.handleBouncedEmail().url)
@@ -64,7 +66,31 @@ class EventHubBounceIntegrationSpec extends ISpecBase {
     }
 
     "return 400 BAD_REQUEST if the enrolment field does not contain an APPA ID in the correct format" in {
-      val event = emailBouncedEvent.copy(event = emailBouncedEventDetails.copy(enrolment = "HMRC-AD-ORG~APPAID~A12345"))
+      val eventTags = Tags(Some("HMRC-AD-ORG~APPAID~A12345"))
+      val event     = emailBouncedEvent.copy(event = emailBouncedEventDetails.copy(tags = Some(eventTags)))
+
+      val response = callRoute(
+        FakeRequest("POST", routes.EventHubBounceController.handleBouncedEmail().url)
+          .withBody(Json.toJson(event))
+      )
+
+      status(response) mustBe BAD_REQUEST
+    }
+
+    "return 400 BAD_REQUEST if the tags data item is not present" in {
+      val event = emailBouncedEvent.copy(event = emailBouncedEventDetails.copy(tags = None))
+
+      val response = callRoute(
+        FakeRequest("POST", routes.EventHubBounceController.handleBouncedEmail().url)
+          .withBody(Json.toJson(event))
+      )
+
+      status(response) mustBe BAD_REQUEST
+    }
+
+    "return 400 BAD_REQUEST if the enrolment data item is not present in the tags" in {
+      val eventTags = Tags(None)
+      val event     = emailBouncedEvent.copy(event = emailBouncedEventDetails.copy(tags = Some(eventTags)))
 
       val response = callRoute(
         FakeRequest("POST", routes.EventHubBounceController.handleBouncedEmail().url)
