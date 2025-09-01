@@ -198,7 +198,7 @@ trait TestData extends ModelGenerators {
     detected = Instant.now(clock),
     code = 605,
     reason = "Not delivering to previously bounced address",
-    tags = eventTags
+    tags = Some(eventTags)
   )
 
   val emailBouncedEvent = EmailBouncedEvent(

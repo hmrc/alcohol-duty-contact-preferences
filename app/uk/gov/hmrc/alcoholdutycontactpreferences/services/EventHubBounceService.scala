@@ -21,7 +21,7 @@ import play.api.Logging
 import play.api.http.Status.BAD_REQUEST
 import uk.gov.hmrc.alcoholdutycontactpreferences.config.AppConfig
 import uk.gov.hmrc.alcoholdutycontactpreferences.connectors.SubmitPreferencesConnector
-import uk.gov.hmrc.alcoholdutycontactpreferences.models.{EventDetails, PaperlessPreferenceSubmission, PaperlessPreferenceSubmittedResponse}
+import uk.gov.hmrc.alcoholdutycontactpreferences.models.{EventDetails, PaperlessPreferenceSubmission, PaperlessPreferenceSubmittedResponse, Tags}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.http.ErrorResponse
 
@@ -37,7 +37,7 @@ class EventHubBounceService @Inject() (
   def handleBouncedEmail(
     eventDetails: EventDetails
   )(implicit hc: HeaderCarrier): EitherT[Future, ErrorResponse, PaperlessPreferenceSubmittedResponse] =
-    getAppaIdFromEnrolmentString(eventDetails.tags.enrolment) match {
+    getAppaIdFromEnrolmentString(eventDetails.tags) match {
       case Right(appaId) =>
         val contactPreferenceSubmission = PaperlessPreferenceSubmission(
           paperlessPreference = false,
@@ -49,19 +49,27 @@ class EventHubBounceService @Inject() (
       case Left(error)   => EitherT.leftT(error)
     }
 
-  private def getAppaIdFromEnrolmentString(enrolment: String): Either[ErrorResponse, String] = {
+  private def getAppaIdFromEnrolmentString(maybeTags: Option[Tags]): Either[ErrorResponse, String] = {
     val requiredPrefix = appConfig.enrolmentServiceName + "~" + appConfig.enrolmentIdentifierKey + "~"
-    if (!enrolment.startsWith(requiredPrefix)) {
-      logger.warn("Invalid format for enrolment in bounced email event")
-      Left(ErrorResponse(BAD_REQUEST, "Invalid format for enrolment in bounced email event"))
-    } else {
-      val appaId = enrolment.stripPrefix(requiredPrefix)
-      if (!appaId.matches("[A-Z]{5}\\d{10}")) {
-        logger.warn("Invalid format for APPA ID in bounced email event")
-        Left(ErrorResponse(BAD_REQUEST, "Invalid format for APPA ID in bounced email event"))
-      } else {
-        Right(appaId)
-      }
+
+    maybeTags match {
+      case Some(tags) =>
+        val enrolment = tags.enrolment
+        if (!enrolment.startsWith(requiredPrefix)) {
+          logger.warn("Invalid format for enrolment in bounced email event")
+          Left(ErrorResponse(BAD_REQUEST, "Invalid format for enrolment in bounced email event"))
+        } else {
+          val appaId = enrolment.stripPrefix(requiredPrefix)
+          if (!appaId.matches("[A-Z]{5}\\d{10}")) {
+            logger.warn("Invalid format for APPA ID in bounced email event")
+            Left(ErrorResponse(BAD_REQUEST, "Invalid format for APPA ID in bounced email event"))
+          } else {
+            Right(appaId)
+          }
+        }
+      case None       =>
+        logger.warn("Tags property not found in bounced email event")
+        Left(ErrorResponse(BAD_REQUEST, "Tags property not found in bounced email event"))
     }
   }
 

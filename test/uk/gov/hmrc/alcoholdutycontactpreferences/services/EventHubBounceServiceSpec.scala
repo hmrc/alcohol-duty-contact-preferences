@@ -66,7 +66,7 @@ class EventHubBounceServiceSpec extends SpecBase {
         .thenReturn(EitherT.rightT[Future, ErrorResponse](testSubmissionResponse))
 
       val eventTags    = Tags("foo", "invalid", "bar")
-      val eventDetails = emailBouncedEventDetails.copy(tags = eventTags)
+      val eventDetails = emailBouncedEventDetails.copy(tags = Some(eventTags))
 
       whenReady(service.handleBouncedEmail(eventDetails).value) { result =>
         result mustBe Left(ErrorResponse(BAD_REQUEST, "Invalid format for enrolment in bounced email event"))
@@ -80,10 +80,23 @@ class EventHubBounceServiceSpec extends SpecBase {
         .thenReturn(EitherT.rightT[Future, ErrorResponse](testSubmissionResponse))
 
       val eventTags    = Tags("foo", "HMRC-AD-ORG~APPAID~A12345", "bar")
-      val eventDetails = emailBouncedEventDetails.copy(tags = eventTags)
+      val eventDetails = emailBouncedEventDetails.copy(tags = Some(eventTags))
 
       whenReady(service.handleBouncedEmail(eventDetails).value) { result =>
         result mustBe Left(ErrorResponse(BAD_REQUEST, "Invalid format for APPA ID in bounced email event"))
+
+        verify(mockSubmitPreferencesConnector, times(0)).submitContactPreferences(any(), any())(any())
+      }
+    }
+
+    "return an ErrorReponse when the tags data item is not present" in {
+      when(mockSubmitPreferencesConnector.submitContactPreferences(any(), any())(any()))
+        .thenReturn(EitherT.rightT[Future, ErrorResponse](testSubmissionResponse))
+
+      val eventDetails = emailBouncedEventDetails.copy(tags = None)
+
+      whenReady(service.handleBouncedEmail(eventDetails).value) { result =>
+        result mustBe Left(ErrorResponse(BAD_REQUEST, "Tags property not found in bounced email event"))
 
         verify(mockSubmitPreferencesConnector, times(0)).submitContactPreferences(any(), any())(any())
       }

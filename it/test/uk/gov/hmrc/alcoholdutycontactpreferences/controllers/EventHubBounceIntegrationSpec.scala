@@ -55,7 +55,7 @@ class EventHubBounceIntegrationSpec extends ISpecBase {
 
     "return 400 BAD_REQUEST if the enrolment field does not start with HMRC-AD-ORG~APPAID~" in {
       val eventTags = Tags("foo", "invalid", "bar")
-      val event     = emailBouncedEvent.copy(event = emailBouncedEventDetails.copy(tags = eventTags))
+      val event     = emailBouncedEvent.copy(event = emailBouncedEventDetails.copy(tags = Some(eventTags)))
 
       val response = callRoute(
         FakeRequest("POST", routes.EventHubBounceController.handleBouncedEmail().url)
@@ -67,7 +67,18 @@ class EventHubBounceIntegrationSpec extends ISpecBase {
 
     "return 400 BAD_REQUEST if the enrolment field does not contain an APPA ID in the correct format" in {
       val eventTags = Tags("foo", "HMRC-AD-ORG~APPAID~A12345", "bar")
-      val event     = emailBouncedEvent.copy(event = emailBouncedEventDetails.copy(tags = eventTags))
+      val event     = emailBouncedEvent.copy(event = emailBouncedEventDetails.copy(tags = Some(eventTags)))
+
+      val response = callRoute(
+        FakeRequest("POST", routes.EventHubBounceController.handleBouncedEmail().url)
+          .withBody(Json.toJson(event))
+      )
+
+      status(response) mustBe BAD_REQUEST
+    }
+
+    "return 400 BAD_REQUEST if the tags data item is not present" in {
+      val event = emailBouncedEvent.copy(event = emailBouncedEventDetails.copy(tags = None))
 
       val response = callRoute(
         FakeRequest("POST", routes.EventHubBounceController.handleBouncedEmail().url)

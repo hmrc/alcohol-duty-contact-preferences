@@ -61,7 +61,7 @@ case class EventDetails(
   detected: Instant,
   code: Int,
   reason: String,
-  tags: Tags
+  tags: Option[Tags]
 )
 
 object EventDetails {
