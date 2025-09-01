@@ -21,7 +21,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchersSugar.eqTo
 import uk.gov.hmrc.alcoholdutycontactpreferences.base.SpecBase
 import uk.gov.hmrc.alcoholdutycontactpreferences.connectors.SubmitPreferencesConnector
-import uk.gov.hmrc.alcoholdutycontactpreferences.models.{ErrorCodes, PaperlessPreferenceSubmittedResponse}
+import uk.gov.hmrc.alcoholdutycontactpreferences.models.{ErrorCodes, PaperlessPreferenceSubmittedResponse, Tags}
 import uk.gov.hmrc.play.bootstrap.http.ErrorResponse
 
 import scala.concurrent.Future
@@ -65,7 +65,8 @@ class EventHubBounceServiceSpec extends SpecBase {
       when(mockSubmitPreferencesConnector.submitContactPreferences(any(), any())(any()))
         .thenReturn(EitherT.rightT[Future, ErrorResponse](testSubmissionResponse))
 
-      val eventDetails = emailBouncedEventDetails.copy(enrolment = "invalid")
+      val eventTags    = Tags("foo", "invalid", "bar")
+      val eventDetails = emailBouncedEventDetails.copy(tags = eventTags)
 
       whenReady(service.handleBouncedEmail(eventDetails).value) { result =>
         result mustBe Left(ErrorResponse(BAD_REQUEST, "Invalid format for enrolment in bounced email event"))
@@ -78,7 +79,8 @@ class EventHubBounceServiceSpec extends SpecBase {
       when(mockSubmitPreferencesConnector.submitContactPreferences(any(), any())(any()))
         .thenReturn(EitherT.rightT[Future, ErrorResponse](testSubmissionResponse))
 
-      val eventDetails = emailBouncedEventDetails.copy(enrolment = "HMRC-AD-ORG~APPAID~A12345")
+      val eventTags    = Tags("foo", "HMRC-AD-ORG~APPAID~A12345", "bar")
+      val eventDetails = emailBouncedEventDetails.copy(tags = eventTags)
 
       whenReady(service.handleBouncedEmail(eventDetails).value) { result =>
         result mustBe Left(ErrorResponse(BAD_REQUEST, "Invalid format for APPA ID in bounced email event"))

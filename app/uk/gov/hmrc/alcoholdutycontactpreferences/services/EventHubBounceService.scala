@@ -37,7 +37,7 @@ class EventHubBounceService @Inject() (
   def handleBouncedEmail(
     eventDetails: EventDetails
   )(implicit hc: HeaderCarrier): EitherT[Future, ErrorResponse, PaperlessPreferenceSubmittedResponse] =
-    getAppaIdFromEnrolmentString(eventDetails.enrolment) match {
+    getAppaIdFromEnrolmentString(eventDetails.tags.enrolment) match {
       case Right(appaId) =>
         val contactPreferenceSubmission = PaperlessPreferenceSubmission(
           paperlessPreference = false,

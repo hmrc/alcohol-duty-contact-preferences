@@ -19,6 +19,7 @@ package uk.gov.hmrc.alcoholdutycontactpreferences.controllers
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import uk.gov.hmrc.alcoholdutycontactpreferences.base.ISpecBase
+import uk.gov.hmrc.alcoholdutycontactpreferences.models.Tags
 
 class EventHubBounceIntegrationSpec extends ISpecBase {
   val submitPreferencesUrl = config.submitPreferencesUrl(appaId)
@@ -53,7 +54,8 @@ class EventHubBounceIntegrationSpec extends ISpecBase {
     }
 
     "return 400 BAD_REQUEST if the enrolment field does not start with HMRC-AD-ORG~APPAID~" in {
-      val event = emailBouncedEvent.copy(event = emailBouncedEventDetails.copy(enrolment = "invalid"))
+      val eventTags = Tags("foo", "invalid", "bar")
+      val event     = emailBouncedEvent.copy(event = emailBouncedEventDetails.copy(tags = eventTags))
 
       val response = callRoute(
         FakeRequest("POST", routes.EventHubBounceController.handleBouncedEmail().url)
@@ -64,7 +66,8 @@ class EventHubBounceIntegrationSpec extends ISpecBase {
     }
 
     "return 400 BAD_REQUEST if the enrolment field does not contain an APPA ID in the correct format" in {
-      val event = emailBouncedEvent.copy(event = emailBouncedEventDetails.copy(enrolment = "HMRC-AD-ORG~APPAID~A12345"))
+      val eventTags = Tags("foo", "HMRC-AD-ORG~APPAID~A12345", "bar")
+      val event     = emailBouncedEvent.copy(event = emailBouncedEventDetails.copy(tags = eventTags))
 
       val response = callRoute(
         FakeRequest("POST", routes.EventHubBounceController.handleBouncedEmail().url)

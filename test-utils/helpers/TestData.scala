@@ -190,13 +190,15 @@ trait TestData extends ModelGenerators {
   val testSubmissionResponse = PaperlessPreferenceSubmittedResponse(Instant.now(clock), "910000000000")
   val testSubmissionSuccess  = PaperlessPreferenceSubmittedSuccess(testSubmissionResponse)
 
+  val eventTags: Tags = Tags("foo", s"HMRC-AD-ORG~APPAID~$appaId", "bar")
+
   val emailBouncedEventDetails = EventDetails(
     event = "failed",
     emailAddress = emailAddress,
     detected = Instant.now(clock),
     code = 605,
     reason = "Not delivering to previously bounced address",
-    enrolment = s"HMRC-AD-ORG~APPAID~$appaId"
+    tags = eventTags
   )
 
   val emailBouncedEvent = EmailBouncedEvent(
