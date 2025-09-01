@@ -9,19 +9,20 @@ we update the user's contact preference in ETMP to post, with the bounced email 
 
 **Request Body**:
 
-| Field Name         | Description                                         | Data Type    | Mandatory/Optional | Notes                                   |
-|--------------------|-----------------------------------------------------|--------------|--------------------|-----------------------------------------|
-| eventId            | The event id                                        | UUID         | Mandatory          |                                         |
-| subject            | The event subject                                   | String       | Mandatory          | Non-empty string                        |
-| groupId            | The group id                                        | String       | Mandatory          |                                         |
-| timestamp          | The timestamp for this event instance               | Timestamp    | Mandatory          | e.g. 2021-07-01T13:09:29Z               |
-| event              | Object containing event details                     | EventDetails | Mandatory          |                                         |
-| event.event        | Brief description of the event                      | String       | Mandatory          | e.g. failed                             |
-| event.emailAddress | The user's email address                            | String       | Mandatory          |                                         |
-| event.detected     | The time the event was detected                     | Timestamp    | Mandatory          | e.g. 2021-04-07T09:46:29+00:00          |
-| event.code         | Status code for the event (as defined by Event Hub) | Numeric      | Mandatory          |                                         |
-| event.reason       | Reason for the event being fired                    | String       | Mandatory          |                                         |
-| event.enrolment    | The user's enrolment details                        | String       | Mandatory          | e.g. HMRC-AD-ORG~APPAID~XMADP0000100208 |
+| Field Name           | Description                                         | Data Type    | Mandatory/Optional | Notes                                          |
+|----------------------|-----------------------------------------------------|--------------|--------------------|------------------------------------------------|
+| eventId              | The event id                                        | UUID         | Mandatory          |                                                |
+| subject              | The event subject                                   | String       | Mandatory          | Non-empty string                               |
+| groupId              | The group id                                        | String       | Mandatory          |                                                |
+| timestamp            | The timestamp for this event instance               | Timestamp    | Mandatory          | e.g. 2021-07-01T13:09:29Z                      |
+| event                | Object containing event details                     | EventDetails | Mandatory          |                                                |
+| event.event          | Brief description of the event                      | String       | Mandatory          | e.g. failed                                    |
+| event.emailAddress   | The user's email address                            | String       | Mandatory          |                                                |
+| event.detected       | The time the event was detected                     | Timestamp    | Mandatory          | e.g. 2021-04-07T09:46:29+00:00                 |
+| event.code           | Status code for the event (as defined by Event Hub) | Numeric      | Mandatory          |                                                |
+| event.reason         | Reason for the event being fired                    | String       | Mandatory          | Should be present for ADR bounced email events |
+| event.tags           | The optional tags (new)                             | String       | Optional           | e.g. HMRC-AD-ORG~APPAID~XMADP0000100208        |
+| event.tags.enrolment | The user's enrolment details                        | String       | Optional           | e.g. HMRC-AD-ORG~APPAID~XMADP0000100208        |
 
 See the [Event Hub README](https://github.com/hmrc/event-hub?tab=readme-ov-file#event-hub) for more information.
 
@@ -40,7 +41,9 @@ curl -v -X POST -H "Content-Type: application/json" http://localhost:9050/event-
         "detected": "2021-04-07T09:46:29+00:00",
         "code": 605,
         "reason": "Not delivering to previously bounced address",
-        "enrolment": "HMRC-AD-ORG~APPAID~XMADP0000100208"
+         "tags" : {
+			"enrolment" : "enrolment":"HMRC-AD-ORG~APPAID~XMADP0000100208"
+		}
     }
 }'
 ```
@@ -60,7 +63,9 @@ curl -v -X POST -H "Content-Type: application/json" http://localhost:16006/alcoh
         "detected":"2021-04-07T09:46:29+00:00",
         "code":605,
         "reason":"Not delivering to previously bounced address",
-        "enrolment":"HMRC-AD-ORG~APPAID~XMADP0000100208"
+        "tags" : {
+			"enrolment" : "enrolment":"HMRC-AD-ORG~APPAID~XMADP0000100208"
+		}
     }
 }'
 ```

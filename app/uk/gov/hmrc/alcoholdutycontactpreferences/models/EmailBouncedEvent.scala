@@ -46,9 +46,7 @@ object EmailBouncedEvent {
 }
 
 case class Tags(
-  source: String,
-  enrolment: String,
-  messageId: String
+  enrolment: Option[String]
 )
 
 object Tags {

@@ -65,7 +65,7 @@ class EventHubBounceServiceSpec extends SpecBase {
       when(mockSubmitPreferencesConnector.submitContactPreferences(any(), any())(any()))
         .thenReturn(EitherT.rightT[Future, ErrorResponse](testSubmissionResponse))
 
-      val eventTags    = Tags("foo", "invalid", "bar")
+      val eventTags    = Tags(Some("invalid"))
       val eventDetails = emailBouncedEventDetails.copy(tags = Some(eventTags))
 
       whenReady(service.handleBouncedEmail(eventDetails).value) { result =>
@@ -79,7 +79,7 @@ class EventHubBounceServiceSpec extends SpecBase {
       when(mockSubmitPreferencesConnector.submitContactPreferences(any(), any())(any()))
         .thenReturn(EitherT.rightT[Future, ErrorResponse](testSubmissionResponse))
 
-      val eventTags    = Tags("foo", "HMRC-AD-ORG~APPAID~A12345", "bar")
+      val eventTags    = Tags(Some("HMRC-AD-ORG~APPAID~A12345"))
       val eventDetails = emailBouncedEventDetails.copy(tags = Some(eventTags))
 
       whenReady(service.handleBouncedEmail(eventDetails).value) { result =>
@@ -97,6 +97,20 @@ class EventHubBounceServiceSpec extends SpecBase {
 
       whenReady(service.handleBouncedEmail(eventDetails).value) { result =>
         result mustBe Left(ErrorResponse(BAD_REQUEST, "Tags property not found in bounced email event"))
+
+        verify(mockSubmitPreferencesConnector, times(0)).submitContactPreferences(any(), any())(any())
+      }
+    }
+
+    "return an ErrorReponse when the enrolment data item is not present in the tags" in {
+      val eventTags = Tags(None)
+      when(mockSubmitPreferencesConnector.submitContactPreferences(any(), any())(any()))
+        .thenReturn(EitherT.rightT[Future, ErrorResponse](testSubmissionResponse))
+
+      val eventDetails = emailBouncedEventDetails.copy(tags = Some(eventTags))
+
+      whenReady(service.handleBouncedEmail(eventDetails).value) { result =>
+        result mustBe Left(ErrorResponse(BAD_REQUEST, "Enrolment property not found in bounced email event tags"))
 
         verify(mockSubmitPreferencesConnector, times(0)).submitContactPreferences(any(), any())(any())
       }
