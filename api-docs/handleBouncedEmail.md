@@ -21,7 +21,7 @@ we update the user's contact preference in ETMP to post, with the bounced email 
 | event.detected       | The time the event was detected                     | Timestamp    | Mandatory          | e.g. 2021-04-07T09:46:29+00:00                 |
 | event.code           | Status code for the event (as defined by Event Hub) | Numeric      | Mandatory          |                                                |
 | event.reason         | Reason for the event being fired                    | String       | Mandatory          | Should be present for ADR bounced email events |
-| event.tags           | The optional tags (new)                             | String       | Optional           | e.g. HMRC-AD-ORG~APPAID~XMADP0000100208        |
+| event.tags           | The optional tags (new)                             | String       | Optional           |                                                |
 | event.tags.enrolment | The user's enrolment details                        | String       | Optional           | e.g. HMRC-AD-ORG~APPAID~XMADP0000100208        |
 
 See the [Event Hub README](https://github.com/hmrc/event-hub?tab=readme-ov-file#event-hub) for more information.
