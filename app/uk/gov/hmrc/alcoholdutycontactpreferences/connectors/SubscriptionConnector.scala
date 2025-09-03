@@ -17,11 +17,13 @@
 package uk.gov.hmrc.alcoholdutycontactpreferences.connectors
 
 import cats.data.EitherT
+import org.apache.pekko.actor.{ActorSystem, Scheduler}
+import org.apache.pekko.pattern.retry
 import play.api.Logging
-import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND}
-import uk.gov.hmrc.alcoholdutycontactpreferences.config.AppConfig
+import play.api.http.Status._
+import uk.gov.hmrc.alcoholdutycontactpreferences.config.{AppConfig, CircuitBreakerProvider}
 import uk.gov.hmrc.alcoholdutycontactpreferences.connectors.helpers.HIPHeaders
-import uk.gov.hmrc.alcoholdutycontactpreferences.models.{SubscriptionContactPreferences, SubscriptionSummarySuccess}
+import uk.gov.hmrc.alcoholdutycontactpreferences.models.{ErrorCodes, SubscriptionContactPreferences, SubscriptionSummarySuccess}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.http.ErrorResponse
@@ -33,53 +35,65 @@ import scala.util.{Failure, Success, Try}
 class SubscriptionConnector @Inject() (
   config: AppConfig,
   headers: HIPHeaders,
+  circuitBreakerProvider: CircuitBreakerProvider,
+  implicit val system: ActorSystem,
   implicit val httpClient: HttpClientV2
 )(implicit ec: ExecutionContext)
     extends HttpReadsInstances
     with Logging {
 
+  implicit val scheduler: Scheduler = system.scheduler
+
   def getSubscriptionContactPreferences(
     appaId: String
   )(implicit hc: HeaderCarrier): EitherT[Future, ErrorResponse, SubscriptionContactPreferences] =
-    EitherT {
+    EitherT(
+      retry(
+        () => call(appaId),
+        attempts = config.retryAttempts,
+        delay = config.retryAttemptsDelay
+      ).recoverWith { _ =>
+        Future.successful(Left(ErrorCodes.unexpectedResponse))
+      }
+    )
 
+  private def call(
+    appaId: String
+  )(implicit hc: HeaderCarrier): Future[Either[ErrorResponse, SubscriptionContactPreferences]] =
+    circuitBreakerProvider.get().withCircuitBreaker {
       logger.info(s"Fetching subscription summary for appaId $appaId")
-
       httpClient
         .get(url"${config.getSubscriptionUrl(appaId)}")
         .setHeader(headers.subscriptionHeaders(): _*)
-        .execute[Either[UpstreamErrorResponse, HttpResponse]]
-        .map {
-          case Right(response) =>
-            Try {
-              response.json
-                .as[SubscriptionSummarySuccess]
-            } match {
-              case Success(doc)       =>
-                logger.info(s"Retrieved subscription summary success for appaId $appaId")
-                Right(doc.success)
-              case Failure(exception) =>
-                logger.warn(s"Unable to parse subscription summary success for appaId $appaId")
-                Left(ErrorResponse(INTERNAL_SERVER_ERROR, "Unable to parse subscription summary success"))
-            }
-          case Left(error)     => Left(processError(error, appaId))
+        .execute[HttpResponse]
+        .flatMap { response =>
+          response.status match {
+            case OK                   =>
+              Try {
+                response.json.as[SubscriptionSummarySuccess]
+              } match {
+                case Success(doc) =>
+                  logger.info(s"Retrieved subscription summary success for appaId $appaId")
+                  Future.successful(Right(doc.success))
+                case Failure(_)   =>
+                  logger.warn(s"Unable to parse subscription summary success for appaId $appaId")
+                  Future.successful(
+                    Left(ErrorResponse(INTERNAL_SERVER_ERROR, "Unable to parse subscription summary success"))
+                  )
+              }
+            case BAD_REQUEST          =>
+              logger.warn(s"Bad request sent to get subscription for appaId $appaId")
+              Future.successful(Left(ErrorResponse(BAD_REQUEST, "Bad request")))
+            case NOT_FOUND            =>
+              logger.warn(s"No subscription summary found for appaId $appaId")
+              Future.successful(Left(ErrorResponse(NOT_FOUND, "Subscription summary not found")))
+            case UNPROCESSABLE_ENTITY =>
+              logger.warn(s"Subscription summary request unprocessable for appaId $appaId")
+              Future.successful(Left(ErrorResponse(UNPROCESSABLE_ENTITY, "Unprocessable entity")))
+            case _                    =>
+              logger.warn(s"An error was returned while trying to fetch subscription summary for appaId $appaId")
+              Future.failed(new InternalServerException(response.body))
+          }
         }
-        .recoverWith { case e: Exception =>
-          logger.warn(s"An exception was returned while trying to fetch subscription summary for appaId $appaId")
-          Future.successful(Left(ErrorResponse(INTERNAL_SERVER_ERROR, e.getMessage)))
-        }
-    }
-
-  private def processError(error: UpstreamErrorResponse, appaId: String): ErrorResponse =
-    error.statusCode match {
-      case BAD_REQUEST =>
-        logger.info(s"Bad request sent to get subscription for appaId $appaId")
-        ErrorResponse(BAD_REQUEST, "Bad request")
-      case NOT_FOUND   =>
-        logger.info(s"No subscription summary found for appaId $appaId")
-        ErrorResponse(NOT_FOUND, "Subscription summary not found")
-      case _           =>
-        logger.warn(s"An error was returned while trying to fetch subscription summary for appaId $appaId")
-        ErrorResponse(INTERNAL_SERVER_ERROR, "An error occurred")
     }
 }
