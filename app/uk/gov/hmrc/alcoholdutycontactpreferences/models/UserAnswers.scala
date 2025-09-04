@@ -18,14 +18,12 @@ package uk.gov.hmrc.alcoholdutycontactpreferences.models
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import uk.gov.hmrc.alcoholdutycontactpreferences.queries.{Gettable, Settable}
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 import uk.gov.hmrc.crypto.json.JsonEncryption
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
 import java.time.{Clock, Instant}
-import scala.util.{Failure, Success, Try}
 
 case class DecryptedUA(
   appaId: String,
@@ -84,40 +82,7 @@ case class UserAnswers(
   startedTime: Instant,
   lastUpdated: Instant,
   validUntil: Option[Instant] = None
-) {
-  def get[A](cacheable: Gettable[A])(implicit rds: Reads[A]): Option[A] =
-    Reads.optionNoError(Reads.at(cacheable.path)).reads(data).getOrElse(None)
-
-  def set[A](page: Settable[A], value: A)(implicit writes: Writes[A]): Try[UserAnswers] = {
-
-    val updatedData = data.setObject(page.path, Json.toJson(value)) match {
-      case JsSuccess(jsValue, _) =>
-        Success(jsValue)
-      case JsError(errors)       =>
-        Failure(JsResultException(errors))
-    }
-
-    updatedData.flatMap { d =>
-      val updatedAnswers = copy(data = d)
-      page.cleanup(Some(value), updatedAnswers)
-    }
-  }
-
-  def remove[A](page: Settable[A]): Try[UserAnswers] = {
-
-    val updatedData = data.removeObject(page.path) match {
-      case JsSuccess(jsValue, _) =>
-        Success(jsValue)
-      case JsError(_)            =>
-        Success(data)
-    }
-
-    updatedData.flatMap { d =>
-      val updatedAnswers = copy(data = d)
-      page.cleanup(None, updatedAnswers)
-    }
-  }
-}
+)
 
 object UserAnswers {
   def createUserAnswers(

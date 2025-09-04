@@ -16,22 +16,16 @@
 
 package uk.gov.hmrc.alcoholdutycontactpreferences.models
 
-import play.api.libs.json.{JsPath, Json}
+import play.api.libs.json.Json
 import uk.gov.hmrc.alcoholdutycontactpreferences.base.SpecBase
 import uk.gov.hmrc.alcoholdutycontactpreferences.crypto.NoCrypto
-import uk.gov.hmrc.alcoholdutycontactpreferences.queries.{Gettable, Settable}
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
 
 import java.time.Instant
-import scala.util.Success
 
 class UserAnswersSpec extends SpecBase {
   val ua          = userAnswers.copy(validUntil = Some(Instant.now(clock).plusMillis(1)))
   val uaDecrypted = decryptedUA.copy(validUntil = Some(Instant.now(clock).plusMillis(1)))
-
-  case object TestCacheable extends Gettable[String] with Settable[String] {
-    override def path: JsPath = JsPath \ toString
-  }
 
   "UserAnswers must" - {
     "when encryption is enabled" - {
@@ -60,37 +54,6 @@ class UserAnswersSpec extends SpecBase {
       "deserialise from json" in {
         Json.parse(jsonWithoutEncryption).as[UserAnswers] mustBe ua
       }
-    }
-
-    "set a value for a given page and get the same value" in {
-
-      val userAnswers = emptyUserAnswers
-
-      val expectedValue = "value"
-
-      val updatedUserAnswers = userAnswers.set(TestCacheable, expectedValue) match {
-        case Success(value) => value
-        case _              => fail()
-      }
-
-      val actualValue = updatedUserAnswers.get(TestCacheable) match {
-        case Some(value) => value
-        case _           => fail()
-      }
-
-      expectedValue mustBe actualValue
-    }
-
-    "remove a value for a given page" in {
-      val userAnswers = emptyUserAnswers.set(TestCacheable, "value").success.value
-
-      val updatedUserAnswers = userAnswers.remove(TestCacheable) match {
-        case Success(updatedUA) => updatedUA
-        case _                  => fail()
-      }
-
-      val actualValueOption = updatedUserAnswers.get(TestCacheable)
-      actualValueOption mustBe None
     }
 
     "create a UserAnswers from components when there is an existing verified email" in {
