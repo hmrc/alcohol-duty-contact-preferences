@@ -19,7 +19,7 @@ package uk.gov.hmrc.alcoholdutycontactpreferences.connectors
 import play.api.libs.json.Json
 import uk.gov.hmrc.alcoholdutycontactpreferences.base.{ConnectorTestHelpers, SpecBase}
 import uk.gov.hmrc.alcoholdutycontactpreferences.connectors.helpers.HIPHeaders
-import uk.gov.hmrc.alcoholdutycontactpreferences.models.SubscriptionSummarySuccess
+import uk.gov.hmrc.alcoholdutycontactpreferences.models.{ErrorCodes, SubscriptionSummarySuccess}
 import uk.gov.hmrc.play.bootstrap.http.ErrorResponse
 
 class SubscriptionConnectorSpec extends SpecBase with ConnectorTestHelpers {
@@ -34,19 +34,27 @@ class SubscriptionConnectorSpec extends SpecBase with ConnectorTestHelpers {
       }
     }
 
-    "return BAD_REQUEST if a bad request received" in new SetUp {
+    "return BAD_REQUEST if a bad request received with no retry" in new SetUp {
       stubGet(url, BAD_REQUEST, Json.toJson(badRequest).toString)
-      whenReady(connector.getSubscriptionContactPreferences(appaId).value) { result =>
+      whenReady(connectorWithRetry.getSubscriptionContactPreferences(appaId).value) { result =>
         result mustBe Left(ErrorResponse(BAD_REQUEST, "Bad request"))
-        verifyGet(url)
+        verifyGetWithoutRetry(url)
       }
     }
 
-    "return NOT_FOUND if subscription summary data cannot be found" in new SetUp {
+    "return UNPROCESSABLE_ENTITY if a 422 is received with no retry" in new SetUp {
+      stubGet(url, UNPROCESSABLE_ENTITY, Json.toJson(unprocessable).toString)
+      whenReady(connectorWithRetry.getSubscriptionContactPreferences(appaId).value) { result =>
+        result mustBe Left(ErrorResponse(UNPROCESSABLE_ENTITY, "Unprocessable entity"))
+        verifyGetWithoutRetry(url)
+      }
+    }
+
+    "return NOT_FOUND if subscription summary data cannot be found with no retry" in new SetUp {
       stubGet(url, NOT_FOUND, "")
-      whenReady(connector.getSubscriptionContactPreferences(appaId).value) { result =>
+      whenReady(connectorWithRetry.getSubscriptionContactPreferences(appaId).value) { result =>
         result mustBe Left(ErrorResponse(NOT_FOUND, "Subscription summary not found"))
-        verifyGet(url)
+        verifyGetWithoutRetry(url)
       }
     }
 
@@ -59,18 +67,26 @@ class SubscriptionConnectorSpec extends SpecBase with ConnectorTestHelpers {
         }
       }
 
-      "if an error other than BAD_REQUEST or NOT_FOUND is returned" in new SetUp {
+      "if an error other than BAD_REQUEST or NOT_FOUND or UNPROCESSABLE_ENTITY is returned" in new SetUp {
         stubGet(url, INTERNAL_SERVER_ERROR, Json.toJson(internalServerError).toString)
         whenReady(connector.getSubscriptionContactPreferences(appaId).value) { result =>
-          result mustBe Left(ErrorResponse(INTERNAL_SERVER_ERROR, "An error occurred"))
+          result mustBe Left(ErrorCodes.unexpectedResponse)
           verifyGet(url)
+        }
+      }
+
+      "if an error other than BAD_REQUEST or NOT_FOUND or UNPROCESSABLE_ENTITY is returned, the connector will invoke a retry" in new SetUp {
+        stubGet(url, INTERNAL_SERVER_ERROR, Json.toJson(internalServerError).toString)
+        whenReady(connectorWithRetry.getSubscriptionContactPreferences(appaId).value) { result =>
+          result mustBe Left(ErrorCodes.unexpectedResponse)
+          verifyGetWithRetry(url)
         }
       }
 
       "if an exception is thrown when fetching subscription summary" in new SetUp {
         stubGetFault(url)
         whenReady(connector.getSubscriptionContactPreferences(appaId).value) { result =>
-          result mustBe Left(ErrorResponse(INTERNAL_SERVER_ERROR, "Remotely closed"))
+          result mustBe Left(ErrorCodes.unexpectedResponse)
           verifyGet(url)
         }
       }
@@ -78,8 +94,10 @@ class SubscriptionConnectorSpec extends SpecBase with ConnectorTestHelpers {
   }
 
   class SetUp extends ConnectorFixture {
-    val headers   = new HIPHeaders(fakeUUIDGenerator, appConfig, clock)
-    val connector = new SubscriptionConnector(config = config, headers = headers, httpClient = httpClientV2)
-    lazy val url  = appConfig.getSubscriptionUrl(appaId)
+    val headers                                   = new HIPHeaders(fakeUUIDGenerator, appConfig, clock)
+    val connector: SubscriptionConnector          = appWithHttpClientV2.injector.instanceOf[SubscriptionConnector]
+    val connectorWithRetry: SubscriptionConnector =
+      appWithHttpClientV2WithRetry.injector.instanceOf[SubscriptionConnector]
+    lazy val url: String                          = appConfig.getSubscriptionUrl(appaId)
   }
 }
