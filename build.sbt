@@ -1,5 +1,5 @@
-import uk.gov.hmrc.DefaultBuildSettings
 import scoverage.ScoverageKeys
+import uk.gov.hmrc.DefaultBuildSettings
 
 val playVersion = "play-30"
 
@@ -11,14 +11,13 @@ ThisBuild / excludeDependencies ++= Seq(
   ExclusionRule(organization = "com.typesafe.play")
 )
 
-
 lazy val microservice = Project("alcohol-duty-contact-preferences", file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin)
   .settings(
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
     libraryDependencies += "uk.gov.hmrc" %% s"crypto-json-$playVersion" % "8.3.0",
-      // https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html
+    // https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html
     // suppress warnings in generated routes files
     scalacOptions += "-Wconf:src=routes/.*:s",
     scalafmtOnCompile := true
