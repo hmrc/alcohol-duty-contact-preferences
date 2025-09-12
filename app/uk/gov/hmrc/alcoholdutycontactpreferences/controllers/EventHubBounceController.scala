@@ -39,7 +39,7 @@ class EventHubBounceController @Inject() (
       .fold(
         invalid = error => {
           logger.warn(s"Bounced email json body could not be parsed as EmailBouncedEvent")
-          Future.successful(InternalServerError("Bounced email json body could not be parsed as EmailBouncedEvent"))
+          Future.successful(BadRequest("Bounced email json body could not be parsed as EmailBouncedEvent"))
         },
         valid = event => {
           logger.info(
