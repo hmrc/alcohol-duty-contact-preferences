@@ -25,6 +25,7 @@ we update the user's contact preference in ETMP to post, with the bounced email 
 | event.tags.enrolment | The user's enrolment details                        | String       | Optional           | e.g. HMRC-AD-ORG~APPAID~XMADP0000100208        |
 
 See the [Event Hub README](https://github.com/hmrc/event-hub?tab=readme-ov-file#event-hub) for more information.
+See the [Event Hub Confluence](https://confluence.tools.tax.service.gov.uk/pages/viewpage.action?spaceKey=DCT&title=Event+Hub) for more information.
 
 To hit this endpoint directly without going through Event Hub, you can use this request:
 
