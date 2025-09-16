@@ -26,28 +26,6 @@ we update the user's contact preference in ETMP to post, with the bounced email 
 
 See the [Event Hub README](https://github.com/hmrc/event-hub?tab=readme-ov-file#event-hub) for more information.
 
-The following request to Event Hub can be used to test this endpoint:
-
-```
-curl -v -X POST -H "Content-Type: application/json" http://localhost:9050/event-hub/publish/email -d '
-{
-    "eventId": "623b6f96-d36f-4014-8874-7f3f8287f9e6", 
-    "subject": "calling", 
-    "groupId": "su users",
-    "timestamp": "2021-07-01T13:09:29Z",
-    "event" : {
-        "event": "failed",
-        "emailAddress": "hmrc-customer@some-domain.org",
-        "detected": "2021-04-07T09:46:29+00:00",
-        "code": 605,
-        "reason": "Not delivering to previously bounced address",
-         "tags" : {
-			"enrolment" : "enrolment":"HMRC-AD-ORG~APPAID~XMADP0000100208"
-		}
-    }
-}'
-```
-
 To hit this endpoint directly without going through Event Hub, you can use this request:
 
 ```
@@ -64,7 +42,7 @@ curl -v -X POST -H "Content-Type: application/json" http://localhost:16006/alcoh
         "code":605,
         "reason":"Not delivering to previously bounced address",
         "tags" : {
-			"enrolment" : "enrolment":"HMRC-AD-ORG~APPAID~XMADP0000100208"
+			"enrolment":"HMRC-AD-ORG~APPAID~XMADP0000100208"
 		}
     }
 }'
