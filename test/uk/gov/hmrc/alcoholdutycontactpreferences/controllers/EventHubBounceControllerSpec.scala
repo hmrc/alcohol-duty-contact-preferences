@@ -54,7 +54,7 @@ class EventHubBounceControllerSpec extends SpecBase {
       verify(mockEventHubBounceService, times(1)).handleBouncedEmail(eqTo(emailBouncedEventDetails))(any())
     }
 
-    "return 500 INTERNAL_SERVER_ERROR when the request body cannot be parsed" in {
+    "return 400 BAD_REQUEST when the request body cannot be parsed" in {
       when(mockEventHubBounceService.handleBouncedEmail(any())(any()))
         .thenReturn(EitherT.rightT[Future, ErrorResponse](testSubmissionResponse))
 
@@ -63,7 +63,7 @@ class EventHubBounceControllerSpec extends SpecBase {
           fakeRequestWithJsonBody(Json.toJson("invalid"))
         )
 
-      status(result)          mustBe INTERNAL_SERVER_ERROR
+      status(result)          mustBe BAD_REQUEST
       contentAsString(result) mustBe "Bounced email json body could not be parsed as EmailBouncedEvent"
 
       verify(mockEventHubBounceService, times(0)).handleBouncedEmail(any())(any())

@@ -44,13 +44,13 @@ class EventHubBounceIntegrationSpec extends ISpecBase {
       verifyPut(submitPreferencesUrl)
     }
 
-    "return 500 INTERNAL_SERVER_ERROR if the request body cannot be parsed" in {
+    "return 400 BAD_REQUEST if the request body cannot be parsed" in {
       val response = callRoute(
         FakeRequest("POST", routes.EventHubBounceController.handleBouncedEmail().url)
           .withBody(Json.toJson("invalid"))
       )
 
-      status(response) mustBe INTERNAL_SERVER_ERROR
+      status(response) mustBe BAD_REQUEST
     }
 
     "return 400 BAD_REQUEST if the enrolment field does not start with HMRC-AD-ORG~APPAID~" in {

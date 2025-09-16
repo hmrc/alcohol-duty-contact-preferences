@@ -30,19 +30,6 @@ To run the service with test only routes enabled:
 This endpoint clears all user answers data in the repository.
 > `DELETE /alcohol-duty-contact-preferences/test-only/user-answers/clear-all`
 
-## Testing the event hub bounced email endpoint
-
-To test this endpoint, you need this service running locally and the event hub running in service manager with the
-correct config. You can start all ADR microservices, then stop this microservice as follows:
-> `sm2 --start ALCOHOL_DUTY_CONTACT_PREFERENCES_ALL`
-> `sm2 --stop ALCOHOL_DUTY_CONTACT_PREFERENCES`
-
-Event hub can be started independently with:
-> `sm2 --start EVENT_HUB_FOR_ADR`
-
-For an example request, via an API client like Bruno, to Event Hub, see
-the [readme for this endpoint](api-docs/handleBouncedEmail.md).
-
 ## Running tests
 
 ### Unit tests
