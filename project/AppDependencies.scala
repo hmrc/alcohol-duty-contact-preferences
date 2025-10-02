@@ -9,7 +9,10 @@ object AppDependencies {
   val compile = Seq(
     "org.typelevel"     %% "cats-core"                 % "2.13.0",
     "uk.gov.hmrc"       %% "bootstrap-backend-play-30" % bootstrapVersion,
-    "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-30"        % hmrcMongoVersion
+    "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-30"        % hmrcMongoVersion,
+    "com.beachape"      %% "enumeratum"                % "1.9.0",
+    "com.beachape"      %% "enumeratum-play"           % "1.9.0",
+    "com.beachape"      %% "enumeratum-cats"           % "1.9.0"
   )
 
   val test = Seq(

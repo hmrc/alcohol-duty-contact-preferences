@@ -22,6 +22,7 @@ import play.api.http.Status.BAD_REQUEST
 import uk.gov.hmrc.alcoholdutycontactpreferences.config.AppConfig
 import uk.gov.hmrc.alcoholdutycontactpreferences.connectors.SubmitPreferencesConnector
 import uk.gov.hmrc.alcoholdutycontactpreferences.models.{EventDetails, PaperlessPreferenceSubmission, PaperlessPreferenceSubmittedResponse, Tags}
+import uk.gov.hmrc.alcoholdutycontactpreferences.utils.audit.AuditUtil
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.http.ErrorResponse
 
@@ -30,7 +31,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class EventHubBounceService @Inject() (
   submitPreferencesConnector: SubmitPreferencesConnector,
-  appConfig: AppConfig
+  appConfig: AppConfig,
+  auditUtil: AuditUtil
 )(implicit ec: ExecutionContext)
     extends Logging {
 
@@ -39,6 +41,7 @@ class EventHubBounceService @Inject() (
   )(implicit hc: HeaderCarrier): EitherT[Future, ErrorResponse, PaperlessPreferenceSubmittedResponse] =
     getAppaIdFromEnrolmentString(eventDetails.tags) match {
       case Right(appaId) =>
+        auditUtil.auditEmailBouncedEvent(appaId, eventDetails.emailAddress, eventDetails.reason)
         val contactPreferenceSubmission = PaperlessPreferenceSubmission(
           paperlessPreference = false,
           emailAddress = None,
