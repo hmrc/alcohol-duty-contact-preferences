@@ -15,9 +15,7 @@
  */
 
 package uk.gov.hmrc.alcoholdutycontactpreferences.models.audit
-
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.alcoholdutycontactpreferences.models.audit.AuditType.EmailContactPreferenceEmailBounced
 
 import java.time.Instant
 
@@ -27,7 +25,7 @@ case class EmailBounced(
   reasonForBouncedEmail: String,
   bounceEventTime: Instant
 ) extends AuditEventDetail {
-  protected val _auditType: AuditType = EmailContactPreferenceEmailBounced
+  protected val _auditType: AuditType = uk.gov.hmrc.alcoholdutycontactpreferences.models.audit.AuditType.EmailBounced
 }
 object EmailBounced {
   implicit val format: OFormat[EmailBounced] = Json.format[EmailBounced]

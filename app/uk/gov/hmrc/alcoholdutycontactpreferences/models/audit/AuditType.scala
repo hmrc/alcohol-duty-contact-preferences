@@ -23,5 +23,5 @@ sealed trait AuditType extends EnumEntry
 object AuditType extends Enum[AuditType] {
   val values = findValues
 
-  case object EmailContactPreferenceEmailBounced extends AuditType
+  case object EmailBounced extends AuditType
 }

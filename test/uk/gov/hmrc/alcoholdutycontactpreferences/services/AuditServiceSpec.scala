@@ -41,7 +41,7 @@ class AuditServiceSpec extends SpecBase {
       auditService.audit(testDetail)
 
       verify(mockAuditConnector)
-        .sendExplicitAudit(eqTo("EmailContactPreferenceEmailBounced"), eqTo(testDetail))(any(), any(), any())
+        .sendExplicitAudit(eqTo("EmailBounced"), eqTo(testDetail))(any(), any(), any())
     }
   }
 }
