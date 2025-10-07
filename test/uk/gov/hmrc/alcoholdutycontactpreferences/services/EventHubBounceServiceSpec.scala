@@ -22,6 +22,7 @@ import org.mockito.ArgumentMatchersSugar.eqTo
 import uk.gov.hmrc.alcoholdutycontactpreferences.base.SpecBase
 import uk.gov.hmrc.alcoholdutycontactpreferences.connectors.SubmitPreferencesConnector
 import uk.gov.hmrc.alcoholdutycontactpreferences.models.{ErrorCodes, PaperlessPreferenceSubmittedResponse, Tags}
+import uk.gov.hmrc.alcoholdutycontactpreferences.utils.audit.AuditUtil
 import uk.gov.hmrc.play.bootstrap.http.ErrorResponse
 
 import scala.concurrent.Future
@@ -29,11 +30,12 @@ import scala.concurrent.Future
 class EventHubBounceServiceSpec extends SpecBase {
   val mockSubmitPreferencesConnector: SubmitPreferencesConnector = mock[SubmitPreferencesConnector]
 
-  val service = new EventHubBounceService(mockSubmitPreferencesConnector, appConfig)
+  val mockAuditUtil: AuditUtil = mock[AuditUtil]
+  val service                  = new EventHubBounceService(mockSubmitPreferencesConnector, appConfig, mockAuditUtil)
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    reset(mockSubmitPreferencesConnector)
+    reset(mockSubmitPreferencesConnector, mockAuditUtil)
   }
 
   "handleBouncedEmail must" - {
@@ -46,6 +48,13 @@ class EventHubBounceServiceSpec extends SpecBase {
 
         verify(mockSubmitPreferencesConnector, times(1))
           .submitContactPreferences(eqTo(contactPreferenceSubmissionBouncedEmail), eqTo(appaId))(any())
+
+        verify(mockAuditUtil, times(1))
+          .auditEmailBouncedEvent(
+            eqTo(appaId),
+            eqTo(emailBouncedEventDetails.emailAddress),
+            eqTo(emailBouncedEventDetails.reason)
+          )(any())
       }
     }
 
@@ -58,6 +67,13 @@ class EventHubBounceServiceSpec extends SpecBase {
 
         verify(mockSubmitPreferencesConnector, times(1))
           .submitContactPreferences(eqTo(contactPreferenceSubmissionBouncedEmail), eqTo(appaId))(any())
+
+        verify(mockAuditUtil, times(1))
+          .auditEmailBouncedEvent(
+            eqTo(appaId),
+            eqTo(emailBouncedEventDetails.emailAddress),
+            eqTo(emailBouncedEventDetails.reason)
+          )(any())
       }
     }
 
@@ -72,6 +88,13 @@ class EventHubBounceServiceSpec extends SpecBase {
         result mustBe Left(ErrorResponse(BAD_REQUEST, "Invalid format for enrolment in bounced email event"))
 
         verify(mockSubmitPreferencesConnector, times(0)).submitContactPreferences(any(), any())(any())
+
+        verify(mockAuditUtil, times(0))
+          .auditEmailBouncedEvent(
+            eqTo(appaId),
+            eqTo(emailBouncedEventDetails.emailAddress),
+            eqTo(emailBouncedEventDetails.reason)
+          )(any())
       }
     }
 
@@ -86,6 +109,13 @@ class EventHubBounceServiceSpec extends SpecBase {
         result mustBe Left(ErrorResponse(BAD_REQUEST, "Invalid format for APPA ID in bounced email event"))
 
         verify(mockSubmitPreferencesConnector, times(0)).submitContactPreferences(any(), any())(any())
+
+        verify(mockAuditUtil, times(0))
+          .auditEmailBouncedEvent(
+            eqTo(appaId),
+            eqTo(emailBouncedEventDetails.emailAddress),
+            eqTo(emailBouncedEventDetails.reason)
+          )(any())
       }
     }
 
@@ -99,6 +129,13 @@ class EventHubBounceServiceSpec extends SpecBase {
         result mustBe Left(ErrorResponse(BAD_REQUEST, "Tags property not found in bounced email event"))
 
         verify(mockSubmitPreferencesConnector, times(0)).submitContactPreferences(any(), any())(any())
+
+        verify(mockAuditUtil, times(0))
+          .auditEmailBouncedEvent(
+            eqTo(appaId),
+            eqTo(emailBouncedEventDetails.emailAddress),
+            eqTo(emailBouncedEventDetails.reason)
+          )(any())
       }
     }
 
@@ -113,6 +150,13 @@ class EventHubBounceServiceSpec extends SpecBase {
         result mustBe Left(ErrorResponse(BAD_REQUEST, "Enrolment property not found in bounced email event tags"))
 
         verify(mockSubmitPreferencesConnector, times(0)).submitContactPreferences(any(), any())(any())
+
+        verify(mockAuditUtil, times(0))
+          .auditEmailBouncedEvent(
+            eqTo(appaId),
+            eqTo(emailBouncedEventDetails.emailAddress),
+            eqTo(emailBouncedEventDetails.reason)
+          )(any())
       }
     }
   }
