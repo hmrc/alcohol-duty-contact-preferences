@@ -17,7 +17,7 @@ lazy val microservice = Project("alcohol-duty-contact-preferences", file("."))
   .disablePlugins(JUnitXmlReportPlugin)
   .settings(
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
-    libraryDependencies += "uk.gov.hmrc" %% s"crypto-json-$playVersion" % "8.3.0",
+    libraryDependencies += "uk.gov.hmrc" %% s"crypto-json-$playVersion" % "8.4.0",
       // https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html
     // suppress warnings in generated routes files
     scalacOptions += "-Wconf:src=routes/.*:s",
