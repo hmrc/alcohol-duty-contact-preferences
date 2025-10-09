@@ -36,7 +36,7 @@ class SpecBaseWithConfigOverrides extends SpecBase {
     "microservice.services.submit-preferences.port"                  -> 12345,
     "microservice.services.submit-preferences.clientId"              -> "submission clientId",
     "microservice.services.submit-preferences.secret"                -> "submission secret",
-    "microservice.services.submit-preferences.url.submitPreferences" -> "/etmp/RESTAdapter/excise/email-contact-preference",
+    "microservice.services.submit-preferences.url.submitPreferences" -> "/etmp/RESTAdapter/email-contact-preference",
     "downstream-apis.idType"                                         -> "ZAD",
     "downstream-apis.regime"                                         -> "AD",
     "crypto.key"                                                     -> "cryptokey",
@@ -90,7 +90,7 @@ class AppConfigSpec extends SpecBaseWithConfigOverrides {
       "must return the submitContactPreferences url" in {
         appConfig.submitPreferencesUrl(
           appaId
-        ) mustBe s"http://submissionhost:12345/etmp/RESTAdapter/excise/email-contact-preference/AD/ZAD/$appaId"
+        ) mustBe s"http://submissionhost:12345/etmp/RESTAdapter/email-contact-preference/AD/ZAD/$appaId"
       }
 
       "must return the client id" in {
