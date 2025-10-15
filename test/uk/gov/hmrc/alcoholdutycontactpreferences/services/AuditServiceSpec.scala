@@ -22,8 +22,6 @@ import uk.gov.hmrc.alcoholdutycontactpreferences.base.SpecBase
 import uk.gov.hmrc.alcoholdutycontactpreferences.models.audit.EmailBounced
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
-import java.time.Instant
-
 class AuditServiceSpec extends SpecBase {
 
   private val mockAuditConnector = mock[AuditConnector]
@@ -35,8 +33,7 @@ class AuditServiceSpec extends SpecBase {
       val testDetail = EmailBounced(
         "someappaid",
         "test@test.com",
-        "test bounce",
-        Instant.now(clock)
+        "test bounce"
       )
       auditService.audit(testDetail)
 

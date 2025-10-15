@@ -21,15 +21,14 @@ import uk.gov.hmrc.alcoholdutycontactpreferences.models.audit.EmailBounced
 import uk.gov.hmrc.alcoholdutycontactpreferences.services.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 
-import java.time.{Clock, Instant}
 import javax.inject.Inject
 
-class AuditUtil @Inject() (auditService: AuditService, clock: Clock) extends Logging {
+class AuditUtil @Inject() (auditService: AuditService) extends Logging {
 
   def auditEmailBouncedEvent(appaId: String, bouncedEmailAddress: String, reason: String)(implicit
     hc: HeaderCarrier
   ): Unit = {
-    val emailBounced = EmailBounced(appaId, bouncedEmailAddress, reason, Instant.now(clock))
+    val emailBounced = EmailBounced(appaId, bouncedEmailAddress, reason)
     auditService.audit(emailBounced)
   }
 }

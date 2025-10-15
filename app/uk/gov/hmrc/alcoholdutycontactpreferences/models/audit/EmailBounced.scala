@@ -17,13 +17,10 @@
 package uk.gov.hmrc.alcoholdutycontactpreferences.models.audit
 import play.api.libs.json.{Json, OFormat}
 
-import java.time.Instant
-
 case class EmailBounced(
   alcoholDutyApprovalId: String,
   bouncedEmailAddress: String,
-  reasonForBouncedEmail: String,
-  bounceEventTime: Instant
+  reasonForBouncedEmail: String
 ) extends AuditEventDetail {
   protected val _auditType: AuditType = uk.gov.hmrc.alcoholdutycontactpreferences.models.audit.AuditType.EmailBounced
 }
