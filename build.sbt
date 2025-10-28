@@ -62,8 +62,7 @@ lazy val scoverageExcludedList: Seq[String] = Seq(
   ".*testOnly.*",
   ".*TestOnlyController.*",
   "testOnlyDoNotUseInAppConf.*",
-  ".*config.*",
-  ".*models.*"
+  ".*config.*"
 )
 
 addCommandAlias("runAllChecks", ";clean;test:compile;scalafmtCheckAll;coverage;test;it/test;scalastyle;coverageReport")
