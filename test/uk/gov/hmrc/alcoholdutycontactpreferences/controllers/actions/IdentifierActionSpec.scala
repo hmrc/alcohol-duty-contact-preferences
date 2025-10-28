@@ -17,7 +17,6 @@
 package uk.gov.hmrc.alcoholdutycontactpreferences.controllers.actions
 
 import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchersSugar.eqTo
 import play.api.mvc.{BodyParsers, Request, Result}
 import play.api.test.Helpers._
 import uk.gov.hmrc.alcoholdutycontactpreferences.base.SpecBase
@@ -27,6 +26,10 @@ import uk.gov.hmrc.auth.core.CredentialStrength.strong
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{authorisedEnrolments, internalId => retriveInternalId}
 import uk.gov.hmrc.auth.core.retrieve.~
+
+// For Scala3
+import org.mockito.ArgumentMatchers.{eq => eqTo}
+import org.mockito.Mockito.when
 
 import scala.concurrent.Future
 

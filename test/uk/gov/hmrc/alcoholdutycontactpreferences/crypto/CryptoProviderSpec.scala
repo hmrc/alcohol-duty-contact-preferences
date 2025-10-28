@@ -20,6 +20,8 @@ import uk.gov.hmrc.alcoholdutycontactpreferences.base.SpecBase
 import uk.gov.hmrc.alcoholdutycontactpreferences.config.AppConfig
 import uk.gov.hmrc.crypto.AesCrypto
 
+import org.mockito.Mockito.when
+
 class CryptoProviderSpec extends SpecBase {
   val mockAppConfig: AppConfig = mock[AppConfig]
 

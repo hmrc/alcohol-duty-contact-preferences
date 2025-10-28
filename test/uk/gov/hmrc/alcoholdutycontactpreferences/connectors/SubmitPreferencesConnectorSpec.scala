@@ -20,7 +20,7 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.alcoholdutycontactpreferences.base.{ConnectorTestHelpers, SpecBase}
 import uk.gov.hmrc.alcoholdutycontactpreferences.models.ErrorCodes
 
-class SubmitPreferencesConnectorSpec extends SpecBase with ConnectorTestHelpers {
+abstract class SubmitPreferencesConnectorSpec extends SpecBase with ConnectorTestHelpers {
   protected val endpointName = "submit-preferences"
 
   "SubmitPreferencesConnector when" - {

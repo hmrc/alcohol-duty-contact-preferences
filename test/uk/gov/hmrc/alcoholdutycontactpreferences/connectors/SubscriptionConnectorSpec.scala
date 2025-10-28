@@ -22,7 +22,7 @@ import uk.gov.hmrc.alcoholdutycontactpreferences.connectors.helpers.HIPHeaders
 import uk.gov.hmrc.alcoholdutycontactpreferences.models.{ErrorCodes, SubscriptionSummarySuccess}
 import uk.gov.hmrc.play.bootstrap.http.ErrorResponse
 
-class SubscriptionConnectorSpec extends SpecBase with ConnectorTestHelpers {
+abstract class SubscriptionConnectorSpec extends SpecBase with ConnectorTestHelpers {
   protected val endpointName = "subscription"
 
   "SubscriptionConnector must" - {

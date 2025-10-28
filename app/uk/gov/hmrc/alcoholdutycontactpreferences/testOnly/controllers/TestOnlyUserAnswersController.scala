@@ -16,22 +16,20 @@
 
 package uk.gov.hmrc.alcoholdutycontactpreferences.testOnly.controllers
 
-import play.api.mvc._
+import play.api.mvc.*
 import uk.gov.hmrc.alcoholdutycontactpreferences.repositories.UserAnswersRepository
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import scala.concurrent.Future
 
 class TestOnlyUserAnswersController @Inject() (
   cc: ControllerComponents,
   userAnswersRepository: UserAnswersRepository
-)(implicit ec: ExecutionContext)
-    extends BackendController(cc) {
+) extends BackendController(cc) {
 
   def clearAllData: Action[AnyContent] = Action.async { _ =>
-    for {
-      _ <- userAnswersRepository.collection.drop().toFuture()
-    } yield Ok("All data cleared")
+    userAnswersRepository.collection.drop()
+    Future.successful(Ok("All data cleared"))
   }
 }

@@ -18,12 +18,15 @@ package uk.gov.hmrc.alcoholdutycontactpreferences.services
 
 import cats.data.EitherT
 import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchersSugar.eqTo
 import uk.gov.hmrc.alcoholdutycontactpreferences.base.SpecBase
 import uk.gov.hmrc.alcoholdutycontactpreferences.connectors.SubmitPreferencesConnector
 import uk.gov.hmrc.alcoholdutycontactpreferences.models.{ErrorCodes, PaperlessPreferenceSubmittedResponse, Tags}
 import uk.gov.hmrc.alcoholdutycontactpreferences.utils.audit.AuditUtil
 import uk.gov.hmrc.play.bootstrap.http.ErrorResponse
+
+// For Scala3
+import org.mockito.ArgumentMatchers.{eq => eqTo}
+import org.mockito.Mockito.{reset, times, verify, when}
 
 import scala.concurrent.Future
 

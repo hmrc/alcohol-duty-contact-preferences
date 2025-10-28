@@ -30,8 +30,9 @@ class NoCryptoSpec extends SpecBase {
     }
 
     "wrap the PlainBytes value in an Crypted object" in {
-      val result = NoCrypto.encrypt(PlainBytes(new Array[Byte](5)))
-      result mustBe Crypted(new String(Base64.getEncoder.encode(new Array(5)), StandardCharsets.UTF_8))
+      val result       = NoCrypto.encrypt(PlainBytes("asdrg".getBytes()))
+      val cry: Crypted = Crypted(new String(Base64.getEncoder.encode("asdrg".getBytes()), StandardCharsets.UTF_8))
+      result mustBe cry
     }
   }
 

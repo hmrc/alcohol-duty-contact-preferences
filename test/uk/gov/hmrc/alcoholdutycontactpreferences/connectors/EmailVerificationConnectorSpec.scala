@@ -21,7 +21,7 @@ import uk.gov.hmrc.alcoholdutycontactpreferences.base.{ConnectorTestHelpers, Spe
 import uk.gov.hmrc.alcoholdutycontactpreferences.models.GetVerificationStatusResponse
 import uk.gov.hmrc.play.bootstrap.http.ErrorResponse
 
-class EmailVerificationConnectorSpec extends SpecBase with ConnectorTestHelpers {
+abstract class EmailVerificationConnectorSpec extends SpecBase with ConnectorTestHelpers {
   protected val endpointName = "email-verification"
 
   "EmailVerificationConnector must" - {

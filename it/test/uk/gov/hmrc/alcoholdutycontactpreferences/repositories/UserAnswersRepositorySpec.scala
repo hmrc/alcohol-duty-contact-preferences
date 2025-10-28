@@ -25,13 +25,16 @@ import uk.gov.hmrc.alcoholdutycontactpreferences.models.UserAnswers
 import uk.gov.hmrc.crypto.SymmetricCryptoFactory
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
+// For Scala3
+import org.mockito.Mockito.{times, verify, when}
+
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 class UserAnswersRepositorySpec extends ISpecBase with DefaultPlayMongoRepositorySupport[UserAnswers] {
   private val instant = Instant.now(clock)
 
-  private val DB_TTL_IN_SEC = 100
+  private val DB_TTL_IN_SEC: Long = 100
 
   private val mockAppConfig = mock[AppConfig]
   when(mockAppConfig.dbTimeToLiveInSeconds) thenReturn DB_TTL_IN_SEC
@@ -39,7 +42,7 @@ class UserAnswersRepositorySpec extends ISpecBase with DefaultPlayMongoRepositor
   private val mockCryptoProvider = mock[CryptoProvider]
   when(mockCryptoProvider.getCrypto) thenReturn SymmetricCryptoFactory.aesCrypto(config.cryptoKey)
 
-  protected override val repository = new UserAnswersRepository(
+  protected override val repository: UserAnswersRepository = new UserAnswersRepository(
     mongoComponent = mongoComponent,
     appConfig = mockAppConfig,
     cryptoProvider = mockCryptoProvider,

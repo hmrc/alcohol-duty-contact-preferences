@@ -18,12 +18,16 @@ package uk.gov.hmrc.alcoholdutycontactpreferences.controllers
 
 import cats.data.EitherT
 import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchersSugar.eqTo
 import play.api.libs.json.Json
 import play.api.mvc.Result
 import uk.gov.hmrc.alcoholdutycontactpreferences.base.SpecBase
 import uk.gov.hmrc.alcoholdutycontactpreferences.connectors.EmailVerificationConnector
+import uk.gov.hmrc.alcoholdutycontactpreferences.models.GetVerificationStatusResponse
 import uk.gov.hmrc.play.bootstrap.http.ErrorResponse
+
+// For Scala3
+import org.mockito.ArgumentMatchers.{eq => eqTo}
+import org.mockito.Mockito.when
 
 import scala.concurrent.Future
 
@@ -39,7 +43,7 @@ class EmailVerificationControllerSpec extends SpecBase {
   "getEmailVerification must" - {
     "return 200 OK when GetVerificationStatusResponse is returned for the credId" in {
       when(mockEmailVerificationConnector.getEmailVerification(eqTo(credId))(any()))
-        .thenReturn(EitherT.rightT(getVerificationStatusResponse))
+        .thenReturn(EitherT.rightT[Future, GetVerificationStatusResponse](getVerificationStatusResponse))
 
       val result: Future[Result] = controller.getEmailVerification(credId)(fakeRequest)
 
@@ -50,7 +54,9 @@ class EmailVerificationControllerSpec extends SpecBase {
     "return 500 INTERNAL_SERVER_ERROR when an error is returned from the connector" in {
       when(mockEmailVerificationConnector.getEmailVerification(eqTo(credId))(any()))
         .thenReturn(
-          EitherT.leftT(ErrorResponse(INTERNAL_SERVER_ERROR, "Unexpected response for email verification list"))
+          EitherT.leftT[Future, ErrorResponse](
+            ErrorResponse(INTERNAL_SERVER_ERROR, "Unexpected response for email verification list")
+          )
         )
 
       val result: Future[Result] = controller.getEmailVerification(credId)(fakeRequest)
