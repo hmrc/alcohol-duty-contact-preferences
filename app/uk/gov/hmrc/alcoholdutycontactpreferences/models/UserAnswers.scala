@@ -68,7 +68,7 @@ object DecryptedUA {
       (__ \ "startedTime").format(MongoJavatimeFormats.instantFormat) and
       (__ \ "lastUpdated").format(MongoJavatimeFormats.instantFormat) and
       (__ \ "validUntil").formatNullable(MongoJavatimeFormats.instantFormat)
-  )(DecryptedUA.apply, unlift(DecryptedUA.unapply))
+  )(DecryptedUA.apply, o => Tuple.fromProductTyped(o))
 
 }
 
@@ -90,7 +90,7 @@ object UserAnswers {
     contactPreferences: SubscriptionContactPreferences,
     clock: Clock
   ): UserAnswers = {
-    val existingEmail: Option[SensitiveString] = contactPreferences.emailAddress.map(SensitiveString)
+    val existingEmail: Option[SensitiveString] = contactPreferences.emailAddress.map(SensitiveString.apply)
     val hasVerifiedAndValidEmail: Boolean      = existingEmail.nonEmpty &&
       contactPreferences.emailVerificationFlag.contains(true) && !contactPreferences.bouncedEmailFlag.contains(true)
 
@@ -111,7 +111,7 @@ object UserAnswers {
         contactPreferences.emailVerificationFlag,
         contactPreferences.bouncedEmailFlag,
         SensitiveString(correspondenceAddress),
-        contactPreferences.country.map(SensitiveString)
+        contactPreferences.country.map(SensitiveString.apply)
       ),
       emailAddress = None,
       verifiedEmailAddresses = if (hasVerifiedAndValidEmail) existingEmail.toSet else Set.empty[SensitiveString],
@@ -126,14 +126,14 @@ object UserAnswers {
       userId = decryptedUA.userId,
       subscriptionSummary = SubscriptionSummaryBackend(
         decryptedUA.subscriptionSummary.paperlessReference,
-        decryptedUA.subscriptionSummary.emailAddress.map(SensitiveString),
+        decryptedUA.subscriptionSummary.emailAddress.map(SensitiveString.apply),
         decryptedUA.subscriptionSummary.emailVerification,
         decryptedUA.subscriptionSummary.bouncedEmail,
         SensitiveString(decryptedUA.subscriptionSummary.correspondenceAddress),
-        decryptedUA.subscriptionSummary.countryCode.map(SensitiveString)
+        decryptedUA.subscriptionSummary.countryCode.map(SensitiveString.apply)
       ),
-      emailAddress = decryptedUA.emailAddress.map(SensitiveString),
-      verifiedEmailAddresses = decryptedUA.verifiedEmailAddresses.map(SensitiveString),
+      emailAddress = decryptedUA.emailAddress.map(SensitiveString.apply),
+      verifiedEmailAddresses = decryptedUA.verifiedEmailAddresses.map(SensitiveString.apply),
       data = decryptedUA.data,
       startedTime = decryptedUA.startedTime,
       lastUpdated = decryptedUA.lastUpdated,
@@ -151,7 +151,7 @@ object UserAnswers {
         (__ \ "startedTime").format(MongoJavatimeFormats.instantFormat) and
         (__ \ "lastUpdated").format(MongoJavatimeFormats.instantFormat) and
         (__ \ "validUntil").formatNullable(MongoJavatimeFormats.instantFormat)
-    )(UserAnswers.apply, unlift(UserAnswers.unapply))
+    )(UserAnswers.apply, o => Tuple.fromProductTyped(o))
 
   implicit def sensitiveStringFormat(implicit crypto: Encrypter with Decrypter): Format[SensitiveString] =
     JsonEncryption.sensitiveEncrypterDecrypter(SensitiveString.apply)
@@ -189,7 +189,7 @@ object SubscriptionSummaryBackend {
         (__ \ "bouncedEmail").formatNullable[Boolean] and
         (__ \ "correspondenceAddress").format[SensitiveString] and
         (__ \ "countryCode").formatNullable[SensitiveString]
-    )(SubscriptionSummaryBackend.apply, unlift(SubscriptionSummaryBackend.unapply))
+    )(SubscriptionSummaryBackend.apply, o => Tuple.fromProductTyped(o))
 
   implicit def sensitiveStringFormat(implicit crypto: Encrypter with Decrypter): Format[SensitiveString] =
     JsonEncryption.sensitiveEncrypterDecrypter(SensitiveString.apply)

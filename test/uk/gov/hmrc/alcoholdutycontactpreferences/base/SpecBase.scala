@@ -18,13 +18,12 @@ package uk.gov.hmrc.alcoholdutycontactpreferences.base
 
 import generators.ModelGenerators
 import helpers.TestData
-import org.mockito.MockitoSugar
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.{BeforeAndAfterEach, OptionValues, TryValues}
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.Application
 import play.api.http.{HeaderNames, Status}
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -52,7 +51,6 @@ trait SpecBase
     with HeaderNames
     with GuiceOneAppPerSuite
     with MockitoSugar
-    with ScalaCheckPropertyChecks
     with BeforeAndAfterEach
     with TestData
     with ModelGenerators

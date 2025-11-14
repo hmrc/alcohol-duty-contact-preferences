@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.alcoholdutycontactpreferences.models
 
-import play.api.libs.json._
-import uk.gov.hmrc.alcoholdutycontactpreferences.models.JsonHelpers
+import play.api.libs.json.*
 
 final case class SubscriptionSummarySuccess(success: SubscriptionContactPreferences)
 
@@ -40,8 +39,7 @@ final case class SubscriptionContactPreferences(
 )
 
 object SubscriptionContactPreferences {
-  import JsonHelpers.booleanReads
-  import JsonHelpers.booleanWrites
+  import JsonHelpers.{booleanReads, booleanWrites}
 
   implicit val subscriptionContactPreferencesFormat: OFormat[SubscriptionContactPreferences] =
     Json.format[SubscriptionContactPreferences]
