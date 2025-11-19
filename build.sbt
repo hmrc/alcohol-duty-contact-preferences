@@ -49,14 +49,11 @@ lazy val testSettings: Seq[Def.Setting[_]] = Seq(
   unmanagedSourceDirectories += baseDirectory.value / "test-utils"
 )
 
-// Models have been added to exclude list as there is a known Scala3 limitation
-// Models are covered by other unit and integration tests
 lazy val scoverageExcludedList: Seq[String] = Seq(
   "<empty>",
   "Reverse.*",
   ".*handlers.*",
   "uk.gov.hmrc.BuildInfo",
-  "app.*",
   ".*SchemaValidationService.*",
   "prod.*",
   ".*Routes.*",
@@ -65,7 +62,7 @@ lazy val scoverageExcludedList: Seq[String] = Seq(
   ".*TestOnlyController.*",
   "testOnlyDoNotUseInAppConf.*",
   ".*config.*",
-  ".*models.*"
+  ".*models.audit.*"
 )
 
-addCommandAlias("runAllChecks", ";clean;test:compile;scalafmtCheckAll;coverage;test;it/test;scalastyle;coverageReport")
+addCommandAlias("runAllChecks", ";clean;test:compile;scalafmtCheckAll;coverage;test;it/test;coverageReport")
