@@ -141,7 +141,7 @@ class IdentifierActionSpec extends SpecBase {
     }
   }
 
-  "return 401 unauthorized if there is an authorisation exception" in {
+  "return 401 unauthorized if there is an authorisation exception" in
     List(
       InsufficientConfidenceLevel(),
       InsufficientEnrolments(),
@@ -161,7 +161,6 @@ class IdentifierActionSpec extends SpecBase {
 
       status(result) mustBe UNAUTHORIZED
     }
-  }
 
   "return the exception if there is any other exception" in {
     val msg = "Test Exception"

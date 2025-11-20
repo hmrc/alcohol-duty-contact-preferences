@@ -40,16 +40,13 @@ This endpoint clears all user answers data in the repository.
 
 > `sbt it/test`
 
-## Scalafmt and Scalastyle
+## Scalafmt
 
 To check if all the scala files in the project are formatted correctly:
 > `sbt scalafmtCheckAll`
 
 To format all the scala files in the project correctly:
 > `sbt scalafmtAll`
-
-To check if there are any scalastyle errors, warnings or infos:
-> `sbt scalastyle`
 
 ### All tests and checks
 
