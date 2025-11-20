@@ -28,7 +28,7 @@ lazy val microservice = Project("alcohol-duty-contact-preferences", file("."))
   .settings(inConfig(Test)(testSettings): _*)
   .settings(
     ScoverageKeys.coverageExcludedFiles := scoverageExcludedList.mkString(";"),
-    ScoverageKeys.coverageMinimumStmtTotal := 80,
+    ScoverageKeys.coverageMinimumStmtTotal := 90,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true
   )
