@@ -10,6 +10,7 @@ ThisBuild / excludeDependencies ++= Seq(
   // Specifically affects play-json-extensions dependency
   ExclusionRule(organization = "com.typesafe.play")
 )
+ThisBuild / scalacOptions += "-Wconf:msg=Flag.*repeatedly:s"
 
 lazy val microservice = Project("alcohol-duty-contact-preferences", file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
