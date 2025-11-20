@@ -16,14 +16,11 @@
 
 package uk.gov.hmrc.alcoholdutycontactpreferences.services
 
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
+import org.mockito.Mockito.verify
 import uk.gov.hmrc.alcoholdutycontactpreferences.base.SpecBase
 import uk.gov.hmrc.alcoholdutycontactpreferences.models.audit.EmailBounced
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-
-// For Scala3
-import org.mockito.ArgumentMatchers.{eq => eqTo}
-import org.mockito.Mockito.verify
 
 class AuditServiceSpec extends SpecBase {
 

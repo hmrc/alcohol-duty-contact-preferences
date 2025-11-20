@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.alcoholdutycontactpreferences.repositories
 
+import org.mockito.Mockito.{times, verify, when}
 import org.mongodb.scala.model.Filters
 import org.scalatest.Assertion
 import uk.gov.hmrc.alcoholdutycontactpreferences.base.ISpecBase
@@ -24,9 +25,6 @@ import uk.gov.hmrc.alcoholdutycontactpreferences.crypto.CryptoProvider
 import uk.gov.hmrc.alcoholdutycontactpreferences.models.UserAnswers
 import uk.gov.hmrc.crypto.SymmetricCryptoFactory
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
-
-// For Scala3
-import org.mockito.Mockito.{times, verify, when}
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
