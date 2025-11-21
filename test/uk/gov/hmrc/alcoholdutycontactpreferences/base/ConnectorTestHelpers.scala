@@ -24,12 +24,12 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.alcoholdutycontactpreferences.config.AppConfig
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.test.{HttpClientV2Support, WireMockSupport}
+import uk.gov.hmrc.http.test.HttpClientV2Support
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.time.Clock
 
-trait ConnectorTestHelpers extends WireMockSupport with HttpClientV2Support with WireMockHelper with TestData {
+trait ConnectorTestHelpers extends HttpClientV2Support with WireMockHelper with TestData {
   this: Suite =>
 
   protected val endpointName: String

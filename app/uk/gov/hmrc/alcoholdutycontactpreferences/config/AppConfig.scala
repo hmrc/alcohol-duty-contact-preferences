@@ -58,7 +58,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val enrolmentServiceName: String   = config.get[String]("enrolment.serviceName")
   val enrolmentIdentifierKey: String = config.get[String]("enrolment.identifierKey")
 
-  val dbTimeToLiveInSeconds: Int = 1200
+  val dbTimeToLiveInSeconds: Long = 1200
 
   def getSubscriptionUrl(appaId: String): String =
     s"$subscriptionHost$subscriptionGetSubscriptionUrlPrefix/$regime/$idType/$appaId"

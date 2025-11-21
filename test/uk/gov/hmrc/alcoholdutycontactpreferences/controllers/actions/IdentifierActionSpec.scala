@@ -16,16 +16,16 @@
 
 package uk.gov.hmrc.alcoholdutycontactpreferences.controllers.actions
 
-import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchersSugar.eqTo
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
+import org.mockito.Mockito.when
 import play.api.mvc.{BodyParsers, Request, Result}
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.alcoholdutycontactpreferences.base.SpecBase
+import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core.CredentialStrength.strong
-import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{authorisedEnrolments, internalId => retriveInternalId}
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{authorisedEnrolments, internalId as retriveInternalId}
 import uk.gov.hmrc.auth.core.retrieve.~
 
 import scala.concurrent.Future
@@ -141,7 +141,7 @@ class IdentifierActionSpec extends SpecBase {
     }
   }
 
-  "return 401 unauthorized if there is an authorisation exception" in {
+  "return 401 unauthorized if there is an authorisation exception" in
     List(
       InsufficientConfidenceLevel(),
       InsufficientEnrolments(),
@@ -161,7 +161,6 @@ class IdentifierActionSpec extends SpecBase {
 
       status(result) mustBe UNAUTHORIZED
     }
-  }
 
   "return the exception if there is any other exception" in {
     val msg = "Test Exception"

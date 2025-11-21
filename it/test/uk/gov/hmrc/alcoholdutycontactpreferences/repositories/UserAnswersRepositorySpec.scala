@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.alcoholdutycontactpreferences.repositories
 
+import org.mockito.Mockito.{times, verify, when}
 import org.mongodb.scala.model.Filters
 import org.scalatest.Assertion
 import uk.gov.hmrc.alcoholdutycontactpreferences.base.ISpecBase
@@ -31,7 +32,7 @@ import java.time.temporal.ChronoUnit
 class UserAnswersRepositorySpec extends ISpecBase with DefaultPlayMongoRepositorySupport[UserAnswers] {
   private val instant = Instant.now(clock)
 
-  private val DB_TTL_IN_SEC = 100
+  private val DB_TTL_IN_SEC: Long = 100
 
   private val mockAppConfig = mock[AppConfig]
   when(mockAppConfig.dbTimeToLiveInSeconds) thenReturn DB_TTL_IN_SEC
@@ -39,16 +40,15 @@ class UserAnswersRepositorySpec extends ISpecBase with DefaultPlayMongoRepositor
   private val mockCryptoProvider = mock[CryptoProvider]
   when(mockCryptoProvider.getCrypto) thenReturn SymmetricCryptoFactory.aesCrypto(config.cryptoKey)
 
-  protected override val repository = new UserAnswersRepository(
+  protected override val repository: UserAnswersRepository = new UserAnswersRepository(
     mongoComponent = mongoComponent,
     appConfig = mockAppConfig,
     cryptoProvider = mockCryptoProvider,
     clock = clock
   )
 
-  "CryptoProvider getCrypto must be called" in {
+  "CryptoProvider getCrypto must be called" in
     verify(mockCryptoProvider, times(1)).getCrypto
-  }
 
   "add must" - {
     "set the last updated time on the supplied user answers to `now`, and save them" in {

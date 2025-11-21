@@ -17,12 +17,13 @@
 package uk.gov.hmrc.alcoholdutycontactpreferences.controllers
 
 import cats.data.EitherT
-import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchersSugar.eqTo
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
+import org.mockito.Mockito.when
 import play.api.libs.json.Json
 import play.api.mvc.Result
 import uk.gov.hmrc.alcoholdutycontactpreferences.base.SpecBase
 import uk.gov.hmrc.alcoholdutycontactpreferences.connectors.SubscriptionConnector
+import uk.gov.hmrc.alcoholdutycontactpreferences.models.SubscriptionContactPreferences
 import uk.gov.hmrc.alcoholdutycontactpreferences.repositories.{UpdateFailure, UpdateSuccess, UserAnswersRepository}
 import uk.gov.hmrc.play.bootstrap.http.ErrorResponse
 
@@ -93,7 +94,7 @@ class UserAnswersControllerSpec extends SpecBase {
     "return 201 CREATED with the user answers that was created" in {
       when(mockUserAnswersRepository.add(any())).thenReturn(Future.successful(userAnswers))
       when(mockSubscriptionConnector.getSubscriptionContactPreferences(eqTo(appaId))(any()))
-        .thenReturn(EitherT.rightT(contactPreferencesEmailSelected))
+        .thenReturn(EitherT.rightT[Future, SubscriptionContactPreferences](contactPreferencesEmailSelected))
 
       val result: Future[Result] =
         controller.createUserAnswers()(
@@ -116,7 +117,7 @@ class UserAnswersControllerSpec extends SpecBase {
       s"return status ${errorResponse.statusCode} if the subscription connector returns the error $errorName when getting the subscription summary" in {
         when(mockUserAnswersRepository.add(any())).thenReturn(Future.successful(userAnswers))
         when(mockSubscriptionConnector.getSubscriptionContactPreferences(eqTo(appaId))(any()))
-          .thenReturn(EitherT.leftT(errorResponse))
+          .thenReturn(EitherT.leftT[Future, ErrorResponse](errorResponse))
 
         val result: Future[Result] =
           controller.createUserAnswers()(

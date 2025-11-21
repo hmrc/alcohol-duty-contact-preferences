@@ -16,16 +16,15 @@
 
 package helpers
 
-import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, getRequestedFor, postRequestedFor, putRequestedFor, urlEqualTo}
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.http.Fault
 import com.github.tomakehurst.wiremock.matching.{EqualToJsonPattern, EqualToPattern}
+import org.scalatest.Suite
+import uk.gov.hmrc.http.test.WireMockSupport
 
-trait WireMockHelper {
-  val wireMockServer: WireMockServer
-  val wireMockHost: String
-  val wireMockPort: Int
+trait WireMockHelper extends WireMockSupport {
+  this: Suite =>
 
   protected val endpointConfigurationPath = "microservice.services"
 
