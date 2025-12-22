@@ -60,23 +60,31 @@ class EventHubBounceService @Inject() (
         tags.enrolment match {
           case Some(enrolment) =>
             if (!enrolment.startsWith(requiredPrefix)) {
-              logger.warn("Invalid format for enrolment in bounced email event")
+              logger.warn(
+                "[EventHubBounceService] [getAppaIdFromEnrolmentString] Invalid format for enrolment in bounced email event"
+              )
               Left(ErrorResponse(BAD_REQUEST, "Invalid format for enrolment in bounced email event"))
             } else {
               val appaId = enrolment.stripPrefix(requiredPrefix)
               if (!appaId.matches("[A-Z]{5}\\d{10}")) {
-                logger.warn("Invalid format for APPA ID in bounced email event")
+                logger.warn(
+                  "[EventHubBounceService] [getAppaIdFromEnrolmentString] Invalid format for APPA ID in bounced email event"
+                )
                 Left(ErrorResponse(BAD_REQUEST, "Invalid format for APPA ID in bounced email event"))
               } else {
                 Right(appaId)
               }
             }
           case None            =>
-            logger.warn("Enrolment property not found in bounced email event tags")
+            logger.warn(
+              "[EventHubBounceService] [getAppaIdFromEnrolmentString] Enrolment property not found in bounced email event tags"
+            )
             Left(ErrorResponse(BAD_REQUEST, "Enrolment property not found in bounced email event tags"))
         }
       case None       =>
-        logger.warn("Tags property not found in bounced email event")
+        logger.warn(
+          "[EventHubBounceService] [getAppaIdFromEnrolmentString] Tags property not found in bounced email event"
+        )
         Left(ErrorResponse(BAD_REQUEST, "Tags property not found in bounced email event"))
     }
   }

@@ -61,7 +61,9 @@ class SubscriptionConnector @Inject() (
     appaId: String
   )(implicit hc: HeaderCarrier): Future[Either[ErrorResponse, SubscriptionContactPreferences]] =
     circuitBreakerProvider.get().withCircuitBreaker {
-      logger.info(s"Fetching subscription summary for appaId $appaId")
+      logger.info(
+        s"[SubscriptionConnector] [getSubscriptionContactPreferences] Fetching subscription summary for appaId $appaId"
+      )
       httpClient
         .get(url"${config.getSubscriptionUrl(appaId)}")
         .setHeader(headers.subscriptionHeaders(): _*)
@@ -73,25 +75,37 @@ class SubscriptionConnector @Inject() (
                 response.json.as[SubscriptionSummarySuccess]
               } match {
                 case Success(doc) =>
-                  logger.info(s"Retrieved subscription summary success for appaId $appaId")
+                  logger.info(
+                    s"[SubscriptionConnector] [getSubscriptionContactPreferences] Retrieved subscription summary success for appaId $appaId"
+                  )
                   Future.successful(Right(doc.success))
                 case Failure(_)   =>
-                  logger.warn(s"Unable to parse subscription summary success for appaId $appaId")
+                  logger.warn(
+                    s"[SubscriptionConnector] [getSubscriptionContactPreferences] Unable to parse subscription summary success for appaId $appaId"
+                  )
                   Future.successful(
                     Left(ErrorResponse(INTERNAL_SERVER_ERROR, "Unable to parse subscription summary success"))
                   )
               }
             case BAD_REQUEST          =>
-              logger.warn(s"Bad request sent to get subscription for appaId $appaId")
+              logger.warn(
+                s"[SubscriptionConnector] [getSubscriptionContactPreferences] Bad request sent to get subscription for appaId $appaId"
+              )
               Future.successful(Left(ErrorResponse(BAD_REQUEST, "Bad request")))
             case NOT_FOUND            =>
-              logger.warn(s"No subscription summary found for appaId $appaId")
+              logger.warn(
+                s"[SubscriptionConnector] [getSubscriptionContactPreferences] No subscription summary found for appaId $appaId"
+              )
               Future.successful(Left(ErrorResponse(NOT_FOUND, "Subscription summary not found")))
             case UNPROCESSABLE_ENTITY =>
-              logger.warn(s"Subscription summary request unprocessable for appaId $appaId")
+              logger.warn(
+                s"[SubscriptionConnector] [getSubscriptionContactPreferences] Subscription summary request unprocessable for appaId $appaId"
+              )
               Future.successful(Left(ErrorResponse(UNPROCESSABLE_ENTITY, "Unprocessable entity")))
             case _                    =>
-              logger.warn(s"An error was returned while trying to fetch subscription summary for appaId $appaId")
+              logger.warn(
+                s"[SubscriptionConnector] [getSubscriptionContactPreferences] An error was returned while trying to fetch subscription summary for appaId $appaId"
+              )
               Future.failed(new InternalServerException(response.body))
           }
         }
