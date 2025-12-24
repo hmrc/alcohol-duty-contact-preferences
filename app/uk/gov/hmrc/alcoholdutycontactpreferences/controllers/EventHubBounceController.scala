@@ -38,20 +38,24 @@ class EventHubBounceController @Inject() (
       .validate[EmailBouncedEvent]
       .fold(
         invalid = _ => {
-          logger.warn(s"Bounced email json body could not be parsed as EmailBouncedEvent")
+          logger.warn(
+            s"[EventHubBounceController] [handleBouncedEmail] Bounced email json body could not be parsed as EmailBouncedEvent"
+          )
           Future.successful(BadRequest("Bounced email json body could not be parsed as EmailBouncedEvent"))
         },
         valid = event => {
           logger.info(
-            s"Bounced email event received. eventId: ${event.eventId}, subject: ${event.subject}, timestamp: ${event.timestamp}"
+            s"[EventHubBounceController] [handleBouncedEmail] Bounced email event received. eventId: ${event.eventId}, subject: ${event.subject}, timestamp: ${event.timestamp}"
           )
           eventHubBounceService.handleBouncedEmail(event.event).value.map {
             case Right(submissionResponse) =>
-              logger.info("Successfully updated contact preferences for bounced email event.")
+              logger.info(
+                "[EventHubBounceController] [handleBouncedEmail] Successfully updated contact preferences for bounced email event."
+              )
               Ok(Json.toJson(submissionResponse))
             case Left(error)               =>
               logger.warn(
-                s"Error updating contact preferences for bounced email event. eventID: ${event.eventId}, status: ${error.statusCode}"
+                s"[EventHubBounceController] [handleBouncedEmail] Error updating contact preferences for bounced email event. eventID: ${event.eventId}, status: ${error.statusCode}"
               )
               Status(error.statusCode)("Error updating contact preferences for bounced email event")
           }

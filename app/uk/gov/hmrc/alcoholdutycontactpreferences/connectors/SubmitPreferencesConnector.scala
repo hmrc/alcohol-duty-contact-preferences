@@ -63,7 +63,9 @@ class SubmitPreferencesConnector @Inject() (
     hc: HeaderCarrier
   ): Future[Either[ErrorResponse, PaperlessPreferenceSubmittedResponse]] =
     circuitBreakerProvider.get().withCircuitBreaker {
-      logger.info(s"Submitting contact preferences for appaId $appaId")
+      logger.info(
+        s"[SubmitPreferencesConnector] [submitContactPreferences] Submitting contact preferences for appaId $appaId"
+      )
       httpClient
         .put(url"${config.submitPreferencesUrl(appaId)}")
         .setHeader(headers.submissionHeaders(): _*)
@@ -73,24 +75,34 @@ class SubmitPreferencesConnector @Inject() (
           case response if response.status == OK                   =>
             Try(response.json.as[PaperlessPreferenceSubmittedSuccess]) match {
               case Success(submissionResponse) =>
-                logger.info(s"Contact preferences submitted successfully for appaId $appaId")
+                logger.info(
+                  s"[SubmitPreferencesConnector] [submitContactPreferences] Contact preferences submitted successfully for appaId $appaId"
+                )
                 Future.successful(Right(submissionResponse.success))
               case Failure(_)                  =>
-                logger.warn(s"Parsing failed for submission response for appaId $appaId")
+                logger.warn(
+                  s"[SubmitPreferencesConnector] [submitContactPreferences] Parsing failed for submission response for appaId $appaId"
+                )
                 Future.successful(Left(ErrorCodes.unexpectedResponse))
             }
           case response if response.status == BAD_REQUEST          =>
-            logger.warn(s"Bad request returned for contact preference submission for appaId $appaId")
+            logger.warn(
+              s"[SubmitPreferencesConnector] [submitContactPreferences] Bad request returned for contact preference submission for appaId $appaId"
+            )
             Future.successful(Left(ErrorCodes.badRequest))
           case response if response.status == NOT_FOUND            =>
-            logger.warn(s"Not found returned for contact preference submission for appaId $appaId")
+            logger.warn(
+              s"[SubmitPreferencesConnector] [submitContactPreferences] Not found returned for contact preference submission for appaId $appaId"
+            )
             Future.successful(Left(ErrorCodes.entityNotFound))
           case response if response.status == UNPROCESSABLE_ENTITY =>
-            logger.warn(s"Unprocessable entity returned for contact preference submission for appaId $appaId")
+            logger.warn(
+              s"[SubmitPreferencesConnector] [submitContactPreferences] Unprocessable entity returned for contact preference submission for appaId $appaId"
+            )
             Future.successful(Left(ErrorCodes.invalidJson))
           case response                                            =>
             logger.warn(
-              s"Received unexpected response from contact preference submission API (appaId $appaId). Status: ${response.status}"
+              s"[SubmitPreferencesConnector] [submitContactPreferences] Received unexpected response from contact preference submission API (appaId $appaId). Status: ${response.status}"
             )
             Future.failed(new InternalServerException(response.body))
         }
