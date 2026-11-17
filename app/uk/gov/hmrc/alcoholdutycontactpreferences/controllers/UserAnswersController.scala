@@ -54,7 +54,7 @@ class UserAnswersController @Inject() (
           subscriptionContactPreferences.foldF(
             err => {
               logger.warn(
-                s"[UserAnswersController] [createUserAnswers] Unable to get existing contact preferences for $appaId - status ${err.statusCode}"
+                s"Unable to get existing contact preferences for $appaId - status ${err.statusCode}"
               )
               Future.successful(error(err))
             },

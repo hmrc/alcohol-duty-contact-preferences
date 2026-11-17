@@ -41,7 +41,7 @@ class EmailVerificationConnector @Inject() (
   )(implicit hc: HeaderCarrier): EitherT[Future, ErrorResponse, GetVerificationStatusResponse] =
     EitherT {
       logger.info(
-        s"[EmailVerificationConnector] [getEmailVerification] Fetching email verification list for credId $credId"
+        s"Fetching email verification list for credId $credId"
       )
 
       httpClient
@@ -55,12 +55,12 @@ class EmailVerificationConnector @Inject() (
             } match {
               case Success(response) =>
                 logger.info(
-                  s"[EmailVerificationConnector] [getEmailVerification] Retrieved email records successfully for credId $credId"
+                  s"Retrieved email records successfully for credId $credId"
                 )
                 Right(response)
               case Failure(_)        =>
                 logger.warn(
-                  s"[EmailVerificationConnector] [getEmailVerification] Unable to parse email records successful response for credId $credId"
+                  s"Unable to parse email records successful response for credId $credId"
                 )
                 Left(ErrorResponse(INTERNAL_SERVER_ERROR, "Unable to parse email records successful response"))
             }
@@ -68,24 +68,24 @@ class EmailVerificationConnector @Inject() (
             error.statusCode match {
               case NOT_FOUND   =>
                 logger.info(
-                  s"[EmailVerificationConnector] [getEmailVerification] There were no email address records for credId $credId. status: ${error.statusCode}"
+                  s"There were no email address records for credId $credId. status: ${error.statusCode}"
                 )
                 Right(GetVerificationStatusResponse(emails = List.empty))
               case BAD_REQUEST =>
                 logger.warn(
-                  s"[EmailVerificationConnector] [getEmailVerification] Invalid request for email verification list for credId $credId. status: ${error.statusCode}"
+                  s"Invalid request for email verification list for credId $credId. status: ${error.statusCode}"
                 )
                 Left(ErrorResponse(INTERNAL_SERVER_ERROR, "Invalid request for email verification list"))
               case _           =>
                 logger.warn(
-                  s"[EmailVerificationConnector] [getEmailVerification] Unexpected response for email verification list for credId: $credId. status: ${error.statusCode}"
+                  s"Unexpected response for email verification list for credId: $credId. status: ${error.statusCode}"
                 )
                 Left(ErrorResponse(INTERNAL_SERVER_ERROR, "Unexpected response for email verification list"))
             }
         }
         .recoverWith { case _: Exception =>
           logger.warn(
-            s"[EmailVerificationConnector] [getEmailVerification] An exception was returned while trying to fetch the email verification list for credId $credId"
+            s"An exception was returned while trying to fetch the email verification list for credId $credId"
           )
           Future.successful(
             Left(
