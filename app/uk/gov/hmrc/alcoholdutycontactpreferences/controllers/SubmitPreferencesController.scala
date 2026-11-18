@@ -42,6 +42,13 @@ class SubmitPreferencesController @Inject() (
   def submitContactPreferences(appaId: String): Action[JsValue] =
     (authorise(parse.json) andThen checkAppaId(appaId)).async { implicit request =>
       withJsonBody[PaperlessPreferenceSubmission] { contactPreferenceSubmission =>
+        logger.info(
+          s"Received contact preference submission for" +
+            s" appaId $appaId: paperlessPreference=${contactPreferenceSubmission.paperlessPreference}," +
+            s" hasEmailAddress=${contactPreferenceSubmission.emailAddress.isDefined}," +
+            s" emailVerification=${contactPreferenceSubmission.emailVerification}," +
+            s" bouncedEmail=${contactPreferenceSubmission.bouncedEmail}"
+        )
         submitPreferencesConnector
           .submitContactPreferences(contactPreferenceSubmission, appaId)
           .fold(
